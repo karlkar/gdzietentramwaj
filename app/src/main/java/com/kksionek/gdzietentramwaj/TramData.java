@@ -53,7 +53,8 @@ public class TramData {
         mId = mFirstLine + "/" + mBrigade;
     }
 
-    public void update(TramData tramData) {
-
+    public void updatePosition(TramData tramData) {
+        mLat = tramData.mLat;
+        mLon = tramData.mLon;
     }
 }

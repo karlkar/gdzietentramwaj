@@ -3,23 +3,18 @@ package com.kksionek.gdzietentramwaj;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.transition.TransitionManager;
-import android.util.Pair;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -35,14 +30,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
 
     private GoogleMap mMap;
+    private Timer mTimer;
     private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private HashMap<String, Marker> mTramMarkerHashMap = new HashMap<>();
 
@@ -55,42 +58,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***", new Response.Listener<String>() {
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
             @Override
-            public void onResponse(String response) {
-                HashMap<String, TramData> map = new HashMap<>();
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray array = jsonObject.getJSONArray("result");
-                    for (int i = 0; i < array.length(); ++i) {
-                        TramData data = new TramData(array.getJSONObject(i));
-                        map.put(data.getId(), data);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                // update model
-                for (TramData tramData : mTramDataHashMap.values()) {
-                    if (!map.containsKey(tramData.getId()))
-                        mTramDataHashMap.remove(tramData.getId());
-                }
-                for (TramData tramData : map.values()) {
-                    if (mTramDataHashMap.containsKey(tramData.getId())) {
-                        mTramDataHashMap.get(tramData.getId()).update(tramData);
-                    } else
-                        mTramDataHashMap.put(tramData.getId(), tramData);
-                }
-                updateMarkers();
+            public void run() {
+                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        requestQueue.add(stringRequest);
+        }, 0, 30000);
 
         checkLocationPermission();
 
@@ -113,14 +87,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateMarkers() {
-        for (String key : mTramDataHashMap.keySet()) {
-            TramData tramData = mTramDataHashMap.get(key);
-            LatLng position = new LatLng(tramData.getLat(), tramData.getLon());
-            if (mTramMarkerHashMap.containsKey(key))
-                mTramMarkerHashMap.get(key).setPosition(position);
-            else {
-                Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(tramData.getFirstLine()));
-                mTramMarkerHashMap.put(key, marker);
+        synchronized (mTramDataHashMap) {
+            Toast.makeText(getApplicationContext(), "UPDATE", Toast.LENGTH_SHORT).show();
+            for (Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
+                LatLng position = new LatLng(element.getValue().getLat(), element.getValue().getLon());
+                if (mTramMarkerHashMap.containsKey(element.getKey())) {
+                    mTramMarkerHashMap.get(element.getKey()).setPosition(position);
+                } else {
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(element.getValue().getFirstLine()));
+                    mTramMarkerHashMap.put(element.getKey(), marker);
+                }
             }
         }
     }
@@ -171,6 +147,71 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 else
                     mMap.setMyLocationEnabled(false);
             }
+        }
+    }
+
+    class TramLoader extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String response = null;
+            try {
+                URL url = new URL("https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                if (conn.getResponseCode() < 300 && conn.getResponseCode() >= 200) {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String str;
+                    StringBuffer stringBuffer = new StringBuffer();
+                    while ((str = bufferedReader.readLine()) != null)
+                        stringBuffer.append(str);
+                    response = stringBuffer.toString();
+                }
+                conn.disconnect();
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+
+            if (response == null) {
+                Log.d("MAPSACTIVITY", "doInBackground: response is null, sorry");
+                return false;
+            } else {
+                Log.d("MAPSACTIVITY", "doInBackground: parsing response");
+                synchronized (mTramDataHashMap) {
+                    HashMap<String, TramData> map = new HashMap<>();
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONArray array = jsonObject.getJSONArray("result");
+                        for (int i = 0; i < array.length(); ++i) {
+                            TramData data = new TramData(array.getJSONObject(i));
+                            map.put(data.getId(), data);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    // update model
+                    Iterator<Map.Entry<String, TramData>> iter = mTramDataHashMap.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Map.Entry<String, TramData> tmp = iter.next();
+                        if (!map.containsKey(tmp.getValue().getId()))
+                            iter.remove();
+                    }
+                    for (TramData tramData : map.values()) {
+                        if (mTramDataHashMap.containsKey(tramData.getId()))
+                            mTramDataHashMap.get(tramData.getId()).updatePosition(tramData);
+                        else
+                            mTramDataHashMap.put(tramData.getId(), tramData);
+                    }
+                }
+                return true;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (result)
+                updateMarkers();
         }
     }
 }
