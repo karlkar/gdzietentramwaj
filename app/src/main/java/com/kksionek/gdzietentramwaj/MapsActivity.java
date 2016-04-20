@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,9 +23,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.IconGenerator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateMarkers() {
+        IconGenerator iconGenerator = new IconGenerator(this);
         synchronized (mTramDataHashMap) {
             Toast.makeText(getApplicationContext(), "UPDATE", Toast.LENGTH_SHORT).show();
             for (Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
@@ -94,7 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (mTramMarkerHashMap.containsKey(element.getKey())) {
                     mTramMarkerHashMap.get(element.getKey()).setPosition(position);
                 } else {
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(element.getValue().getFirstLine()));
+                    Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(element.getValue().getFirstLine()))).position(position).title(element.getValue().getFirstLine()));
                     mTramMarkerHashMap.put(element.getKey(), marker);
                 }
             }
