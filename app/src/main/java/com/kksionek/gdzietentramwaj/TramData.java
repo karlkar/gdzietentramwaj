@@ -38,6 +38,8 @@ public class TramData {
     private String mFirstLine;
     private double mLat;
     private double mLon;
+    private double mPrevLat;
+    private double mPrevLon;
     private String mTime;
     private boolean mLowFloor;
     private String mBrigade;
@@ -47,6 +49,8 @@ public class TramData {
         mFirstLine = jsonObject.getString("FirstLine").trim();
         mLat = jsonObject.getDouble("Lat");
         mLon = jsonObject.getDouble("Lon");
+        mPrevLat = 0;
+        mPrevLon = 0;
         mTime = jsonObject.getString("Time");
         mLowFloor = jsonObject.getBoolean("LowFloor");
         mBrigade = jsonObject.getString("Brigade");
@@ -54,6 +58,8 @@ public class TramData {
     }
 
     public void updatePosition(TramData tramData) {
+        mPrevLat = mLat;
+        mPrevLon = mLon;
         mLat = tramData.mLat;
         mLon = tramData.mLon;
     }
