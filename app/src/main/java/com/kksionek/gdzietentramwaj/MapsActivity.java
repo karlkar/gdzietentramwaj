@@ -2,10 +2,11 @@ package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -14,6 +15,8 @@ import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
@@ -49,8 +52,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private Timer mTimer;
+    IconGenerator mIconGenerator;
     private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private HashMap<String, Marker> mTramMarkerHashMap = new HashMap<>();
+    private LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }, 0, 30000);
+        mIconGenerator = new IconGenerator(this);
 
         checkLocationPermission();
 
@@ -89,16 +88,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         adView.loadAd(adRequest);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        }, 1000, 30000);
+    }
+
+    @Override
+    protected void onPause() {
+        mTimer.cancel();
+        super.onPause();
+    }
+
     private void updateMarkers() {
-        IconGenerator iconGenerator = new IconGenerator(this);
         synchronized (mTramDataHashMap) {
-            Toast.makeText(getApplicationContext(), "UPDATE", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Aktualizacja pozycji", Toast.LENGTH_SHORT).show();
             for (Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
-                LatLng position = new LatLng(element.getValue().getLat(), element.getValue().getLon());
+                final LatLng position = new LatLng(element.getValue().getLat(), element.getValue().getLon());
                 if (mTramMarkerHashMap.containsKey(element.getKey())) {
-                    mTramMarkerHashMap.get(element.getKey()).setPosition(position);
+                    final Marker marker = mTramMarkerHashMap.get(element.getKey());
+                    final LatLng startPosition = marker.getPosition();
+                    final Handler handler = new Handler();
+                    final long start = SystemClock.uptimeMillis();
+                    final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+                    final float durationInMs = 3000;
+
+                    handler.post(new Runnable() {
+                        long elapsed;
+                        float t;
+                        float v;
+
+                        @Override
+                        public void run() {
+                            elapsed = SystemClock.uptimeMillis() - start;
+                            t = elapsed / durationInMs;
+                            v = interpolator.getInterpolation(t);
+
+                            marker.setPosition(mLatLngInterpolator.interpolate(v, startPosition, position));
+
+                            if (t < 1)
+                                handler.postDelayed(this, 16);
+                        }
+                    });
                 } else {
-                    Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(element.getValue().getFirstLine()))).position(position).title(element.getValue().getFirstLine()));
+                    Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(position).title(element.getValue().getFirstLine()));
                     mTramMarkerHashMap.put(element.getKey(), marker);
                 }
             }
@@ -119,6 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -216,6 +256,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         protected void onPostExecute(Boolean result) {
             if (result)
                 updateMarkers();
+        }
+    }
+
+    public class LinearInterpolator {
+        public LatLng interpolate(float fraction, LatLng a, LatLng b) {
+            double lat = (b.latitude - a.latitude) * fraction + a.latitude;
+            double lng = (b.longitude - a.longitude) * fraction + a.longitude;
+            return new LatLng(lat, lng);
         }
     }
 }
