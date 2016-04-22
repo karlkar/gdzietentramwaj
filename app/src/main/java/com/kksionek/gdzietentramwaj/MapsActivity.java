@@ -280,7 +280,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         JSONArray array = jsonObject.getJSONArray("result");
                         for (int i = 0; i < array.length(); ++i) {
                             TramData data = new TramData(array.getJSONObject(i));
-                            map.put(data.getId(), data);
+                            if (data.getStatus().equals("RUNNING"))
+                                map.put(data.getId(), data);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
