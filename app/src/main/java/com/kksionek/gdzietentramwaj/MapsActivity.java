@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +37,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
 
 import org.json.JSONArray;
@@ -48,6 +51,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,8 +64,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Timer mTimer;
     IconGenerator mIconGenerator;
     private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
-    private HashMap<String, Marker> mTramMarkerHashMap = new HashMap<>();
+    private HashMap<String, Pair<Marker, Polyline>> mTramMarkerHashMap = new HashMap<>();
     private LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
+    final Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,36 +146,54 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void updateMarkers() {
         synchronized (mTramDataHashMap) {
             Toast.makeText(getApplicationContext(), "Aktualizacja pozycji", Toast.LENGTH_SHORT).show();
-            for (Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
-                final LatLng position = new LatLng(element.getValue().getLat(), element.getValue().getLon());
+            for (final Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
+                final LatLng newPosition = new LatLng(element.getValue().getLat(), element.getValue().getLon());
                 if (mTramMarkerHashMap.containsKey(element.getKey())) {
-                    final Marker marker = mTramMarkerHashMap.get(element.getKey());
-                    final LatLng startPosition = marker.getPosition();
-                    final Handler handler = new Handler();
-                    final long start = SystemClock.uptimeMillis();
-                    final Interpolator interpolator = new AccelerateDecelerateInterpolator();
-                    final float durationInMs = 3000;
+                    final Marker marker = mTramMarkerHashMap.get(element.getKey()).first;
+                    if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())
+                            || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)) {
+                        final LatLng startPosition = marker.getPosition();
+                        final long start = SystemClock.uptimeMillis();
+                        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+                        final float durationInMs = 3000;
 
-                    handler.post(new Runnable() {
-                        long elapsed;
-                        float t;
-                        float v;
+                        handler.post(new Runnable() {
+                            long elapsed;
+                            float t;
+                            float v;
 
-                        @Override
-                        public void run() {
-                            elapsed = SystemClock.uptimeMillis() - start;
-                            t = elapsed / durationInMs;
-                            v = interpolator.getInterpolation(t);
+                            @Override
+                            public void run() {
+                                elapsed = SystemClock.uptimeMillis() - start;
+                                t = elapsed / durationInMs;
+                                v = interpolator.getInterpolation(t);
 
-                            marker.setPosition(mLatLngInterpolator.interpolate(v, startPosition, position));
+                                LatLng intermediatePosition = mLatLngInterpolator.interpolate(v, startPosition, newPosition);
+                                marker.setPosition(intermediatePosition);
+                                Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
+                                List<LatLng> points = polyline.getPoints();
+                                if (points.size() > 100)
+                                    points.remove(points.get(0));
 
-                            if (t < 1)
-                                handler.postDelayed(this, 16);
-                        }
-                    });
+                                points.add(intermediatePosition);
+                                polyline.setPoints(points);
+
+                                if (t < 1)
+                                    handler.postDelayed(this, 16);
+                            }
+                        });
+                    } else {
+                        marker.setPosition(newPosition);
+                        Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
+                        List<LatLng> points = polyline.getPoints();
+                        points.add(newPosition);
+                        polyline.setPoints(points);
+                    }
                 } else {
-                    Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(position).title(element.getValue().getFirstLine()));
-                    mTramMarkerHashMap.put(element.getKey(), marker);
+                    Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
+                            mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(newPosition).title(element.getValue().getFirstLine()));
+                    Polyline polyline = mMap.addPolyline(new PolylineOptions().add(newPosition).width(5));
+                    mTramMarkerHashMap.put(element.getKey(), new Pair<>(marker, polyline));
                 }
             }
         }
