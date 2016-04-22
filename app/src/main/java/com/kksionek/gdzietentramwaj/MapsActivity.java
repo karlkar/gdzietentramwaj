@@ -146,7 +146,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateMarkers() {
         synchronized (mTramDataHashMap) {
-            Toast.makeText(getApplicationContext(), "Aktualizacja pozycji", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
             for (final Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
                 final LatLng newPosition = new LatLng(element.getValue().getLat(), element.getValue().getLon());
                 if (mTramMarkerHashMap.containsKey(element.getKey())) {
