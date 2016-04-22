@@ -49,6 +49,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -150,12 +151,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final LatLng newPosition = new LatLng(element.getValue().getLat(), element.getValue().getLon());
                 if (mTramMarkerHashMap.containsKey(element.getKey())) {
                     final Marker marker = mTramMarkerHashMap.get(element.getKey()).first;
+                    final Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
+                    polyline.setPoints(new ArrayList<LatLng>());
                     if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())
                             || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)) {
                         final LatLng startPosition = marker.getPosition();
                         final long start = SystemClock.uptimeMillis();
                         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
-                        final float durationInMs = 3000;
 
                         handler.post(new Runnable() {
                             long elapsed;
@@ -165,16 +167,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             @Override
                             public void run() {
                                 elapsed = SystemClock.uptimeMillis() - start;
-                                t = elapsed / durationInMs;
+                                t = elapsed / 3000.0f;
                                 v = interpolator.getInterpolation(t);
 
                                 LatLng intermediatePosition = mLatLngInterpolator.interpolate(v, startPosition, newPosition);
                                 marker.setPosition(intermediatePosition);
-                                Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
                                 List<LatLng> points = polyline.getPoints();
-                                if (points.size() > 100)
-                                    points.remove(points.get(0));
-
                                 points.add(intermediatePosition);
                                 polyline.setPoints(points);
 
@@ -183,11 +181,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         });
                     } else {
-                        marker.setPosition(newPosition);
-                        Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
                         List<LatLng> points = polyline.getPoints();
+                        points.add(marker.getPosition());
                         points.add(newPosition);
                         polyline.setPoints(points);
+                        marker.setPosition(newPosition);
                     }
                 } else {
                     Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
