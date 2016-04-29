@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
@@ -60,6 +59,8 @@ import java.util.TimerTask;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
+    private static final String TAG = "MAPSACTIVITY";
+    private static final String WARSZAWA_TRAM_API = "https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***";
 
     private GoogleMap mMap;
     private Timer mTimer;
@@ -86,32 +87,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         final View adBackground = findViewById(R.id.adBackground);
         AdView adView = (AdView) findViewById(R.id.adView);
-        adBackground.setVisibility(View.GONE);
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceNote5))
                 .addTestDevice(getString(R.string.adMobTestDeviceS5))
                 .build();
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                if (Build.VERSION.SDK_INT >= 19)
-                    TransitionManager.beginDelayedTransition((ViewGroup) findViewById(R.id.rootView));
-                adBackground.setVisibility(View.VISIBLE);
-            }
-        });
         adView.loadAd(adRequest);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }, 1000, 30000);
+        scheduleRefresh();
     }
 
     @Override
@@ -147,15 +133,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void updateMarkers() {
         synchronized (mTramDataHashMap) {
             Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
-            for (final Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
-                final LatLng newPosition = new LatLng(element.getValue().getLat(), element.getValue().getLon());
-                if (mTramMarkerHashMap.containsKey(element.getKey())) {
-                    final Marker marker = mTramMarkerHashMap.get(element.getKey()).first;
-                    final Polyline polyline = mTramMarkerHashMap.get(element.getKey()).second;
+            Iterator<Map.Entry<String, Pair<Marker, Polyline>>> iter = mTramMarkerHashMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, Pair<Marker, Polyline>> element = iter.next();
+                final Marker marker = element.getValue().first;
+                final Polyline polyline = element.getValue().second;
+                if (mTramDataHashMap.containsKey(element.getKey())) {
+                    TramData updatedData = mTramDataHashMap.get(element.getKey());
+                    LatLng prevPosition = updatedData.getPrevLatLng();
+                    final LatLng newPosition = updatedData.getLatLng();
+                    if (prevPosition.equals(newPosition))
+                        continue;
+                    final LatLng animStartPosition = marker.getPosition();
                     polyline.setPoints(new ArrayList<LatLng>());
                     if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())
                             || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)) {
-                        final LatLng startPosition = marker.getPosition();
                         final long start = SystemClock.uptimeMillis();
                         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
 
@@ -170,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 t = elapsed / 3000.0f;
                                 v = interpolator.getInterpolation(t);
 
-                                LatLng intermediatePosition = mLatLngInterpolator.interpolate(v, startPosition, newPosition);
+                                LatLng intermediatePosition = mLatLngInterpolator.interpolate(v, animStartPosition, newPosition);
                                 marker.setPosition(intermediatePosition);
                                 List<LatLng> points = polyline.getPoints();
                                 points.add(intermediatePosition);
@@ -182,14 +174,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         });
                     } else {
                         List<LatLng> points = polyline.getPoints();
-                        points.add(marker.getPosition());
+                        points.add(prevPosition);
                         points.add(newPosition);
                         polyline.setPoints(points);
                         marker.setPosition(newPosition);
                     }
                 } else {
+                    marker.remove();
+                    polyline.remove();
+                    iter.remove();
+                }
+            }
+
+            if (mTramDataHashMap.size() == mTramMarkerHashMap.size())
+                return;
+
+            for (Map.Entry<String, TramData> element : mTramDataHashMap.entrySet()) {
+                if (!mTramMarkerHashMap.containsKey(element.getKey())) {
+                    LatLng newPosition = element.getValue().getLatLng();
                     Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
-                            mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(newPosition).title(element.getValue().getFirstLine()));
+                            mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(newPosition));
                     Polyline polyline = mMap.addPolyline(new PolylineOptions().add(newPosition).width(5));
                     mTramMarkerHashMap.put(element.getKey(), new Pair<>(marker, polyline));
                 }
@@ -211,6 +215,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
@@ -224,7 +229,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         LatLng warsaw = new LatLng(52.231841, 21.005940);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(warsaw, 13));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(warsaw, 15));
         mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(Location location) {
@@ -247,13 +252,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void scheduleRefresh() {
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        }, 500, 30000);
+    }
+
     class TramLoader extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
             String response = null;
             try {
-                URL url = new URL("https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***");
+                URL url = new URL(WARSZAWA_TRAM_API);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 if (conn.getResponseCode() < 300 && conn.getResponseCode() >= 200) {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -269,22 +284,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             if (response == null) {
-                Log.d("MAPSACTIVITY", "doInBackground: response is null, sorry");
+                Log.d(TAG, "doInBackground: response is null, sorry");
                 return false;
             } else {
-                Log.d("MAPSACTIVITY", "doInBackground: parsing response");
+                Log.d(TAG, "doInBackground: parsing response");
                 synchronized (mTramDataHashMap) {
                     HashMap<String, TramData> map = new HashMap<>();
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        JSONArray array = jsonObject.getJSONArray("result");
+                        JSONArray array = jsonObject.optJSONArray("result");
+                        if (array == null) {
+                            JSONObject errorObject = jsonObject.getJSONObject("result");
+                            Log.d(TAG, "doInBackground: Error occurred: '" + errorObject.getString("Message") + "'");
+                            return false;
+                        }
                         for (int i = 0; i < array.length(); ++i) {
                             TramData data = new TramData(array.getJSONObject(i));
-                            if (data.getStatus().equals("RUNNING"))
+                            if (data.isRunning())
                                 map.put(data.getId(), data);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        return false;
+                    }
+
+                    if (map.size() == 0) {
+                        Log.d(TAG, "Received empty response = '" + response + "'");
                         return false;
                     }
 
@@ -310,6 +335,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(Boolean result) {
             if (result)
                 updateMarkers();
+            else
+                scheduleRefresh();
         }
     }
 

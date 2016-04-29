@@ -1,11 +1,16 @@
 package com.kksionek.gdzietentramwaj;
 
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class TramData {
+
+    private static final String TAG = "TRAMDATA";
 
     public String getId() { return mId; }
 
@@ -17,12 +22,12 @@ public class TramData {
         return mFirstLine;
     }
 
-    public double getLat() {
-        return mLat;
+    public LatLng getLatLng() {
+        return mLatLng;
     }
 
-    public double getLon() {
-        return mLon;
+    public LatLng getPrevLatLng() {
+        return mPrevLatLng;
     }
 
     public String getTime() {
@@ -33,13 +38,13 @@ public class TramData {
         return mLowFloor;
     }
 
+    public boolean isRunning() { return mStatus.equals("RUNNING"); };
+
     private String mId;
     private String mStatus;
     private String mFirstLine;
-    private double mLat;
-    private double mLon;
-    private double mPrevLat;
-    private double mPrevLon;
+    private LatLng mLatLng;
+    private LatLng mPrevLatLng;
     private String mTime;
     private boolean mLowFloor;
     private String mBrigade;
@@ -47,10 +52,8 @@ public class TramData {
     public TramData(JSONObject jsonObject) throws JSONException {
         mStatus = jsonObject.getString("Status");
         mFirstLine = jsonObject.getString("FirstLine").trim();
-        mLat = jsonObject.getDouble("Lat");
-        mLon = jsonObject.getDouble("Lon");
-        mPrevLat = 0;
-        mPrevLon = 0;
+        mLatLng = new LatLng(jsonObject.getDouble("Lat"), jsonObject.getDouble("Lon"));
+        mPrevLatLng = mLatLng;
         mTime = jsonObject.getString("Time");
         mLowFloor = jsonObject.getBoolean("LowFloor");
         mBrigade = jsonObject.getString("Brigade");
@@ -58,9 +61,7 @@ public class TramData {
     }
 
     public void updatePosition(TramData tramData) {
-        mPrevLat = mLat;
-        mPrevLon = mLon;
-        mLat = tramData.mLat;
-        mLon = tramData.mLon;
+        mPrevLatLng = mLatLng;
+        mLatLng = tramData.mLatLng;
     }
 }
