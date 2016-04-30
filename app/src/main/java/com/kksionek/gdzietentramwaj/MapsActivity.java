@@ -67,11 +67,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private Timer mTimer;
-    IconGenerator mIconGenerator;
+    private IconGenerator mIconGenerator;
     private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private HashMap<String, Pair<Marker, Polyline>> mTramMarkerHashMap = new HashMap<>();
-    private LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
-    final Handler handler = new Handler();
+    private final LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
+    private final Handler handler = new Handler();
 
     private final Object mDataLoaderMutex = new Object();
     private AsyncTask<Void, Void, Boolean> mDataLoader = null;
@@ -164,6 +164,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
             scheduleRefresh();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
