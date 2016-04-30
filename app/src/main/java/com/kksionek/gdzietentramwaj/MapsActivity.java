@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,19 +16,21 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.TransitionManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.drive.realtime.internal.event.ObjectChangedDetails;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -70,6 +73,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
     final Handler handler = new Handler();
 
+    private final Object mDataLoaderMutex = new Object();
+    private AsyncTask<Void, Void, Boolean> mDataLoader = null;
+
+    private MenuItem mMenuItem = null;
+    private Animation mRotationAnimation = null;
+    private ImageView mRefreshImage = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +95,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         checkLocationPermission();
 
-        final View adBackground = findViewById(R.id.adBackground);
         AdView adView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceNote5))
@@ -106,9 +115,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
     }
 
+    private void startUpdateAnim() {
+        if (mMenuItem == null)
+            return;
+        if (mRefreshImage == null) {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mRefreshImage = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
+        }
+        if (mRotationAnimation == null)
+            mRotationAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_rotate);
+        if (mMenuItem.getActionView() == null) {
+            mRefreshImage.startAnimation(mRotationAnimation);
+            mMenuItem.setActionView(mRefreshImage);
+            mMenuItem.setEnabled(false);
+        }
+    }
+
+    private void stopUpdateAnim() {
+        if (mMenuItem == null)
+            return;
+        if (mMenuItem.getActionView() != null) {
+            mMenuItem.getActionView().clearAnimation();
+            mMenuItem.setActionView(null);
+        }
+        mMenuItem.setEnabled(true);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        mMenuItem = menu.findItem(R.id.menu_item_refresh);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -126,6 +162,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
             builder.show();
             return true;
+        } else if (item.getItemId() == R.id.menu_item_refresh) {
+            scheduleRefresh();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -253,16 +291,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void scheduleRefresh() {
+        Log.d(TAG, "scheduleRefresh: START");
+        if (mTimer != null)
+            mTimer.cancel();
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                new TramLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                synchronized (mDataLoaderMutex) {
+                    if (mDataLoader == null) {
+                        mDataLoader = new TramLoader();
+                        mDataLoader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
+                }
             }
-        }, 500, 30000);
+        }, 10, 30000);
     }
 
     class TramLoader extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected void onPreExecute() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    startUpdateAnim();
+                }
+            });
+            super.onPreExecute();
+        }
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -327,15 +384,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             mTramDataHashMap.put(tramData.getId(), tramData);
                     }
                 }
+                Log.d(TAG, "doInBackground: parsing done");
                 return true;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            if (result)
+            synchronized (mDataLoaderMutex) {
+                mDataLoader = null;
+            }
+            if (result) {
+                stopUpdateAnim();
                 updateMarkers();
-            else
+            } else
                 scheduleRefresh();
         }
     }

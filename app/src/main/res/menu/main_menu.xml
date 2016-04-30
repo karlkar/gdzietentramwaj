@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_item_info"
           android:title="@string/action_menu_info"/>
+    <item
+        android:id="@+id/menu_item_refresh"
+        app:showAsAction="always"
+        android:title="@string/refresh"
+        android:icon="@drawable/ic_menu_refresh"/>
 </menu>
