@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,14 +14,10 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -56,10 +51,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private IconGenerator mIconGenerator;
     private final HashMap<String, Pair<Marker, Polyline>> mTramMarkerHashMap = new HashMap<>();
     private final HashMap<Marker, String> mMarkerTramIdMap = new HashMap<>();
-    private final LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
-    private final Handler handler = new Handler();
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
+    private final Handler mAnimHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,47 +136,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void updateMarkers(HashMap<String, TramData> tramDataHashMap) {
         Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
 
+        updateExistingMarkers(tramDataHashMap);
+
+        if (tramDataHashMap.size() == mTramMarkerHashMap.size())
+            return;
+
+        addNewMarkers(tramDataHashMap);
+    }
+
+    private void updateExistingMarkers(HashMap<String, TramData> tramDataHashMap) {
         Iterator<Map.Entry<String, Pair<Marker, Polyline>>> iter = mTramMarkerHashMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<String, Pair<Marker, Polyline>> element = iter.next();
-            final Marker marker = element.getValue().first;
-            final Polyline polyline = element.getValue().second;
+            Marker marker = element.getValue().first;
+            Polyline polyline = element.getValue().second;
             if (tramDataHashMap.containsKey(element.getKey())) {
                 TramData updatedData = tramDataHashMap.get(element.getKey());
                 LatLng prevPosition = updatedData.getPrevLatLng();
-                final LatLng newPosition = updatedData.getLatLng();
+                LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
                     continue;
-                final LatLng animStartPosition = marker.getPosition();
-                polyline.setPoints(new ArrayList<LatLng>());
+
+                List<LatLng> points = new ArrayList<>();
                 if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())
                         || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)) {
-                    final long start = SystemClock.uptimeMillis();
-                    final Interpolator interpolator = new AccelerateDecelerateInterpolator();
 
-                    handler.post(new Runnable() {
-                        long elapsed;
-                        float t;
-                        float v;
-
-                        @Override
-                        public void run() {
-                            elapsed = SystemClock.uptimeMillis() - start;
-                            t = elapsed / 3000.0f;
-                            v = interpolator.getInterpolation(t);
-
-                            LatLng intermediatePosition = mLatLngInterpolator.interpolate(v, animStartPosition, newPosition);
-                            marker.setPosition(intermediatePosition);
-                            List<LatLng> points = polyline.getPoints();
-                            points.add(intermediatePosition);
-                            polyline.setPoints(points);
-
-                            if (t < 1)
-                                handler.postDelayed(this, 16);
-                        }
-                    });
+                    polyline.setPoints(points);
+                    mAnimHandler.post(new MarkerMoveAnimation(marker, polyline, SystemClock.uptimeMillis(), marker.getPosition(), newPosition, mAnimHandler));
                 } else {
-                    List<LatLng> points = polyline.getPoints();
                     points.add(prevPosition);
                     points.add(newPosition);
                     polyline.setPoints(points);
@@ -195,10 +176,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 iter.remove();
             }
         }
+    }
 
-        if (tramDataHashMap.size() == mTramMarkerHashMap.size())
-            return;
-
+    private void addNewMarkers(HashMap<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 LatLng newPosition = element.getValue().getLatLng();
