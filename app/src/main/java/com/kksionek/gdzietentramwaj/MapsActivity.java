@@ -49,7 +49,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
-    private static final String WARSZAWA_TRAM_API = "https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***";
 
     private final Model mModel = new Model(this);
 
@@ -60,9 +59,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
     private final Handler handler = new Handler();
 
-    private MenuItem mMenuItem = null;
-    private Animation mRotationAnimation = null;
-    private ImageView mRefreshImage = null;
+    private MenuItemRefreshCtrl mMenuItemRefresh = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,35 +97,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void notifyRefreshStarted() {
-        if (mMenuItem == null)
+        if (mMenuItemRefresh == null)
             return;
-        if (mRefreshImage == null) {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mRefreshImage = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
-        }
-        if (mRotationAnimation == null)
-            mRotationAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_rotate);
-        if (mMenuItem.getActionView() == null) {
-            mRefreshImage.startAnimation(mRotationAnimation);
-            mMenuItem.setActionView(mRefreshImage);
-            mMenuItem.setEnabled(false);
-        }
+        mMenuItemRefresh.startAnimation();
     }
 
     public void notifyRefreshEnded() {
-        if (mMenuItem == null)
+        if (mMenuItemRefresh == null)
             return;
-        if (mMenuItem.getActionView() != null) {
-            mMenuItem.getActionView().clearAnimation();
-            mMenuItem.setActionView(null);
-        }
-        mMenuItem.setEnabled(true);
+        mMenuItemRefresh.endAnimation();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        mMenuItem = menu.findItem(R.id.menu_item_refresh);
+        MenuItem menuItem = menu.findItem(R.id.menu_item_refresh);
+        if (menuItem != null)
+            mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
+
         return super.onCreateOptionsMenu(menu);
     }
 
