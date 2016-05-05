@@ -77,7 +77,7 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
                 }
                 for (int i = 0; i < array.length(); ++i) {
                     TramData data = new TramData(array.getJSONObject(i));
-                    if (data.isRunning())
+                    if (data.shouldBeVisible())
                         map.put(data.getId(), data);
                 }
             } catch (JSONException e) {

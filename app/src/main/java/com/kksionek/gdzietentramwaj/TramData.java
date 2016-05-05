@@ -11,6 +11,8 @@ import org.json.JSONObject;
 public class TramData {
 
     private static final String TAG = "TRAMDATA";
+    private static final int MIN_LATITUDE = 45;
+    private static final int MIN_LONGITUDE = 10;
 
     public String getId() { return mId; }
 
@@ -63,5 +65,10 @@ public class TramData {
     public void updatePosition(TramData tramData) {
         mPrevLatLng = mLatLng;
         mLatLng = tramData.mLatLng;
+    }
+
+    public boolean shouldBeVisible() {
+        // Sometimes trams have position outside of Poland (in most cases it is 0, 0)
+        return isRunning() && mLatLng.latitude > MIN_LATITUDE && mLatLng.longitude > MIN_LONGITUDE;
     }
 }
