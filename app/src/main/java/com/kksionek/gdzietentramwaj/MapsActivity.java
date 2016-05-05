@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -128,6 +129,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
             mModel.startUpdates();
+            return true;
+        } else if (item.getItemId() == R.id.menu_item_favorite) {
+            Intent intent = new Intent(this, FavoriteLinesActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
