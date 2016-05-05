@@ -1,8 +1,17 @@
 package com.kksionek.gdzietentramwaj;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.util.List;
 
 public class FavoriteLinesActivity extends AppCompatActivity {
 
@@ -12,6 +21,49 @@ public class FavoriteLinesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_lines);
+
         mGridView = (GridView) findViewById(R.id.gridView);
+        FavoritesAdapter adapter = new FavoritesAdapter(Model.getInstance().getFavoriteTramData());
+        mGridView.setAdapter(adapter);
+    }
+
+    private class FavoritesAdapter extends ArrayAdapter<FavoriteTramData> {
+
+        public FavoritesAdapter(List<FavoriteTramData> objects) {
+            super(FavoriteLinesActivity.this, R.layout.grid_favorite_element, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_favorite_element, parent, false);
+
+                holder = new ViewHolder();
+                holder.textView = (TextView) convertView.findViewById(R.id.tramNum);
+//                holder.imageView = (ImageView) convertView.findViewById(R.id.tramFav);
+                convertView.setTag(holder);
+            } else
+                holder = (ViewHolder) convertView.getTag();
+
+            final FavoriteTramData tramData = getItem(position);
+            holder.textView.setText(tramData.getLine());
+            convertView.setBackgroundResource(tramData.isFavorite() ? android.R.color.holo_green_light : android.R.color.darker_gray);
+//            holder.imageView.setImageResource(tramData.isFavorite() ? android.R.drawable.star_big_on : android.R.drawable.star_big_off);
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tramData.setFavorite(!tramData.isFavorite());
+                    Model.getInstance().getFavoriteManager().setFavorite(tramData.getLine(), tramData.isFavorite());
+                    notifyDataSetChanged();
+                }
+            });
+            return convertView;
+        }
+
+        private class ViewHolder {
+            TextView textView;
+//            ImageView imageView;
+        }
     }
 }

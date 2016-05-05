@@ -46,7 +46,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
 
-    private final Model mModel = new Model(this);
+    private final Model mModel = Model.getInstance();
 
     private GoogleMap mMap;
     private IconGenerator mIconGenerator;
@@ -60,6 +60,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        mModel.setObserver(this);
+
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
