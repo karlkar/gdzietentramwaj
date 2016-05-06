@@ -9,32 +9,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.kksionek.gdzietentramwaj.FavoriteLinesActivity">
 
-    <LinearLayout
-        android:id="@+id/enablerRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Twoje ulubione linie"
-            android:gravity="left|center_vertical"
-            android:layout_weight="1" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
     <TextView
         android:id="@+id/clickToRemoveText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/enablerRow"
+        android:layout_alignParentTop="true"
         android:text="Kliknij na linię, aby ją dodać lub usunąć z ulubionych"/>
 
     <GridView

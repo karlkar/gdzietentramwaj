@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
@@ -87,6 +88,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onPause() {
         mModel.stopUpdates();
         super.onPause();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     public void notifyRefreshStarted() {
