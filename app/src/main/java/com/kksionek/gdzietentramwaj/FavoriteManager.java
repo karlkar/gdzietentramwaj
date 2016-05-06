@@ -26,6 +26,10 @@ public class FavoriteManager {
         PrefManager.setFavoriteTramData(mFavoriteTramData);
     }
 
+    public Set<String> getFavoriteTramData() {
+        return mFavoriteTramData;
+    }
+
     public void markChanged() {
         mChanged = true;
     }

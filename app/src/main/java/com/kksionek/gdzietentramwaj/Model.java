@@ -106,9 +106,13 @@ public class Model {
 
     public List<FavoriteTramData> getFavoriteTramData() {
         SortedSet<FavoriteTramData> favoriteTrams = new TreeSet<>();
+        for (String str : mFavoriteManager.getFavoriteTramData())
+            favoriteTrams.add(new FavoriteTramData(str, true));
+
         synchronized (mTramDataHashMap) {
             for (TramData tramData : mTramDataHashMap.values())
-                favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), mFavoriteManager.isFavorite(tramData.getFirstLine())));
+                if (!mFavoriteManager.isFavorite(tramData.getFirstLine()))
+                    favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), false));
         }
         return new ArrayList<>(favoriteTrams);
     }

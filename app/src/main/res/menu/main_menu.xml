@@ -13,11 +13,12 @@
         android:title="@string/refresh"
         android:icon="@drawable/ic_menu_refresh"/>
 
+
+    <item android:id="@+id/menu_item_favorite"
+          app:showAsAction="never"
+          android:title="@string/action_menu_favorite"/>
+
     <item android:id="@+id/menu_item_info"
         app:showAsAction="never"
         android:title="@string/action_menu_info"/>
-
-    <item android:id="@+id/menu_item_favorite"
-        app:showAsAction="never"
-        android:title="@string/action_menu_favorite"/>
 </menu>
