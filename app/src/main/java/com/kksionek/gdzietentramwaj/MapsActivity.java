@@ -186,10 +186,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (prevPosition.equals(newPosition))
                     continue;
 
-                if (shouldAnimateMarkerMovement(tramMarker, newPosition)) {
-                    tramMarker.clearPolyline();
-                    mAnimHandler.post(new MarkerMoveAnimation(tramMarker, SystemClock.uptimeMillis(), newPosition, mAnimHandler));
-                } else
+                if (shouldAnimateMarkerMovement(tramMarker, newPosition))
+                    tramMarker.animateMovement(newPosition, mAnimHandler);
+                else
                     tramMarker.updateMarker(prevPosition, newPosition);
             } else {
                 mMarkerTramIdMap.remove(tramMarker.getMarker());

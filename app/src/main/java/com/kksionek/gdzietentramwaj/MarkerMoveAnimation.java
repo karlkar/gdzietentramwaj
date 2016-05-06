@@ -26,10 +26,10 @@ public class MarkerMoveAnimation implements Runnable {
     float mT;
     float mV;
 
-    public MarkerMoveAnimation(TramMarker tramMarker, long startTime, LatLng animEndPos, Handler handler) {
+    public MarkerMoveAnimation(TramMarker tramMarker, LatLng animEndPos, Handler handler) {
         mMarker = tramMarker.getMarker();
         mPolyline = tramMarker.getPolyline();
-        mStartTime = startTime;
+        mStartTime = SystemClock.uptimeMillis();
         mAnimStartPos = tramMarker.getMarkerPosition();
         mAnimEndPos = animEndPos;
         mAnimHandler = handler;

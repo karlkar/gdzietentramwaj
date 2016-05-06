@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.UiThread;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -70,7 +71,7 @@ public class TramMarker {
     }
 
     @UiThread
-    public void clearPolyline() {
+    private void clearPolyline() {
         mPolyline.setPoints(new ArrayList<LatLng>());
     }
 
@@ -81,5 +82,11 @@ public class TramMarker {
         points.add(newPosition);
         mPolyline.setPoints(points);
         mMarker.setPosition(newPosition);
+    }
+
+    @UiThread
+    public void animateMovement(LatLng newPosition, Handler mAnimHandler) {
+        clearPolyline();
+        mAnimHandler.post(new MarkerMoveAnimation(this, newPosition, mAnimHandler));
     }
 }
