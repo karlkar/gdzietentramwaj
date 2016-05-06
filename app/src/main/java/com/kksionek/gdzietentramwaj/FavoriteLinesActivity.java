@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -36,8 +37,15 @@ public class FavoriteLinesActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
+            GridView gridView = (GridView)parent;
+            int size = 0;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+                size = gridView.getColumnWidth();
+
             if (convertView == null) {
                 convertView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_favorite_element, parent, false);
+                if (size != 0)
+                    convertView.setLayoutParams(new GridView.LayoutParams(size, size));
 
                 holder = new ViewHolder();
                 holder.textView = (TextView) convertView.findViewById(R.id.tramNum);
@@ -48,7 +56,15 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
             final FavoriteTramData tramData = getItem(position);
             holder.textView.setText(tramData.getLine());
-            convertView.setBackgroundResource(tramData.isFavorite() ? android.R.color.holo_green_light : android.R.color.darker_gray);
+            if (tramData.isFavorite())
+                convertView.setBackgroundResource(android.R.color.holo_green_light);
+            else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    convertView.setBackground(null);
+                else
+                    convertView.setBackgroundDrawable(null);
+            }
+
 //            holder.imageView.setImageResource(tramData.isFavorite() ? android.R.drawable.star_big_on : android.R.drawable.star_big_off);
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
