@@ -68,7 +68,7 @@ public class FavoriteLinesActivity extends AppCompatActivity {
             final FavoriteTramData tramData = getItem(position);
             holder.textView.setText(tramData.getLine());
             if (tramData.isFavorite())
-                convertView.setBackgroundResource(android.R.color.holo_green_light);
+                convertView.setBackgroundResource(R.color.favoriteLineColor);
             else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                     convertView.setBackground(null);
