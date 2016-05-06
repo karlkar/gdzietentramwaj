@@ -61,7 +61,6 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
                 holder = new ViewHolder();
                 holder.textView = (TextView) convertView.findViewById(R.id.tramNum);
-//                holder.imageView = (ImageView) convertView.findViewById(R.id.tramFav);
                 convertView.setTag(holder);
             } else
                 holder = (ViewHolder) convertView.getTag();
@@ -77,7 +76,6 @@ public class FavoriteLinesActivity extends AppCompatActivity {
                     convertView.setBackgroundDrawable(null);
             }
 
-//            holder.imageView.setImageResource(tramData.isFavorite() ? android.R.drawable.star_big_on : android.R.drawable.star_big_off);
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -92,7 +90,6 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
         private class ViewHolder {
             TextView textView;
-//            ImageView imageView;
         }
     }
 }

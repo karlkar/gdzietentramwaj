@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,6 @@ public class PrefManager {
     private static final String PREF_FAVORITE_TRAMS = "PREF_FAVORITE_TRAMS";
 
     private static SharedPreferences mPrefs = null;
-    private static Set<String> favoriteTramData;
 
     private PrefManager() {}
 
@@ -30,10 +30,14 @@ public class PrefManager {
     }
 
     public static Set<String> getFavoriteTramData() {
-        return mPrefs.getStringSet(PREF_FAVORITE_TRAMS, new HashSet<String>());
+        Set<String> set = mPrefs.getStringSet(PREF_FAVORITE_TRAMS, null);
+        if (set == null)
+            return new HashSet<>();
+        else
+            return new HashSet<>(set);
     }
 
     public static void setFavoriteTramData(Set<String> favoriteTramData) {
-        mPrefs.edit().remove(PREF_FAVORITE_TRAMS).putStringSet(PREF_FAVORITE_TRAMS, favoriteTramData).apply();
+        mPrefs.edit().putStringSet(PREF_FAVORITE_TRAMS, favoriteTramData).apply();
     }
 }
