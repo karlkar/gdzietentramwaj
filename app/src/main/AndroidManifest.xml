@@ -48,6 +48,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".FavoriteLinesActivity"
+                  android:label="@string/action_menu_favorite"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
     </application>
 

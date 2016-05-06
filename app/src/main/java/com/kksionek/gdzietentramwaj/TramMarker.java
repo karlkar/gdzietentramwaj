@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.UiThread;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 
 public class TramMarker {
 
-    private static final int POLYLINE_WIDTH = 5;
+    private static final int POLYLINE_WIDTH = 8;
 
     private static IconGenerator mIconGenerator = null;
     private final TramData mTramData;
@@ -34,7 +35,7 @@ public class TramMarker {
 
         mMarker = map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
                 mIconGenerator.makeIcon(tramData.getFirstLine()))).position(tramData.getLatLng()));
-        mPolyline = map.addPolyline(new PolylineOptions().add(tramData.getLatLng()).width(POLYLINE_WIDTH));
+        mPolyline = map.addPolyline(new PolylineOptions().add(tramData.getLatLng()).color(ContextCompat.getColor(ctx, android.R.color.holo_red_light)).width(POLYLINE_WIDTH));
     }
 
     @UiThread

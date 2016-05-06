@@ -3,17 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.kksionek.gdzietentramwaj.FavoriteLinesActivity">
+
+    <include
+        android:id="@+id/my_toolbar"
+        layout="@layout/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/clickToRemoveText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/my_toolbar"
+        android:padding="16dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:text="Kliknij na linię, aby ją dodać lub usunąć z ulubionych"/>
@@ -22,9 +25,10 @@
         android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:layout_below="@id/clickToRemoveText"
-        android:layout_marginTop="16dp"
-        android:numColumns="6">
+        android:numColumns="7">
 
     </GridView>
 
