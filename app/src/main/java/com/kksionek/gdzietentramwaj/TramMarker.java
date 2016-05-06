@@ -72,11 +72,6 @@ public class TramMarker {
     }
 
     @UiThread
-    private void clearPolyline() {
-        mPolyline.setPoints(new ArrayList<LatLng>());
-    }
-
-    @UiThread
     public void updateMarker(LatLng prevPosition, LatLng newPosition) {
         ArrayList<LatLng> points = new ArrayList<>();
         points.add(prevPosition);
@@ -87,7 +82,6 @@ public class TramMarker {
 
     @UiThread
     public void animateMovement(LatLng newPosition, Handler mAnimHandler) {
-        clearPolyline();
         mAnimHandler.post(new MarkerMoveAnimation(this, newPosition, mAnimHandler));
     }
 }
