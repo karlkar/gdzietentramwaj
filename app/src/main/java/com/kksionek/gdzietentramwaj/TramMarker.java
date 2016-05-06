@@ -35,7 +35,7 @@ public class TramMarker {
 
         mMarker = map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
                 mIconGenerator.makeIcon(tramData.getFirstLine()))).position(tramData.getLatLng()));
-        mPolyline = map.addPolyline(new PolylineOptions().add(tramData.getLatLng()).color(ContextCompat.getColor(ctx, android.R.color.holo_red_light)).width(POLYLINE_WIDTH));
+        mPolyline = map.addPolyline(new PolylineOptions().add(tramData.getLatLng()).color(ContextCompat.getColor(ctx, R.color.polylineColor)).width(POLYLINE_WIDTH));
     }
 
     @UiThread
