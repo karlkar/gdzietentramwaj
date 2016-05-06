@@ -1,20 +1,12 @@
 package com.kksionek.gdzietentramwaj;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,8 +18,8 @@ public class Model {
     private static final String WARSZAWA_TRAM_API = "https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***";
 
     private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
-    private FavoriteManager mFavoriteManager;
-    private MapsActivity mMapsActivityObserver;
+    private FavoriteManager mFavoriteManager = null;
+    private MapsActivity mMapsActivityObserver = null;
 
     private final Object mDataLoaderMutex = new Object();
     private TramLoader mDataLoader = null;
@@ -45,7 +37,8 @@ public class Model {
 
     public void setObserver(MapsActivity observer) {
         mMapsActivityObserver = observer;
-        mFavoriteManager = new FavoriteManager(observer);
+        if (mFavoriteManager == null)
+            mFavoriteManager = new FavoriteManager(observer);
     }
 
     private void createAndStartLoaderTask() {
@@ -122,40 +115,5 @@ public class Model {
 
     private static class Holder {
         static final Model instance = new Model();
-    }
-
-    public class FavoriteManager {
-
-        private static final String PREF_FAVORITE_TRAMS = "PREF_FAVORITE_TRAMS";
-        private Context mCtx;
-        private SharedPreferences mSharedPreferences;
-        private Set<String> mFavoriteTramData;
-        private boolean mChanged = false;
-
-        FavoriteManager(Context ctx) {
-            mCtx = ctx;
-            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mCtx);
-            mFavoriteTramData = mSharedPreferences.getStringSet(PREF_FAVORITE_TRAMS, new HashSet<String>());
-        }
-
-        public boolean isFavorite(String line) {
-            return mFavoriteTramData.contains(line);
-        }
-
-        public void setFavorite(String line, boolean favorite) {
-            if (favorite)
-                mFavoriteTramData.add(line);
-            else
-                mFavoriteTramData.remove(line);
-            mSharedPreferences.edit().remove(PREF_FAVORITE_TRAMS).putStringSet(PREF_FAVORITE_TRAMS, mFavoriteTramData).apply();
-        }
-
-        public void markChanged() {
-            mChanged = true;
-        }
-
-        public boolean checkIfChangedAndReset() {
-            return mChanged;
-        }
     }
 }

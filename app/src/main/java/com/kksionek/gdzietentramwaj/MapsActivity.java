@@ -1,26 +1,23 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -29,18 +26,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.ui.IconGenerator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -53,7 +43,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
     private final HashMap<Marker, String> mMarkerTramIdMap = new HashMap<>();
-    private boolean mFavoriteView = false;
+    private boolean mFavoriteView;
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
     private MenuItem mMenuItemFavoriteSwitch = null;
@@ -65,6 +55,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
 
         mModel.setObserver(this);
+        PrefManager.init(this);
+        mFavoriteView = PrefManager.isFavoriteViewOn();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -151,6 +143,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (item.getItemId() == R.id.menu_item_favorite_switch) {
             mFavoriteView = !mFavoriteView;
             updateFavoriteSwitchIcon();
+            PrefManager.setFavoriteViewOn(mFavoriteView);
             updateMarkersVisibility();
         }
         return super.onOptionsItemSelected(item);
