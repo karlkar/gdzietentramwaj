@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -49,15 +48,8 @@ public class FavoriteLinesActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
-            GridView gridView = (GridView)parent;
-            int size = 0;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
-                size = gridView.getColumnWidth();
-
             if (convertView == null) {
                 convertView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_favorite_element, parent, false);
-                if (size != 0)
-                    convertView.setLayoutParams(new GridView.LayoutParams(size, size));
 
                 holder = new ViewHolder();
                 holder.textView = (TextView) convertView.findViewById(R.id.tramNum);
