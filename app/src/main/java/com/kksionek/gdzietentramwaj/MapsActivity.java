@@ -122,7 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateFavoriteSwitchIcon() {
         if (mMenuItemFavoriteSwitch != null)
-            mMenuItemFavoriteSwitch.setIcon(mFavoriteView ? android.R.drawable.star_big_on : android.R.drawable.star_big_off);
+            mMenuItemFavoriteSwitch.setIcon(mFavoriteView ? R.drawable.fav_on : R.drawable.fav_off);
     }
 
     @Override
