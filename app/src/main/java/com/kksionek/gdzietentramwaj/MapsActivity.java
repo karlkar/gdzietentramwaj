@@ -8,7 +8,9 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
@@ -49,11 +51,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final Model mModel = Model.getInstance();
 
     private GoogleMap mMap;
-    private IconGenerator mIconGenerator;
-    private final HashMap<String, Pair<Marker, Polyline>> mTramMarkerHashMap = new HashMap<>();
+    private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
     private final HashMap<Marker, String> mMarkerTramIdMap = new HashMap<>();
+    private boolean mFavoriteView = false;
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
+    private MenuItem mMenuItemFavoriteSwitch = null;
     private final Handler mAnimHandler = new Handler();
 
     @Override
@@ -70,8 +73,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mIconGenerator = new IconGenerator(this);
-
         checkLocationPermission();
 
         AdView adView = (AdView) findViewById(R.id.adView);
@@ -86,6 +87,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         mModel.startUpdates();
+        if (mModel.getFavoriteManager().checkIfChangedAndReset())
+            updateMarkersVisibility();
     }
 
     @Override
@@ -113,7 +116,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (menuItem != null)
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
 
+        mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
+        updateFavoriteSwitchIcon();
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void updateFavoriteSwitchIcon() {
+        if (mMenuItemFavoriteSwitch != null)
+            mMenuItemFavoriteSwitch.setIcon(mFavoriteView ? android.R.drawable.star_big_on : android.R.drawable.star_big_off);
     }
 
     @Override
@@ -137,8 +148,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(this, FavoriteLinesActivity.class);
             startActivity(intent);
             return true;
+        } else if (item.getItemId() == R.id.menu_item_favorite_switch) {
+            mFavoriteView = !mFavoriteView;
+            updateFavoriteSwitchIcon();
+            updateMarkersVisibility();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateMarkersVisibility() {
+        for (TramMarker tramMarker : mTramMarkerHashMap.values())
+            tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
     }
 
     public void updateMarkers(HashMap<String, TramData> tramDataHashMap) {
@@ -152,49 +172,46 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         addNewMarkers(tramDataHashMap);
     }
 
+    @UiThread
     private void updateExistingMarkers(HashMap<String, TramData> tramDataHashMap) {
-        Iterator<Map.Entry<String, Pair<Marker, Polyline>>> iter = mTramMarkerHashMap.entrySet().iterator();
+        Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
         while (iter.hasNext()) {
-            Map.Entry<String, Pair<Marker, Polyline>> element = iter.next();
-            Marker marker = element.getValue().first;
-            Polyline polyline = element.getValue().second;
+            Map.Entry<String, TramMarker> element = iter.next();
+            TramMarker tramMarker = element.getValue();
             if (tramDataHashMap.containsKey(element.getKey())) {
                 TramData updatedData = tramDataHashMap.get(element.getKey());
+
                 LatLng prevPosition = updatedData.getPrevLatLng();
                 LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
                     continue;
 
-                List<LatLng> points = new ArrayList<>();
-                if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())
-                        || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)) {
-
-                    polyline.setPoints(points);
-                    mAnimHandler.post(new MarkerMoveAnimation(marker, polyline, SystemClock.uptimeMillis(), marker.getPosition(), newPosition, mAnimHandler));
-                } else {
-                    points.add(prevPosition);
-                    points.add(newPosition);
-                    polyline.setPoints(points);
-                    marker.setPosition(newPosition);
-                }
+                if (shouldAnimateMarkerMovement(tramMarker, newPosition)) {
+                    tramMarker.clearPolyline();
+                    mAnimHandler.post(new MarkerMoveAnimation(tramMarker, SystemClock.uptimeMillis(), newPosition, mAnimHandler));
+                } else
+                    tramMarker.updateMarker(prevPosition, newPosition);
             } else {
-                mMarkerTramIdMap.remove(marker);
-                marker.remove();
-                polyline.remove();
+                mMarkerTramIdMap.remove(tramMarker.getMarker());
+                tramMarker.remove();
                 iter.remove();
             }
         }
     }
 
+    private boolean shouldAnimateMarkerMovement(TramMarker tramMarker, LatLng newPosition) {
+        return tramMarker.isVisible() &&
+                (mMap.getProjection().getVisibleRegion().latLngBounds.contains(tramMarker.getMarkerPosition())
+                        || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition));
+    }
+
     private void addNewMarkers(HashMap<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
-                LatLng newPosition = element.getValue().getLatLng();
-                Marker marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(
-                        mIconGenerator.makeIcon(element.getValue().getFirstLine()))).position(newPosition));
-                Polyline polyline = mMap.addPolyline(new PolylineOptions().add(newPosition).width(5));
-                mTramMarkerHashMap.put(element.getKey(), new Pair<>(marker, polyline));
-                mMarkerTramIdMap.put(marker, element.getKey());
+                TramMarker tramMarker = new TramMarker(this, element.getValue(), mMap);
+                tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
+                mTramMarkerHashMap.put(element.getKey(), tramMarker);
+                mMarkerTramIdMap.put(tramMarker.getMarker(), element.getKey());
             }
         }
     }

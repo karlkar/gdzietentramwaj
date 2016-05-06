@@ -130,6 +130,7 @@ public class Model {
         private Context mCtx;
         private SharedPreferences mSharedPreferences;
         private Set<String> mFavoriteTramData;
+        private boolean mChanged = false;
 
         FavoriteManager(Context ctx) {
             mCtx = ctx;
@@ -149,5 +150,12 @@ public class Model {
             mSharedPreferences.edit().remove(PREF_FAVORITE_TRAMS).putStringSet(PREF_FAVORITE_TRAMS, mFavoriteTramData).apply();
         }
 
+        public void markChanged() {
+            mChanged = true;
+        }
+
+        public boolean checkIfChangedAndReset() {
+            return mChanged;
+        }
     }
 }

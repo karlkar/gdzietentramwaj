@@ -55,6 +55,7 @@ public class FavoriteLinesActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     tramData.setFavorite(!tramData.isFavorite());
                     Model.getInstance().getFavoriteManager().setFavorite(tramData.getLine(), tramData.isFavorite());
+                    Model.getInstance().getFavoriteManager().markChanged();
                     notifyDataSetChanged();
                 }
             });

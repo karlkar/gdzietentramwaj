@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/menu_item_info"
-        app:showAsAction="never"
-          android:title="@string/action_menu_info"/>
+    <item
+        android:id="@+id/menu_item_favorite_switch"
+        app:showAsAction="always"
+        android:title="Włącz/Wyłącz widok ulubionych"
+        android:icon="@android:drawable/star_big_off"/>
+
     <item
         android:id="@+id/menu_item_refresh"
         app:showAsAction="always"
         android:title="@string/refresh"
         android:icon="@drawable/ic_menu_refresh"/>
+
+    <item android:id="@+id/menu_item_info"
+        app:showAsAction="never"
+        android:title="@string/action_menu_info"/>
 
     <item android:id="@+id/menu_item_favorite"
         app:showAsAction="never"
