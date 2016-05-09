@@ -49,6 +49,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
     private MenuItem mMenuItemFavoriteSwitch = null;
     private final Handler mAnimHandler = new Handler();
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +69,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         checkLocationPermission();
 
-        AdView adView = (AdView) findViewById(R.id.adView);
+        Location loc = new Location("");
+        loc.setLatitude(52.231841);
+        loc.setLongitude(21.005940);
+
+        mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceNote5))
                 .addTestDevice(getString(R.string.adMobTestDeviceS5))
+                .setLocation(loc)
                 .build();
-        adView.loadAd(adRequest);
+        mAdView.loadAd(adRequest);
     }
 
     @Override
@@ -232,13 +238,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
-            } else
-                mMap.setMyLocationEnabled(false);
-        } else
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            mMap.setMyLocationEnabled(
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+        else
             mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         LatLng warsaw = new LatLng(52.231841, 21.005940);
@@ -246,6 +250,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(Location location) {
+                AdRequest adRequest = new AdRequest.Builder()
+                        .addTestDevice(getString(R.string.adMobTestDeviceNote5))
+                        .addTestDevice(getString(R.string.adMobTestDeviceS5))
+                        .setLocation(location)
+                        .build();
+                mAdView.loadAd(adRequest);
+
                 mMap.setOnMyLocationChangeListener(null);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             }
