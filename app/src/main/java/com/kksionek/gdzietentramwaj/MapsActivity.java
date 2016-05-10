@@ -41,7 +41,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Model mModel = Model.getInstance();
 
-    private GoogleMap mMap;
+    private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
     private final HashMap<Marker, String> mMarkerTramIdMap = new HashMap<>();
     private boolean mFavoriteView;
@@ -85,7 +85,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        mModel.startUpdates();
+        if (mMap != null)
+            mModel.startUpdates();
         if (mModel.getFavoriteManager().checkIfChangedAndReset())
             updateMarkersVisibility();
     }
@@ -267,6 +268,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
         });
+
+        mModel.startUpdates();
     }
 
     @Override
