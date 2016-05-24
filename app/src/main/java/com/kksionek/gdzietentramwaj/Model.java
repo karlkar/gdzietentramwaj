@@ -71,7 +71,10 @@ public class Model {
     }
 
     public void stopUpdates() {
-        if (mTimer != null)
+        synchronized (mDataLoaderMutex) {
+            if (mDataLoader != null)
+                mDataLoader.cancel(true);
+        }
             mTimer.cancel();
     }
 

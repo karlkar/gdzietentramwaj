@@ -29,6 +29,7 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
 
     @UiThread
     public void launch() {
+        mDone = false;
         executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -45,6 +46,8 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         String response = null;
+        if (isCancelled())
+            return false;
         try {
             URL url = new URL(mAddress);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -99,6 +102,8 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean result) {
         mDone = true;
+        if (isCancelled())
+            return;
         mModel.notifyJobDone(result);
     }
 }
