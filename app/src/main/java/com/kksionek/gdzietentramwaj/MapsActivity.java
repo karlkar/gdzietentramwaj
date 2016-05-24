@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,7 +8,6 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
@@ -43,7 +41,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
-    private final HashMap<Marker, String> mMarkerTramIdMap = new HashMap<>();
     private boolean mFavoriteView;
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
@@ -95,11 +92,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onPause() {
         mModel.stopUpdates();
         super.onPause();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     public void notifyRefreshStarted() {
@@ -197,7 +189,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 else
                     tramMarker.updateMarker(prevPosition, newPosition);
             } else {
-                mMarkerTramIdMap.remove(tramMarker.getMarker());
                 tramMarker.remove();
                 iter.remove();
             }
@@ -216,7 +207,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 TramMarker tramMarker = new TramMarker(this, element.getValue(), mMap);
                 tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
-                mMarkerTramIdMap.put(tramMarker.getMarker(), element.getKey());
             }
         }
     }

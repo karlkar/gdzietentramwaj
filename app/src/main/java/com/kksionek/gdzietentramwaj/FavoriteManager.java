@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class FavoriteManager {
 
-    private Set<String> mFavoriteTramData;
+    private final Set<String> mFavoriteTramData;
     private boolean mChanged = false;
 
     public FavoriteManager(Context ctx) {

@@ -22,8 +22,8 @@ public class TramMarker {
 
     private static IconGenerator mIconGenerator = null;
     private final TramData mTramData;
-    private Marker mMarker;
-    private Polyline mPolyline;
+    private final Marker mMarker;
+    private final Polyline mPolyline;
     private boolean mVisible;
 
     @UiThread

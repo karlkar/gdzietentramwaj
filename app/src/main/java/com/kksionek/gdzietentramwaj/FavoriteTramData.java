@@ -1,7 +1,9 @@
 package com.kksionek.gdzietentramwaj;
 
+import android.support.annotation.NonNull;
+
 public class FavoriteTramData implements Comparable {
-    private String mLine;
+    private final String mLine;
     private boolean mFavorite;
 
     public FavoriteTramData(String line, boolean favorite) {
@@ -16,9 +18,7 @@ public class FavoriteTramData implements Comparable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof FavoriteTramData))
-            return false;
-        return mLine.equals(((FavoriteTramData)o).getLine());
+        return o instanceof FavoriteTramData && mLine.equals(((FavoriteTramData) o).getLine());
     }
 
     public String getLine() {
@@ -34,9 +34,9 @@ public class FavoriteTramData implements Comparable {
     }
 
     @Override
-    public int compareTo(Object another) {
+    public int compareTo(@NonNull Object another) {
         if (!(another instanceof FavoriteTramData))
             return -1;
-        return new Integer(mLine).compareTo(new Integer(((FavoriteTramData)another).getLine()));
+        return Integer.valueOf(mLine).compareTo(Integer.valueOf(((FavoriteTramData)another).getLine()));
     }
 }

@@ -1,9 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +37,7 @@ public class TramData {
         return mLowFloor;
     }
 
-    public boolean isRunning() { return mStatus.equals("RUNNING"); };
+    public boolean isRunning() { return mStatus.equals("RUNNING"); }
 
     private String mId;
     private String mStatus;
@@ -49,7 +46,6 @@ public class TramData {
     private LatLng mPrevLatLng;
     private String mTime;
     private boolean mLowFloor;
-    private String mBrigade;
 
     public TramData(JSONObject jsonObject) throws JSONException {
         mStatus = jsonObject.getString("Status");
@@ -58,8 +54,8 @@ public class TramData {
         mPrevLatLng = mLatLng;
         mTime = jsonObject.getString("Time");
         mLowFloor = jsonObject.getBoolean("LowFloor");
-        mBrigade = jsonObject.getString("Brigade");
-        mId = mFirstLine + "/" + mBrigade;
+        String brigade = jsonObject.getString("Brigade");
+        mId = mFirstLine + "/" + brigade;
     }
 
     public void updatePosition(TramData tramData) {

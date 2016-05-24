@@ -16,8 +16,6 @@ import java.util.List;
 
 public class FavoriteLinesActivity extends AppCompatActivity {
 
-    private GridView mGridView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,9 +32,9 @@ public class FavoriteLinesActivity extends AppCompatActivity {
             }
         });
 
-        mGridView = (GridView) findViewById(R.id.gridView);
+        GridView gridView = (GridView) findViewById(R.id.gridView);
         FavoritesAdapter adapter = new FavoritesAdapter(Model.getInstance().getFavoriteTramData());
-        mGridView.setAdapter(adapter);
+        gridView.setAdapter(adapter);
     }
 
     private class FavoritesAdapter extends ArrayAdapter<FavoriteTramData> {

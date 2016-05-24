@@ -51,10 +51,10 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
             if (conn.getResponseCode() < 300 && conn.getResponseCode() >= 200) {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String str;
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuilder = new StringBuilder();
                 while ((str = bufferedReader.readLine()) != null)
-                    stringBuffer.append(str);
-                response = stringBuffer.toString();
+                    stringBuilder.append(str);
+                response = stringBuilder.toString();
             }
             conn.disconnect();
         } catch (java.io.IOException e) {

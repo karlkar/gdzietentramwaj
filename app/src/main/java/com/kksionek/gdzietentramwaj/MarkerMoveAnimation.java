@@ -21,7 +21,7 @@ public class MarkerMoveAnimation implements Runnable {
     private static final LinearInterpolator mLatLngInterpolator = new LinearInterpolator();
     private static final Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
     private static Handler mAnimHandler = null;
-    private long mStartTime;
+    private final long mStartTime;
     private final Marker mMarker;
     private final Polyline mPolyline;
     private final LatLng mAnimStartPos;
