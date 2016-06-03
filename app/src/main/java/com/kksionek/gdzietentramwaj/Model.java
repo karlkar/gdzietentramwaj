@@ -71,7 +71,8 @@ public class Model {
     }
 
     public void stopUpdates() {
-        mTimer.cancel();
+        if (mTimer != null)
+            mTimer.cancel();
     }
 
     public void notifyRefreshStarted() {
