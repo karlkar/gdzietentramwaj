@@ -1,27 +1,65 @@
 package com.kksionek.gdzietentramwaj;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.annotations.SerializedName;
 
 public class TramData {
 
     private static final String TAG = "TRAMDATA";
-    private static final int MIN_LATITUDE = 45;
-    private static final int MIN_LONGITUDE = 10;
+    private transient static final int MIN_LATITUDE = 45;
+    private transient static final int MIN_LONGITUDE = 10;
 
-    public String getId() { return mId; }
+    @SerializedName("Time")
+    private String mTime;
 
-    public String getStatus() {
-        return mStatus;
+    @SerializedName("Lat")
+    private String mLat;
+
+    @SerializedName("Lon")
+    private String mLng;
+
+    @SerializedName("FirstLine")
+    private String mFirstLine;
+
+    @SerializedName("Brigade")
+    private String mBrigade;
+
+    @SerializedName("Status")
+    private String mStatus;
+
+    @SerializedName("LowFloor")
+    private boolean mLowFloor;
+
+    private transient LatLng mLatLng = null;
+    private transient LatLng mPrevLatLng = null;
+
+    public String getId() { return mFirstLine + "/" + mBrigade; }
+
+    public String getTime() {
+        return mTime;
     }
+
+    public String getLat() { return mLat; }
+
+    public String getLng() { return mLng; }
 
     public String getFirstLine() {
         return mFirstLine;
     }
 
+    public String getBrigade() { return mBrigade; }
+
+    public String getStatus() {
+        return mStatus;
+    }
+
+    public boolean isLowFloor() {
+        return mLowFloor;
+    }
+
     public LatLng getLatLng() {
+        if (mLatLng == null)
+            mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
         return mLatLng;
     }
 
@@ -29,34 +67,7 @@ public class TramData {
         return mPrevLatLng;
     }
 
-    public String getTime() {
-        return mTime;
-    }
-
-    public boolean isLowFloor() {
-        return mLowFloor;
-    }
-
     public boolean isRunning() { return mStatus.equals("RUNNING"); }
-
-    private String mId;
-    private String mStatus;
-    private String mFirstLine;
-    private LatLng mLatLng;
-    private LatLng mPrevLatLng;
-    private String mTime;
-    private boolean mLowFloor;
-
-    public TramData(JSONObject jsonObject) throws JSONException {
-        mStatus = jsonObject.getString("Status");
-        mFirstLine = jsonObject.getString("FirstLine").trim();
-        mLatLng = new LatLng(jsonObject.getDouble("Lat"), jsonObject.getDouble("Lon"));
-        mPrevLatLng = mLatLng;
-        mTime = jsonObject.getString("Time");
-        mLowFloor = jsonObject.getBoolean("LowFloor");
-        String brigade = jsonObject.getString("Brigade");
-        mId = mFirstLine + "/" + brigade;
-    }
 
     public void updatePosition(TramData tramData) {
         mPrevLatLng = mLatLng;
@@ -65,6 +76,6 @@ public class TramData {
 
     public boolean shouldBeVisible() {
         // Sometimes trams have position outside of Poland (in most cases it is 0, 0)
-        return isRunning() && mLatLng.latitude > MIN_LATITUDE && mLatLng.longitude > MIN_LONGITUDE;
+        return isRunning() && getLatLng().latitude > MIN_LATITUDE && getLatLng().longitude > MIN_LONGITUDE;
     }
 }

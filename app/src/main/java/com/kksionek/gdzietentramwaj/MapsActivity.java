@@ -53,7 +53,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        mModel.setObserver(this);
+        mModel.setObserver(this, ((TramApplication) getApplication()).getTramInterface());
         PrefManager.init(this);
         mFavoriteView = PrefManager.isFavoriteViewOn();
 

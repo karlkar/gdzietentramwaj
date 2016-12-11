@@ -20,6 +20,7 @@ public class Model {
     private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private FavoriteManager mFavoriteManager = null;
     private MapsActivity mMapsActivityObserver = null;
+    private TramInterface mTramInterface = null;
 
     private final Object mDataLoaderMutex = new Object();
     private TramLoader mDataLoader = null;
@@ -35,16 +36,17 @@ public class Model {
         return mFavoriteManager;
     }
 
-    public void setObserver(MapsActivity observer) {
+    public void setObserver(MapsActivity observer, TramInterface tramInterface) {
         mMapsActivityObserver = observer;
         if (mFavoriteManager == null)
             mFavoriteManager = new FavoriteManager(observer);
+        mTramInterface = tramInterface;
     }
 
     private void createAndStartLoaderTask() {
         synchronized (mDataLoaderMutex) {
             if (mDataLoader == null || mDataLoader.isDone()) {
-                mDataLoader = new TramLoader(WARSZAWA_TRAM_API, this);
+                mDataLoader = new TramLoader(WARSZAWA_TRAM_API, this, mTramInterface);
                 mMapsActivityObserver.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

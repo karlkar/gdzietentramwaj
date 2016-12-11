@@ -1,19 +1,13 @@
 package com.kksionek.gdzietentramwaj;
 
-
 import android.os.AsyncTask;
 import android.support.annotation.UiThread;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.IOException;
 import java.util.HashMap;
+
+import retrofit2.Response;
 
 class TramLoader extends AsyncTask<Void, Void, Boolean> {
 
@@ -21,10 +15,12 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
     private final String mAddress;
     private final Model mModel;
     private boolean mDone = false;
+    private TramInterface mTramInterface;
 
-    public TramLoader(String address, Model model) {
+    public TramLoader(String address, Model model, TramInterface tramInterface) {
         mAddress = address;
         mModel = model;
+        mTramInterface = tramInterface;
     }
 
     @UiThread
@@ -45,53 +41,29 @@ class TramLoader extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        String response = null;
         if (isCancelled())
             return false;
+
+        Response<TramList> tramListResponse = null;
         try {
-            URL url = new URL(mAddress);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            if (conn.getResponseCode() < 300 && conn.getResponseCode() >= 200) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String str;
-                StringBuilder stringBuilder = new StringBuilder();
-                while ((str = bufferedReader.readLine()) != null)
-                    stringBuilder.append(str);
-                response = stringBuilder.toString();
-            }
-            conn.disconnect();
-        } catch (java.io.IOException e) {
+            tramListResponse = mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY).execute();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (response == null) {
+        if (tramListResponse == null) {
             Log.d(TAG, "doInBackground: response is null, sorry");
             return false;
         } else {
             Log.d(TAG, "doInBackground: parsing response");
             HashMap<String, TramData> map = new HashMap<>();
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                JSONArray array = jsonObject.optJSONArray("result");
-                if (array == null) {
-                    JSONObject errorObject = jsonObject.getJSONObject("result");
-                    Log.d(TAG, "doInBackground: Error occurred: '" + errorObject.getString("Message") + "'");
-                    return false;
-                }
-                for (int i = 0; i < array.length(); ++i) {
-                    TramData data = new TramData(array.getJSONObject(i));
-                    if (data.shouldBeVisible())
-                        map.put(data.getId(), data);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return false;
+            for (TramData data : tramListResponse.body().getList()) {
+                if (data.shouldBeVisible())
+                    map.put(data.getId(), data);
             }
 
-            if (map.size() == 0) {
-                Log.d(TAG, "Received empty response = '" + response + "'");
+            if (map.size() == 0)
                 return false;
-            }
 
             mModel.update(map);
             Log.d(TAG, "doInBackground: parsing done");
