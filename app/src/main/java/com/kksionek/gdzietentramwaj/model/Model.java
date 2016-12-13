@@ -1,13 +1,16 @@
 package com.kksionek.gdzietentramwaj.model;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.util.Log;
 
 import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.data.TramData;
 import com.kksionek.gdzietentramwaj.data.TramInterface;
-import com.kksionek.gdzietentramwaj.view.MapsActivity;
+import com.kksionek.gdzietentramwaj.view.ModelObserverInterface;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,18 +27,19 @@ import io.reactivex.schedulers.Schedulers;
 public class Model {
 
     private static final String TAG = "MODEL";
-
-    private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private final HashMap<String, TramData> mTmpTramDataHashMap = new HashMap<>();
+    private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private FavoriteManager mFavoriteManager = null;
-    private MapsActivity mMapsActivityObserver = null;
+    private WeakReference<ModelObserverInterface> mModelObserver = null;
     private TramInterface mTramInterface = null;
 
-    private Disposable mDisposable = null;
-    private Disposable mDisposable2 = null;
-    private Observable<Long> mObservable;
+    private Disposable mDisposableInterval = null;
+    private Disposable mDisposableRetrofit = null;
+    private Observable<Long> mIntervalObservable = null;
+    private Observable<TramData> mRetrofitObservable = null;
 
-    private Model() {}
+    private Model() {
+    }
 
     public static Model getInstance() {
         return Holder.instance;
@@ -45,10 +49,9 @@ public class Model {
         return mFavoriteManager;
     }
 
-    public void setObserver(MapsActivity observer, TramInterface tramInterface) {
-        mMapsActivityObserver = observer;
-        if (mFavoriteManager == null)
-            mFavoriteManager = new FavoriteManager(observer);
+    public void setObserver(@NonNull ModelObserverInterface observer, @NonNull Context ctx, @NonNull TramInterface tramInterface) {
+        mModelObserver = new WeakReference<>(observer);
+        mFavoriteManager = new FavoriteManager(ctx);
         mTramInterface = tramInterface;
     }
 
@@ -56,91 +59,98 @@ public class Model {
     public void startFetchingData() {
         Log.d(TAG, "startFetchingData: START");
 
-        if (mDisposable != null && !mDisposable.isDisposed())
-            mDisposable.dispose();
-        if (mDisposable2 != null && !mDisposable2.isDisposed())
-            mDisposable2.dispose();
+        if (mDisposableInterval != null && !mDisposableInterval.isDisposed())
+            mDisposableInterval.dispose();
+        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+            mDisposableRetrofit.dispose();
 
-        Observable.interval(0, 30, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(new Observer<Long>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mDisposable = d;
-                    }
+        if (mIntervalObservable == null)
+            mIntervalObservable = Observable.interval(0, 30, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io());
 
-                    @Override
-                    public void onNext(Long value) {
-                        Log.d(TAG, "onNext: NEW event from Interval");
-                        if (mDisposable2 != null && !mDisposable2.isDisposed())
-                            mDisposable2.dispose();
+        mIntervalObservable.subscribe(new Observer<Long>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                mDisposableInterval = d;
+            }
 
-                        mTmpTramDataHashMap.clear();
-                        mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
-                                .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
-                                .filter(tramData -> tramData.shouldBeVisible())
-                                .map(tramData -> {
-                                    mTmpTramDataHashMap.put(tramData.getId(), tramData);
-                                    return tramData;
-                                })
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .retryWhen(errors ->
-                                        errors
-                                                .zipWith(
-                                                        Observable.range(1, 3), (n, i) -> i)
-                                                .flatMap(
-                                                        retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)))
-                                .subscribe(new Observer<TramData>() {
-                                    @Override
-                                    public void onSubscribe(Disposable d) {
-                                        mDisposable2 = d;
-                                    }
+            @Override
+            public void onNext(Long value) {
+                Log.d(TAG, "onNext: NEW event from Interval");
+                if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+                    mDisposableRetrofit.dispose();
 
-                                    @Override
-                                    public void onNext(TramData value) {
-                                    }
+                mTmpTramDataHashMap.clear();
+                if (mRetrofitObservable == null)
+                    mRetrofitObservable = mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
+                            .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
+                            .filter(tramData -> tramData.shouldBeVisible())
+                            .map(tramData -> {
+                                mTmpTramDataHashMap.put(tramData.getId(), tramData);
+                                return tramData;
+                            })
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .retryWhen(errors ->
+                                    errors
+                                            .zipWith(
+                                                    Observable.range(1, 3), (n, i) -> i)
+                                            .flatMap(
+                                                    retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)));
+                mRetrofitObservable
+                        .subscribe(new Observer<TramData>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                mDisposableRetrofit = d;
+                            }
 
-                                    @Override
-                                    public void onError(Throwable e) {
-                                    }
+                            @Override
+                            public void onNext(TramData value) {
+                            }
 
-                                    @Override
-                                    public void onComplete() {
-                                        Log.d(TAG, "doOnComplete: ");
-                                        synchronized (mTramDataHashMap) {
-                                            mTramDataHashMap = mTmpTramDataHashMap;
-                                        }
-                                        notifyJobDone();
-                                    }
-                                });
-                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.d(TAG, "onError: " + e.getMessage());
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
+                            @Override
+                            public void onComplete() {
+                                Log.d(TAG, "doOnComplete: ");
+                                synchronized (mTramDataHashMap) {
+                                    mTramDataHashMap = mTmpTramDataHashMap;
+                                }
+                                notifyJobDone();
+                            }
+                        });
+            }
 
-                    }
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: " + e.getMessage());
+            }
 
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            @Override
+            public void onComplete() {
+            }
+        });
     }
 
     public void stopUpdates() {
-        if (mDisposable != null && !mDisposable.isDisposed())
-            mDisposable.dispose();
+        if (mDisposableInterval != null && !mDisposableInterval.isDisposed())
+            mDisposableInterval.dispose();
 
-        if (mDisposable2 != null && !mDisposable2.isDisposed())
-            mDisposable2.dispose();
+        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+            mDisposableRetrofit.dispose();
     }
 
     public void notifyJobDone() {
-        mMapsActivityObserver.notifyRefreshEnded();
-        synchronized (mTramDataHashMap) {
-            mMapsActivityObserver.updateMarkers(mTramDataHashMap);
+        ModelObserverInterface mapsActivity = mModelObserver.get();
+        if (mapsActivity != null) {
+            mapsActivity.notifyRefreshEnded();
+            synchronized (mTramDataHashMap) {
+                mapsActivity.updateMarkers(mTramDataHashMap);
+            }
         }
     }
 

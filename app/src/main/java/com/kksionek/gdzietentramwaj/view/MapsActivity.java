@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ModelObserverInterface {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
@@ -55,7 +55,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        mModel.setObserver(this, ((TramApplication) getApplication()).getTramInterface());
+        mModel.setObserver(this, getApplicationContext(), ((TramApplication) getApplication()).getTramInterface());
         PrefManager.init(this);
         mFavoriteView = PrefManager.isFavoriteViewOn();
 
@@ -94,12 +94,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onPause() {
         mModel.stopUpdates();
         super.onPause();
-    }
-
-    public void notifyRefreshEnded() {
-        if (mMenuItemRefresh == null)
-            return;
-        mMenuItemRefresh.endAnimation();
     }
 
     @Override
@@ -160,6 +154,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
     }
 
+    @Override
+    @UiThread
+    public void notifyRefreshEnded() {
+        if (mMenuItemRefresh == null)
+            return;
+        mMenuItemRefresh.endAnimation();
+    }
+
+    @Override
     @UiThread
     public void updateMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
@@ -181,7 +184,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (tramDataHashMap.containsKey(element.getKey())) {
                 TramData updatedData = tramDataHashMap.get(element.getKey());
 
-                LatLng prevPosition = updatedData.getPrevLatLng();
+                LatLng prevPosition = tramMarker.getMarkerPosition();
                 LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
                     continue;

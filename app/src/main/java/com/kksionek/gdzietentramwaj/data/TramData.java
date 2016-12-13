@@ -31,9 +31,8 @@ public class TramData {
     private boolean mLowFloor;
 
     private transient LatLng mLatLng = null;
-    private transient LatLng mPrevLatLng = null;
 
-    public String getId() { return mFirstLine + "/" + mBrigade; }
+    public String getId() { return mFirstLine.trim() + "/" + mBrigade.trim(); }
 
     public String getTime() {
         return mTime;
@@ -44,10 +43,10 @@ public class TramData {
     public String getLng() { return mLng; }
 
     public String getFirstLine() {
-        return mFirstLine;
+        return mFirstLine.trim();
     }
 
-    public String getBrigade() { return mBrigade; }
+    public String getBrigade() { return mBrigade.trim(); }
 
     public String getStatus() {
         return mStatus;
@@ -58,23 +57,12 @@ public class TramData {
     }
 
     public LatLng getLatLng() {
-        if (mLatLng == null) {
+        if (mLatLng == null)
             mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
-            mPrevLatLng = mLatLng;
-        }
         return mLatLng;
     }
 
-    public LatLng getPrevLatLng() {
-        return mPrevLatLng;
-    }
-
     public boolean isRunning() { return mStatus.equals("RUNNING"); }
-
-    public void updatePosition(TramData tramData) {
-        mPrevLatLng = mLatLng;
-        mLatLng = tramData.mLatLng;
-    }
 
     public boolean shouldBeVisible() {
         // Sometimes trams have position outside of Poland (in most cases it is 0, 0)
