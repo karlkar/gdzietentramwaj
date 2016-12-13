@@ -1,28 +1,24 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.model;
 
 import android.support.annotation.UiThread;
 import android.util.Log;
 
+import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
+import com.kksionek.gdzietentramwaj.data.TramData;
+import com.kksionek.gdzietentramwaj.data.TramInterface;
+import com.kksionek.gdzietentramwaj.view.MapsActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Function;
-import io.reactivex.internal.operators.observable.ObservableInterval;
 import io.reactivex.schedulers.Schedulers;
 
 public class Model {

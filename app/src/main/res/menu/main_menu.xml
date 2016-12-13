@@ -4,7 +4,7 @@
     <item
         android:id="@+id/menu_item_favorite_switch"
         app:showAsAction="always"
-        android:title="Włącz/Wyłącz widok ulubionych"
+        android:title="@string/toggle_favorite_view"
         android:icon="@android:drawable/star_big_off"/>
 
     <item

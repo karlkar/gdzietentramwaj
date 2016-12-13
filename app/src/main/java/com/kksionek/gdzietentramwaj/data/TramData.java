@@ -1,6 +1,4 @@
-package com.kksionek.gdzietentramwaj;
-
-import android.util.Log;
+package com.kksionek.gdzietentramwaj.data;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;

@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,13 +8,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.kksionek.gdzietentramwaj.R;
+
 public class MenuItemRefreshCtrl {
     private final Context mCtx;
     private final MenuItem mMenuItem;
     private Animation mRotationAnimation = null;
     private ImageView mRefreshImage = null;
 
-    public MenuItemRefreshCtrl(Context ctx, @NonNull MenuItem menuItem) {
+    public MenuItemRefreshCtrl(@NonNull Context ctx, @NonNull MenuItem menuItem) {
         mCtx = ctx;
         mMenuItem = menuItem;
     }

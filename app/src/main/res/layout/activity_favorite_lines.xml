@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.kksionek.gdzietentramwaj.FavoriteLinesActivity">
+    tools:context="com.kksionek.gdzietentramwaj.view.FavoriteLinesActivity">
 
     <include
         android:id="@+id/my_toolbar"
@@ -19,7 +19,7 @@
         android:padding="16dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="Kliknij na linię, aby ją dodać lub usunąć z ulubionych"/>
+        android:text="@string/fav_instruction"/>
 
     <GridView
         android:id="@+id/gridView"

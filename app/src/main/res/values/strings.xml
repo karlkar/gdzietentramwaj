@@ -6,4 +6,6 @@
     <string name="action_menu_info">O aplikacji</string>
     <string name="refresh">Odśwież</string>
     <string name="action_menu_favorite">Twoje linie</string>
+    <string name="fav_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
+    <string name="toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
 </resources>

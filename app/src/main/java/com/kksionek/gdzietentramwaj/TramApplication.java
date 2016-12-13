@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj;
 import android.app.Application;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.kksionek.gdzietentramwaj.data.TramInterface;
 
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;

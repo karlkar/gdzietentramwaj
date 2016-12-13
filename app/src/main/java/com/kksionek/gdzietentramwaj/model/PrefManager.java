@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;

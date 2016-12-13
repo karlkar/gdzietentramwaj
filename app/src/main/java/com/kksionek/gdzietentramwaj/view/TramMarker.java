@@ -1,7 +1,8 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.content.ContextCompat;
 
@@ -13,6 +14,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
+import com.kksionek.gdzietentramwaj.R;
+import com.kksionek.gdzietentramwaj.data.TramData;
 
 import java.util.ArrayList;
 
@@ -27,7 +30,7 @@ public class TramMarker {
     private boolean mVisible;
 
     @UiThread
-    public TramMarker(Context ctx, TramData tramData, GoogleMap map) {
+    public TramMarker(@NonNull Context ctx, @NonNull TramData tramData, @NonNull GoogleMap map) {
         if (mIconGenerator == null)
             mIconGenerator = new IconGenerator(ctx);
 
@@ -72,7 +75,7 @@ public class TramMarker {
     }
 
     @UiThread
-    public void updateMarker(LatLng prevPosition, LatLng newPosition) {
+    public void updateMarker(@NonNull LatLng prevPosition, @NonNull LatLng newPosition) {
         ArrayList<LatLng> points = new ArrayList<>();
         points.add(prevPosition);
         points.add(newPosition);
@@ -81,7 +84,7 @@ public class TramMarker {
     }
 
     @UiThread
-    public void animateMovement(LatLng newPosition, Handler mAnimHandler) {
+    public void animateMovement(@NonNull LatLng newPosition, @NonNull Handler mAnimHandler) {
         mAnimHandler.post(new MarkerMoveAnimation(this, newPosition, mAnimHandler));
     }
 }

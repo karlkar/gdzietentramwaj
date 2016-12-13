@@ -1,7 +1,8 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
+
+import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
+import com.kksionek.gdzietentramwaj.model.Model;
+import com.kksionek.gdzietentramwaj.R;
 
 import java.util.List;
 
@@ -25,12 +30,7 @@ public class FavoriteLinesActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        myToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         GridView gridView = (GridView) findViewById(R.id.gridView);
         FavoritesAdapter adapter = new FavoritesAdapter(Model.getInstance().getFavoriteTramData());
@@ -44,7 +44,8 @@ public class FavoriteLinesActivity extends AppCompatActivity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        @NonNull
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.grid_favorite_element, parent, false);
@@ -66,14 +67,10 @@ public class FavoriteLinesActivity extends AppCompatActivity {
                     convertView.setBackgroundDrawable(null);
             }
 
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    tramData.setFavorite(!tramData.isFavorite());
-                    Model.getInstance().getFavoriteManager().setFavorite(tramData.getLine(), tramData.isFavorite());
-                    Model.getInstance().getFavoriteManager().markChanged();
-                    notifyDataSetChanged();
-                }
+            convertView.setOnClickListener(v -> {
+                tramData.setFavorite(!tramData.isFavorite());
+                Model.getInstance().getFavoriteManager().setFavorite(tramData.getLine(), tramData.isFavorite());
+                notifyDataSetChanged();
             });
             return convertView;
         }

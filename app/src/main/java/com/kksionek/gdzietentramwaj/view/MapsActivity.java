@@ -1,7 +1,6 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -14,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -26,12 +24,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.kksionek.gdzietentramwaj.model.Model;
+import com.kksionek.gdzietentramwaj.model.PrefManager;
+import com.kksionek.gdzietentramwaj.R;
+import com.kksionek.gdzietentramwaj.TramApplication;
+import com.kksionek.gdzietentramwaj.data.TramData;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -83,10 +84,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        if (mMap != null)
+        if (mMap != null) {
             startFetchingData();
-        if (mModel.getFavoriteManager().checkIfChangedAndReset())
             updateMarkersVisibility();
+        }
     }
 
     @Override
@@ -116,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onCreateOptionsMenu(menu);
     }
 
+    @UiThread
     private void updateFavoriteSwitchIcon() {
         if (mMenuItemFavoriteSwitch != null)
             mMenuItemFavoriteSwitch.setIcon(mFavoriteView ? R.drawable.fav_on : R.drawable.fav_off);
@@ -127,12 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("O aplikacji");
             builder.setMessage("Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
             builder.show();
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
@@ -157,12 +154,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mModel.startFetchingData();
     }
 
+    @UiThread
     private void updateMarkersVisibility() {
         for (TramMarker tramMarker : mTramMarkerHashMap.values())
             tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
     }
 
-    public void updateMarkers(HashMap<String, TramData> tramDataHashMap) {
+    @UiThread
+    public void updateMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
 
         updateExistingMarkers(tramDataHashMap);
@@ -174,7 +173,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @UiThread
-    private void updateExistingMarkers(HashMap<String, TramData> tramDataHashMap) {
+    private void updateExistingMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<String, TramMarker> element = iter.next();
@@ -198,13 +197,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private boolean shouldAnimateMarkerMovement(TramMarker tramMarker, LatLng newPosition) {
+    private boolean shouldAnimateMarkerMovement(@NonNull TramMarker tramMarker, @NonNull LatLng newPosition) {
         return tramMarker.isVisible() &&
                 (mMap.getProjection().getVisibleRegion().latLngBounds.contains(tramMarker.getMarkerPosition())
                         || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition));
     }
 
-    private void addNewMarkers(HashMap<String, TramData> tramDataHashMap) {
+    @UiThread
+    private void addNewMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker tramMarker = new TramMarker(this, element.getValue(), mMap);
@@ -214,6 +214,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @UiThread
     private void checkLocationPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             return;

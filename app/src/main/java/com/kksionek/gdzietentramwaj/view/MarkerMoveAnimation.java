@@ -1,7 +1,8 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -31,7 +32,7 @@ public class MarkerMoveAnimation implements Runnable {
     float mT;
     float mV;
 
-    public MarkerMoveAnimation(TramMarker tramMarker, LatLng animEndPos, Handler handler) {
+    public MarkerMoveAnimation(@NonNull TramMarker tramMarker, @NonNull LatLng animEndPos, @NonNull Handler handler) {
         mMarker = tramMarker.getMarker();
         mPolyline = tramMarker.getPolyline();
         mStartTime = SystemClock.uptimeMillis();

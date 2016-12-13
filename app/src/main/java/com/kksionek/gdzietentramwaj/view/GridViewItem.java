@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj;
+package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
