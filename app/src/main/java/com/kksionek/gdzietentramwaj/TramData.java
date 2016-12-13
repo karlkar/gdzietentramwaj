@@ -1,5 +1,7 @@
 package com.kksionek.gdzietentramwaj;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
@@ -58,8 +60,10 @@ public class TramData {
     }
 
     public LatLng getLatLng() {
-        if (mLatLng == null)
+        if (mLatLng == null) {
             mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
+            mPrevLatLng = mLatLng;
+        }
         return mLatLng;
     }
 

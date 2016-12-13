@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
@@ -15,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.Marker;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -83,7 +84,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         if (mMap != null)
-            mModel.startUpdates();
+            startFetchingData();
         if (mModel.getFavoriteManager().checkIfChangedAndReset())
             updateMarkersVisibility();
     }
@@ -92,12 +93,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onPause() {
         mModel.stopUpdates();
         super.onPause();
-    }
-
-    public void notifyRefreshStarted() {
-        if (mMenuItemRefresh == null)
-            return;
-        mMenuItemRefresh.startAnimation();
     }
 
     public void notifyRefreshEnded() {
@@ -115,6 +110,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         updateFavoriteSwitchIcon();
+
+        new Handler().postDelayed(()->startFetchingData(), 1000);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -139,7 +136,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             builder.show();
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
-            mModel.startUpdates();
+            startFetchingData();
             return true;
         } else if (item.getItemId() == R.id.menu_item_favorite) {
             Intent intent = new Intent(this, FavoriteLinesActivity.class);
@@ -152,6 +149,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             updateMarkersVisibility();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @UiThread
+    private void startFetchingData() {
+        mMenuItemRefresh.startAnimation();
+        mModel.startFetchingData();
     }
 
     private void updateMarkersVisibility() {
@@ -252,14 +255,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             }
         });
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                return true;
-            }
-        });
-
-        mModel.startUpdates();
+        mMap.setOnMarkerClickListener(marker -> true);
     }
 
     @Override

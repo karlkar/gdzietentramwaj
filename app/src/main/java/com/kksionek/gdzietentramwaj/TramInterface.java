@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -10,5 +10,5 @@ public interface TramInterface {
     public static final String APIKEY = "***REMOVED***";
 
     @GET("/api/action/wsstore_get/")
-    Call<TramList> getTrams(@Query("id") String id, @Query("apikey") String apikey);
+    Observable<TramList> getTrams(@Query("id") String id, @Query("apikey") String apikey);
 }

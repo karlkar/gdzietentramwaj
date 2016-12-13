@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
+import android.support.annotation.UiThread;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -11,20 +12,32 @@ import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function;
+import io.reactivex.internal.operators.observable.ObservableInterval;
+import io.reactivex.schedulers.Schedulers;
 
 public class Model {
 
     private static final String TAG = "MODEL";
-    private static final String WARSZAWA_TRAM_API = "https://api.um.warszawa.pl/api/action/wsstore_get/?id=c7238cfe-8b1f-4c38-bb4a-de386db7e776&apikey=***REMOVED***";
 
-    private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
+    private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
+    private final HashMap<String, TramData> mTmpTramDataHashMap = new HashMap<>();
     private FavoriteManager mFavoriteManager = null;
     private MapsActivity mMapsActivityObserver = null;
     private TramInterface mTramInterface = null;
 
-    private final Object mDataLoaderMutex = new Object();
-    private TramLoader mDataLoader = null;
-    private Timer mTimer;
+    private Disposable mDisposable = null;
+    private Disposable mDisposable2 = null;
+    private Observable<Long> mObservable;
 
     private Model() {}
 
@@ -43,70 +56,95 @@ public class Model {
         mTramInterface = tramInterface;
     }
 
-    private void createAndStartLoaderTask() {
-        synchronized (mDataLoaderMutex) {
-            if (mDataLoader == null || mDataLoader.isDone()) {
-                mDataLoader = new TramLoader(WARSZAWA_TRAM_API, this, mTramInterface);
-                mMapsActivityObserver.runOnUiThread(new Runnable() {
+    @UiThread
+    public void startFetchingData() {
+        Log.d(TAG, "startFetchingData: START");
+
+        if (mDisposable != null && !mDisposable.isDisposed())
+            mDisposable.dispose();
+        if (mDisposable2 != null && !mDisposable2.isDisposed())
+            mDisposable2.dispose();
+
+        Observable.interval(0, 30, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<Long>() {
                     @Override
-                    public void run() {
-                        mDataLoader.launch();
+                    public void onSubscribe(Disposable d) {
+                        mDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(Long value) {
+                        Log.d(TAG, "onNext: NEW event from Interval");
+                        if (mDisposable2 != null && !mDisposable2.isDisposed())
+                            mDisposable2.dispose();
+
+                        mTmpTramDataHashMap.clear();
+                        mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
+                                .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
+                                .filter(tramData -> tramData.shouldBeVisible())
+                                .map(tramData -> {
+                                    mTmpTramDataHashMap.put(tramData.getId(), tramData);
+                                    return tramData;
+                                })
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .retryWhen(errors ->
+                                        errors
+                                                .zipWith(
+                                                        Observable.range(1, 3), (n, i) -> i)
+                                                .flatMap(
+                                                        retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)))
+                                .subscribe(new Observer<TramData>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+                                        mDisposable2 = d;
+                                    }
+
+                                    @Override
+                                    public void onNext(TramData value) {
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+                                        Log.d(TAG, "doOnComplete: ");
+                                        synchronized (mTramDataHashMap) {
+                                            mTramDataHashMap = mTmpTramDataHashMap;
+                                        }
+                                        notifyJobDone();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
                     }
                 });
-            }
-        }
-    }
-
-    public void startUpdates() {
-        Log.d(TAG, "startUpdates: START");
-        if (mTimer != null) {
-            mTimer.cancel();
-            mTimer.purge();
-        }
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                createAndStartLoaderTask();
-            }
-        }, 10, 30000);
     }
 
     public void stopUpdates() {
-        synchronized (mDataLoaderMutex) {
-            if (mDataLoader != null)
-                mDataLoader.cancel(true);
-        }
-            mTimer.cancel();
+        if (mDisposable != null && !mDisposable.isDisposed())
+            mDisposable.dispose();
+
+        if (mDisposable2 != null && !mDisposable2.isDisposed())
+            mDisposable2.dispose();
     }
 
-    public void notifyRefreshStarted() {
-        mMapsActivityObserver.notifyRefreshStarted();
-    }
-
-    public void notifyJobDone(boolean result) {
-        if (result) {
-            mMapsActivityObserver.notifyRefreshEnded();
-            synchronized (mTramDataHashMap) {
-                mMapsActivityObserver.updateMarkers(mTramDataHashMap);
-            }
-        } else
-            startUpdates();
-    }
-
-    public void update(HashMap<String, TramData> map) {
-        Iterator<Map.Entry<String, TramData>> iter = mTramDataHashMap.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String, TramData> tmp = iter.next();
-            if (!map.containsKey(tmp.getValue().getId()))
-                iter.remove();
-        }
-
-        for (TramData tramData : map.values()) {
-            if (mTramDataHashMap.containsKey(tramData.getId()))
-                mTramDataHashMap.get(tramData.getId()).updatePosition(tramData);
-            else
-                mTramDataHashMap.put(tramData.getId(), tramData);
+    public void notifyJobDone() {
+        mMapsActivityObserver.notifyRefreshEnded();
+        synchronized (mTramDataHashMap) {
+            mMapsActivityObserver.updateMarkers(mTramDataHashMap);
         }
     }
 

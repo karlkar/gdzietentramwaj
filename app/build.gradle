@@ -3,19 +3,26 @@ apply plugin: 'com.android.application'
 android {
 
     compileSdkVersion 25
-    buildToolsVersion "23.0.3"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.kksionek.gdzietentramwaj"
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 9
         versionName "1.8"
+        jackOptions {
+            enabled true
+        }
     }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -29,9 +36,11 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-
-// DEBUG:
-//    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.2'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
+    // DEBUG:
+    //    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
