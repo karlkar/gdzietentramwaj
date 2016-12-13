@@ -53,6 +53,8 @@ public class Model {
         mModelObserver = new WeakReference<>(observer);
         mFavoriteManager = new FavoriteManager(ctx);
         mTramInterface = tramInterface;
+        mIntervalObservable = getIntervalObservable();
+        mRetrofitObservable = getRetrofitObservable();
     }
 
     @UiThread
@@ -64,76 +66,47 @@ public class Model {
         if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
             mDisposableRetrofit.dispose();
 
-        if (mIntervalObservable == null)
-            mIntervalObservable = Observable.interval(0, 30, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io());
+        mIntervalObservable.subscribe();
+    }
 
-        mIntervalObservable.subscribe(new Observer<Long>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                mDisposableInterval = d;
-            }
+    private Observable<Long> getIntervalObservable() {
+        return Observable.interval(0, 30, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .doOnSubscribe(disposable -> mDisposableInterval = disposable)
+                .doOnError(throwable -> Log.d(TAG, "onError: IntervalObservable - " + throwable.getMessage()))
+                .doOnNext(l -> {
+                    Log.d(TAG, "onNext: NEW event from Interval");
+                    if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+                        mDisposableRetrofit.dispose();
 
-            @Override
-            public void onNext(Long value) {
-                Log.d(TAG, "onNext: NEW event from Interval");
-                if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
-                    mDisposableRetrofit.dispose();
+                    mTmpTramDataHashMap.clear();
+                    mRetrofitObservable.subscribe();
+                });
+    }
 
-                mTmpTramDataHashMap.clear();
-                if (mRetrofitObservable == null)
-                    mRetrofitObservable = mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
-                            .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
-                            .filter(tramData -> tramData.shouldBeVisible())
-                            .map(tramData -> {
-                                mTmpTramDataHashMap.put(tramData.getId(), tramData);
-                                return tramData;
-                            })
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .retryWhen(errors ->
-                                    errors
-                                            .zipWith(
-                                                    Observable.range(1, 3), (n, i) -> i)
-                                            .flatMap(
-                                                    retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)));
-                mRetrofitObservable
-                        .subscribe(new Observer<TramData>() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-                                mDisposableRetrofit = d;
-                            }
-
-                            @Override
-                            public void onNext(TramData value) {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.d(TAG, "onError: " + e.getMessage());
-                            }
-
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "doOnComplete: ");
-                                synchronized (mTramDataHashMap) {
-                                    mTramDataHashMap = mTmpTramDataHashMap;
-                                }
-                                notifyJobDone();
-                            }
-                        });
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: " + e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        });
+    private Observable<TramData> getRetrofitObservable() {
+        return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
+                .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
+                .doOnNext(TramData::trimStrings)
+                .filter(tramData -> tramData.shouldBeVisible())
+                .doOnNext(tramData -> mTmpTramDataHashMap.put(tramData.getId(), tramData))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(errors ->
+                        errors
+                                .zipWith(
+                                        Observable.range(1, 3), (n, i) -> i)
+                                .flatMap(
+                                        retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)))
+                .doOnSubscribe(disposable -> mDisposableRetrofit = disposable)
+                .doOnComplete(() -> {
+                    Log.d(TAG, "doOnComplete: ");
+                    synchronized (mTramDataHashMap) {
+                        mTramDataHashMap = mTmpTramDataHashMap;
+                    }
+                    notifyJobDone();
+                });
     }
 
     public void stopUpdates() {
