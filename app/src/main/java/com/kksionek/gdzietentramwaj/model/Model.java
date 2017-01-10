@@ -87,11 +87,11 @@ public class Model {
 
     private Observable<TramData> getRetrofitObservable() {
         return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
-                .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
-                .doOnNext(TramData::trimStrings)
-                .filter(tramData -> tramData.shouldBeVisible())
-                .doOnNext(tramData -> mTmpTramDataHashMap.put(tramData.getId(), tramData))
                 .subscribeOn(Schedulers.io())
+                .flatMap(tramList -> Observable.fromIterable(tramList.getList())
+                        .filter(tramData -> tramData.shouldBeVisible()))
+                        .doOnNext(TramData::trimStrings)
+                .doOnNext(tramData -> mTmpTramDataHashMap.put(tramData.getId(), tramData))
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(errors ->
                         errors
