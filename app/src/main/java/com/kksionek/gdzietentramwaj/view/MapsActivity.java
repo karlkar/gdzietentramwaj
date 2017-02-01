@@ -73,12 +73,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         loc.setLongitude(21.005940);
 
         mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(getString(R.string.adMobTestDeviceNote5))
-                .addTestDevice(getString(R.string.adMobTestDeviceS5))
-                .setLocation(loc)
-                .build();
-        mAdView.loadAd(adRequest);
+        reloadAds(loc);
     }
 
     @Override
@@ -222,9 +217,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             return;
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
         }
     }
@@ -238,39 +232,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             mMap.setMyLocationEnabled(
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
         else
             mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         LatLng warsaw = new LatLng(52.231841, 21.005940);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(warsaw, 15));
-        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                AdRequest adRequest = new AdRequest.Builder()
-                        .addTestDevice(getString(R.string.adMobTestDeviceNote5))
-                        .addTestDevice(getString(R.string.adMobTestDeviceS5))
-                        .setLocation(location)
-                        .build();
-                mAdView.loadAd(adRequest);
+        mMap.setOnMyLocationChangeListener(location -> {
+            reloadAds(location);
 
-                mMap.setOnMyLocationChangeListener(null);
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-            }
+            mMap.setOnMyLocationChangeListener(null);
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
         });
         mMap.setOnMarkerClickListener(marker -> true);
+    }
+
+    private void reloadAds(Location location) {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(getString(R.string.adMobTestDeviceS5))
+                .addTestDevice(getString(R.string.adMobTestDeviceS7))
+                .setLocation(location)
+                .build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
-            if (grantResults.length > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                        || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    mMap.setMyLocationEnabled(true);
-                else
-                    mMap.setMyLocationEnabled(false);
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
             }
         }
     }

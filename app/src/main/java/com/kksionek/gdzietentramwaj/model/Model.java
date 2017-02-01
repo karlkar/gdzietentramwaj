@@ -88,8 +88,10 @@ public class Model {
     private Observable<TramData> getRetrofitObservable() {
         return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
                 .subscribeOn(Schedulers.io())
+                .doOnNext(tramList -> Log.d(TAG, "getRetrofitObservable: " + tramList.getList().size()))
+                .filter(tramList -> tramList.getList().size() > 0)
                 .flatMap(tramList -> Observable.fromIterable(tramList.getList())
-                        .filter(tramData -> tramData.shouldBeVisible()))
+                        .filter(TramData::shouldBeVisible))
                         .doOnNext(TramData::trimStrings)
                 .doOnNext(tramData -> mTmpTramDataHashMap.put(tramData.getId(), tramData))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -98,10 +100,11 @@ public class Model {
                                 .zipWith(
                                         Observable.range(1, 3), (n, i) -> i)
                                 .flatMap(
-                                        retryCount -> Observable.timer(5L * retryCount, TimeUnit.SECONDS)))
+                                        retryCount -> Observable.timer(retryCount, TimeUnit.SECONDS)))
                 .doOnSubscribe(disposable -> mDisposableRetrofit = disposable)
                 .doOnComplete(() -> {
-                    Log.d(TAG, "doOnComplete: ");
+                    if (mTmpTramDataHashMap.size() == 0)
+                        return;
                     synchronized (mTramDataHashMap) {
                         mTramDataHashMap = mTmpTramDataHashMap;
                     }
@@ -122,6 +125,7 @@ public class Model {
         if (mapsActivity != null) {
             mapsActivity.notifyRefreshEnded();
             synchronized (mTramDataHashMap) {
+                Log.d(TAG, "notifyJobDone: mTramDataHashMap " + mTramDataHashMap.size() );
                 mapsActivity.updateMarkers(mTramDataHashMap);
             }
         }
