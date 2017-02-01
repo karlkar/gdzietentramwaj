@@ -56,7 +56,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
 
         mModel.setObserver(this, getApplicationContext(), ((TramApplication) getApplication()).getTramInterface());
-        PrefManager.init(this);
+        PrefManager.init(getApplicationContext());
         mFavoriteView = PrefManager.isFavoriteViewOn();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -83,11 +83,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startFetchingData();
             updateMarkersVisibility();
         }
+        if (mAdView != null)
+            mAdView.resume();
     }
 
     @Override
     protected void onPause() {
         mModel.stopUpdates();
+        if (mAdView != null)
+            mAdView.pause();
         super.onPause();
     }
 
