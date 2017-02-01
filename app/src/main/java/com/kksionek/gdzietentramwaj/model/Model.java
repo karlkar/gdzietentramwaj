@@ -19,7 +19,6 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -27,8 +26,7 @@ import io.reactivex.schedulers.Schedulers;
 public class Model {
 
     private static final String TAG = "MODEL";
-    private final HashMap<String, TramData> mTmpTramDataHashMap = new HashMap<>();
-    private HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
+    private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
     private FavoriteManager mFavoriteManager = null;
     private WeakReference<ModelObserverInterface> mModelObserver = null;
     private TramInterface mTramInterface = null;
@@ -49,7 +47,10 @@ public class Model {
         return mFavoriteManager;
     }
 
-    public void setObserver(@NonNull ModelObserverInterface observer, @NonNull Context ctx, @NonNull TramInterface tramInterface) {
+    public void setObserver(
+            @NonNull ModelObserverInterface observer,
+            @NonNull Context ctx,
+            @NonNull TramInterface tramInterface) {
         mModelObserver = new WeakReference<>(observer);
         mFavoriteManager = new FavoriteManager(ctx);
         mTramInterface = tramInterface;
@@ -61,10 +62,12 @@ public class Model {
     public void startFetchingData() {
         Log.d(TAG, "startFetchingData: START");
 
-        if (mDisposableInterval != null && !mDisposableInterval.isDisposed())
+        if (mDisposableInterval != null && !mDisposableInterval.isDisposed()) {
             mDisposableInterval.dispose();
-        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+        }
+        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
             mDisposableRetrofit.dispose();
+        }
 
         mIntervalObservable.subscribe();
     }
@@ -74,13 +77,17 @@ public class Model {
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .doOnSubscribe(disposable -> mDisposableInterval = disposable)
-                .doOnError(throwable -> Log.d(TAG, "onError: IntervalObservable - " + throwable.getMessage()))
+                .doOnError(throwable -> Log.d(TAG,
+                        "onError: IntervalObservable - " + throwable.getMessage()))
                 .doOnNext(l -> {
                     Log.d(TAG, "onNext: NEW event from Interval");
-                    if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+                    if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
                         mDisposableRetrofit.dispose();
+                    }
 
-                    mTmpTramDataHashMap.clear();
+                    synchronized (mTramDataHashMap) {
+                        mTramDataHashMap.clear();
+                    }
                     mRetrofitObservable.subscribe();
                 });
     }
@@ -88,36 +95,39 @@ public class Model {
     private Observable<TramData> getRetrofitObservable() {
         return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
                 .subscribeOn(Schedulers.io())
-                .doOnNext(tramList -> Log.d(TAG, "getRetrofitObservable: " + tramList.getList().size()))
+                .doOnNext(tramList -> Log.d(TAG,
+                        "getRetrofitObservable: " + tramList.getList().size()))
                 .filter(tramList -> tramList.getList().size() > 0)
                 .flatMap(tramList -> Observable.fromIterable(tramList.getList())
-                        .filter(TramData::shouldBeVisible))
+                        .filter(TramData::shouldBeVisible)
                         .doOnNext(TramData::trimStrings)
-                .doOnNext(tramData -> mTmpTramDataHashMap.put(tramData.getId(), tramData))
+                        .subscribeOn(Schedulers.computation()))
+                .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(errors ->
                         errors
                                 .zipWith(
                                         Observable.range(1, 3), (n, i) -> i)
                                 .flatMap(
-                                        retryCount -> Observable.timer(retryCount, TimeUnit.SECONDS)))
+                                        retryCount -> Observable.timer(retryCount,
+                                                TimeUnit.SECONDS)))
                 .doOnSubscribe(disposable -> mDisposableRetrofit = disposable)
                 .doOnComplete(() -> {
-                    if (mTmpTramDataHashMap.size() == 0)
+                    if (mTramDataHashMap.size() == 0) {
                         return;
-                    synchronized (mTramDataHashMap) {
-                        mTramDataHashMap = mTmpTramDataHashMap;
                     }
                     notifyJobDone();
                 });
     }
 
     public void stopUpdates() {
-        if (mDisposableInterval != null && !mDisposableInterval.isDisposed())
+        if (mDisposableInterval != null && !mDisposableInterval.isDisposed()) {
             mDisposableInterval.dispose();
+        }
 
-        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed())
+        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
             mDisposableRetrofit.dispose();
+        }
     }
 
     public void notifyJobDone() {
@@ -125,7 +135,6 @@ public class Model {
         if (mapsActivity != null) {
             mapsActivity.notifyRefreshEnded();
             synchronized (mTramDataHashMap) {
-                Log.d(TAG, "notifyJobDone: mTramDataHashMap " + mTramDataHashMap.size() );
                 mapsActivity.updateMarkers(mTramDataHashMap);
             }
         }
@@ -133,13 +142,16 @@ public class Model {
 
     public List<FavoriteTramData> getFavoriteTramData() {
         SortedSet<FavoriteTramData> favoriteTrams = new TreeSet<>();
-        for (String str : mFavoriteManager.getFavoriteTramData())
+        for (String str : mFavoriteManager.getFavoriteTramData()) {
             favoriteTrams.add(new FavoriteTramData(str, true));
+        }
 
         synchronized (mTramDataHashMap) {
-            for (TramData tramData : mTramDataHashMap.values())
-                if (!mFavoriteManager.isFavorite(tramData.getFirstLine()))
+            for (TramData tramData : mTramDataHashMap.values()) {
+                if (!mFavoriteManager.isFavorite(tramData.getFirstLine())) {
                     favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), false));
+                }
+            }
         }
         return new ArrayList<>(favoriteTrams);
     }
