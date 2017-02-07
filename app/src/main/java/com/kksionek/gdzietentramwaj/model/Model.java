@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.util.Log;
+import android.util.Pair;
 
 import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.data.TramData;
@@ -96,7 +97,17 @@ public class Model {
                             .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
                             .toList()
                             .toObservable()
+                            .retryWhen(errors -> Observable.zip(
+                                    errors,
+                                    Observable.just(1, 3, 5, 7),
+                                    Pair::new)
+                                    .flatMap(pair -> {
+                                        if (pair.second > 5)
+                                            return Observable.<Long>error(pair.first);
+                                        return Observable.timer((long) pair.second, TimeUnit.SECONDS);
+                                    }))
                             .onErrorResumeNext(throwable -> {
+                                throwable.printStackTrace();
                                 return Observable.just(new ArrayList<>());
                             });
                 });
