@@ -31,10 +31,8 @@ public class Model {
     private WeakReference<ModelObserverInterface> mModelObserver = null;
     private TramInterface mTramInterface = null;
 
-    private Disposable mDisposableInterval = null;
     private Disposable mDisposableRetrofit = null;
-    private Observable<Long> mIntervalObservable = null;
-    private Observable<TramData> mRetrofitObservable = null;
+    private Observable<List<TramData>> mRetrofitObservable = null;
 
     private Model() {
     }
@@ -54,88 +52,71 @@ public class Model {
         mModelObserver = new WeakReference<>(observer);
         mFavoriteManager = new FavoriteManager(ctx);
         mTramInterface = tramInterface;
-        mIntervalObservable = getIntervalObservable();
-        mRetrofitObservable = getRetrofitObservable();
+        mRetrofitObservable = getIntervalObservable();
     }
 
     @UiThread
     public void startFetchingData() {
         Log.d(TAG, "startFetchingData: START");
 
-        if (mDisposableInterval != null && !mDisposableInterval.isDisposed()) {
-            mDisposableInterval.dispose();
-        }
-        if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
-            mDisposableRetrofit.dispose();
-        }
+        stopUpdates();
 
-        mIntervalObservable.subscribe();
+        mDisposableRetrofit = mRetrofitObservable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        tramDatas -> {
+                            Log.d(TAG, "startFetchingData: onNext");
+                            notifyJobDone();
+                        },
+                        throwable -> {
+                            Log.d(TAG, "startFetchingData: onError");
+                            ModelObserverInterface observer = mModelObserver.get();
+                            if (observer != null) {
+                                observer.notifyRefreshEnded();
+                            }
+                            throwable.printStackTrace();
+                        },
+                        () -> Log.d(TAG, "startFetchingData: onComplete"));
     }
 
-    private Observable<Long> getIntervalObservable() {
+    private Observable<List<TramData>> getIntervalObservable() {
         return Observable.interval(0, 30, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .doOnSubscribe(disposable -> mDisposableInterval = disposable)
-                .doOnError(throwable -> Log.d(TAG,
-                        "onError: IntervalObservable - " + throwable.getMessage()))
-                .doOnNext(l -> {
-                    Log.d(TAG, "onNext: NEW event from Interval");
-                    if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
-                        mDisposableRetrofit.dispose();
-                    }
-
+                .flatMap(val -> {
                     synchronized (mTramDataHashMap) {
                         mTramDataHashMap.clear();
                     }
-                    mRetrofitObservable.subscribe();
+                    return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
+                            .subscribeOn(Schedulers.io())
+                            .doOnNext(tramList -> Log.d(TAG, "getIntervalObservable: " + tramList.getList().size()))
+                            .filter(tramList -> tramList.getList().size() > 0)
+                            .flatMap(tramList -> Observable.fromIterable(tramList.getList())
+                                    .filter(TramData::shouldBeVisible)
+                                    .doOnNext(TramData::trimStrings)
+                                    .subscribeOn(Schedulers.computation()))
+                            .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
+                            .toList()
+                            .toObservable()
+                            .onErrorResumeNext(throwable -> {
+                                return Observable.just(new ArrayList<>());
+                            });
                 });
     }
 
-    private Observable<TramData> getRetrofitObservable() {
-        return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
-                .subscribeOn(Schedulers.io())
-                .doOnNext(tramList -> Log.d(TAG,
-                        "getRetrofitObservable: " + tramList.getList().size()))
-                .filter(tramList -> tramList.getList().size() > 0)
-                .flatMap(tramList -> Observable.fromIterable(tramList.getList())
-                        .filter(TramData::shouldBeVisible)
-                        .doOnNext(TramData::trimStrings)
-                        .subscribeOn(Schedulers.computation()))
-                .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
-                .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(errors ->
-                        errors
-                                .zipWith(
-                                        Observable.range(1, 3), (n, i) -> i)
-                                .flatMap(
-                                        retryCount -> Observable.timer(retryCount,
-                                                TimeUnit.SECONDS)))
-                .doOnSubscribe(disposable -> mDisposableRetrofit = disposable)
-                .doOnComplete(() -> {
-                    if (mTramDataHashMap.size() == 0) {
-                        return;
-                    }
-                    notifyJobDone();
-                });
-    }
 
     public void stopUpdates() {
-        if (mDisposableInterval != null && !mDisposableInterval.isDisposed()) {
-            mDisposableInterval.dispose();
-        }
-
         if (mDisposableRetrofit != null && !mDisposableRetrofit.isDisposed()) {
             mDisposableRetrofit.dispose();
         }
     }
 
     public void notifyJobDone() {
-        ModelObserverInterface mapsActivity = mModelObserver.get();
-        if (mapsActivity != null) {
-            mapsActivity.notifyRefreshEnded();
+        ModelObserverInterface observer = mModelObserver.get();
+        if (observer != null) {
+            observer.notifyRefreshEnded();
             synchronized (mTramDataHashMap) {
-                mapsActivity.updateMarkers(mTramDataHashMap);
+                if (mTramDataHashMap.size() > 0) {
+                    observer.updateMarkers(mTramDataHashMap);
+                }
             }
         }
     }

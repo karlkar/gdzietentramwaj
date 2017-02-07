@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,11 +24,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.kksionek.gdzietentramwaj.model.Model;
-import com.kksionek.gdzietentramwaj.model.PrefManager;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.data.TramData;
+import com.kksionek.gdzietentramwaj.model.Model;
+import com.kksionek.gdzietentramwaj.model.PrefManager;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -105,7 +105,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         updateFavoriteSwitchIcon();
 
-        new Handler().postDelayed(()->startFetchingData(), 1000);
+        new Handler().postDelayed(() -> startFetchingData(), 1000);
 
         return super.onCreateOptionsMenu(menu);
     }
