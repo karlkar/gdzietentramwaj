@@ -32,7 +32,7 @@ public class Model {
 
     private static final String TAG = "MODEL";
     private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
-    private final SortedMap<String, Boolean> mFavoriteTramDatas = new TreeMap<>();
+    private final TreeMap<String, Boolean> mFavoriteTramDatas = new TreeMap<>(new NaturalOrderComparator());
     private FavoriteManager mFavoriteManager = null;
     private WeakReference<ModelObserverInterface> mModelObserver = null;
     private TramInterface mTramInterface = null;
@@ -107,18 +107,18 @@ public class Model {
                             .doOnNext(tramList -> Log.d(TAG, "getIntervalObservable: " + tramList.getList().size()))
                             .filter(tramList -> tramList.getList().size() > 0)
                             .flatMap(tramList -> Observable.fromIterable(tramList.getList())
+                                    .doOnNext(tramData -> {
+                                        String line = tramData.getFirstLine();
+                                        if (!mFavoriteTramDatas.containsKey(line)) {
+                                            mFavoriteTramDatas.put(
+                                                    line,
+                                                    mFavoriteManager.isFavorite(line));
+                                        }
+                                    })
                                     .filter(TramData::shouldBeVisible)
                                     .filter(tramData -> tramData.isCloseTo(lastLocation))
                                     .doOnNext(TramData::trimStrings)
                                     .subscribeOn(Schedulers.computation()))
-                            .doOnNext(tramData -> {
-                                String line = tramData.getFirstLine();
-                                if (!mFavoriteTramDatas.containsKey(line)) {
-                                    mFavoriteTramDatas.put(
-                                            line,
-                                            mFavoriteManager.isFavorite(line));
-                                }
-                            })
                             .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
                             .toList()
                             .toObservable()

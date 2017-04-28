@@ -108,7 +108,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         updateFavoriteSwitchIcon();
 
-        new Handler().postDelayed(this::startFetchingData, 3000);
+        new Handler().postDelayed(this::startFetchingData, 1000);
 
         return super.onCreateOptionsMenu(menu);
     }
