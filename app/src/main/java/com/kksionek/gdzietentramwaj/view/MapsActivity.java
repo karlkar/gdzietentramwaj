@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.data.TramData;
+import com.kksionek.gdzietentramwaj.model.Geolocalizer;
 import com.kksionek.gdzietentramwaj.model.Model;
 import com.kksionek.gdzietentramwaj.model.PrefManager;
 
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ModelObserverInterface {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ModelObserverInterface, Geolocalizer.LocationUpdateListener {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
@@ -85,6 +86,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (mAdView != null)
             mAdView.resume();
+        ((TramApplication)getApplication()).getGeolocalizer().onResume();
     }
 
     @Override
@@ -92,6 +94,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mModel.stopUpdates();
         if (mAdView != null)
             mAdView.pause();
+        ((TramApplication)getApplication()).getGeolocalizer().onPause();
         super.onPause();
     }
 
@@ -105,7 +108,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         updateFavoriteSwitchIcon();
 
-        new Handler().postDelayed(() -> startFetchingData(), 1000);
+        new Handler().postDelayed(this::startFetchingData, 3000);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -244,18 +247,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             mMap.setMyLocationEnabled(
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED);
         else
             mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         LatLng warsaw = new LatLng(52.231841, 21.005940);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(warsaw, 15));
-        mMap.setOnMyLocationChangeListener(location -> {
-            reloadAds(location);
-
-            mMap.setOnMyLocationChangeListener(null);
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-        });
+        Geolocalizer geolocalizer = ((TramApplication)getApplication()).getGeolocalizer();
+        Location location = geolocalizer.getLastLocation();
+        if (location != null) {
+            onLocationUpdated(location);
+        } else {
+            geolocalizer.addLocationUpdateListener(this);
+        }
         mMap.setOnMarkerClickListener(marker -> true);
     }
 
@@ -272,8 +277,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+                ((TramApplication)getApplication()).getGeolocalizer().onResume();
+                mMap.setMyLocationEnabled(
+                        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED);
             }
         }
+    }
+
+    @Override
+    public void onLocationUpdated(Location location) {
+        reloadAds(location);
+        if (mMap != null)
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(
+                    new LatLng(location.getLatitude(), location.getLongitude())));
+        ((TramApplication)getApplication()).getGeolocalizer().removeLocationUpdateListener(this);
     }
 }

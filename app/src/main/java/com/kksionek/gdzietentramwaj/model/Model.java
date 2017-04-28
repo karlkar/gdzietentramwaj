@@ -1,11 +1,13 @@
 package com.kksionek.gdzietentramwaj.model;
 
 import android.content.Context;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.util.Log;
 import android.util.Pair;
 
+import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.data.TramData;
 import com.kksionek.gdzietentramwaj.data.TramInterface;
@@ -91,6 +93,7 @@ public class Model {
                         mTramDataHashMap.clear();
                     }
                     mModelObserver.get().notifyRefreshStarted();
+                    Location lastLocation = TramApplication.getInstance().getGeolocalizer().getLastLocation();
                     return Observable.merge(
                             mTramInterface.getTrams(
                                     TramInterface.ID,
@@ -105,6 +108,7 @@ public class Model {
                             .filter(tramList -> tramList.getList().size() > 0)
                             .flatMap(tramList -> Observable.fromIterable(tramList.getList())
                                     .filter(TramData::shouldBeVisible)
+                                    .filter(tramData -> tramData.isCloseTo(lastLocation))
                                     .doOnNext(TramData::trimStrings)
                                     .subscribeOn(Schedulers.computation()))
                             .doOnNext(tramData -> {
