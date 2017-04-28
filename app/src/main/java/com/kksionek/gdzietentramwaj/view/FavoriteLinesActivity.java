@@ -17,7 +17,10 @@ import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.model.Model;
 import com.kksionek.gdzietentramwaj.R;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 public class FavoriteLinesActivity extends AppCompatActivity {
 
@@ -33,7 +36,12 @@ public class FavoriteLinesActivity extends AppCompatActivity {
         myToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         GridView gridView = (GridView) findViewById(R.id.gridView);
-        FavoritesAdapter adapter = new FavoritesAdapter(Model.getInstance().getFavoriteTramData());
+
+        ArrayList<FavoriteTramData> tramDatas = new ArrayList<>();
+        for (SortedMap.Entry<String, Boolean> entry : Model.getInstance().getFavoriteTramData().entrySet()) {
+            tramDatas.add(new FavoriteTramData(entry.getKey(), entry.getValue()));
+        }
+        FavoritesAdapter adapter = new FavoritesAdapter(tramDatas);
         gridView.setAdapter(adapter);
     }
 

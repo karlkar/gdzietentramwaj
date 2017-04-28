@@ -15,7 +15,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,7 @@ public class Model {
 
     private static final String TAG = "MODEL";
     private final HashMap<String, TramData> mTramDataHashMap = new HashMap<>();
+    private final SortedMap<String, Boolean> mFavoriteTramDatas = new TreeMap<>();
     private FavoriteManager mFavoriteManager = null;
     private WeakReference<ModelObserverInterface> mModelObserver = null;
     private TramInterface mTramInterface = null;
@@ -104,6 +107,14 @@ public class Model {
                                     .filter(TramData::shouldBeVisible)
                                     .doOnNext(TramData::trimStrings)
                                     .subscribeOn(Schedulers.computation()))
+                            .doOnNext(tramData -> {
+                                String line = tramData.getFirstLine();
+                                if (!mFavoriteTramDatas.containsKey(line)) {
+                                    mFavoriteTramDatas.put(
+                                            line,
+                                            mFavoriteManager.isFavorite(line));
+                                }
+                            })
                             .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
                             .toList()
                             .toObservable()
@@ -138,25 +149,30 @@ public class Model {
                 if (mTramDataHashMap.size() > 0) {
                     observer.updateMarkers(mTramDataHashMap);
                 }
+                mTramDataHashMap.clear();
             }
         }
     }
 
-    public List<FavoriteTramData> getFavoriteTramData() {
-        SortedSet<FavoriteTramData> favoriteTrams = new TreeSet<>();
-        for (String str : mFavoriteManager.getFavoriteTramData()) {
-            favoriteTrams.add(new FavoriteTramData(str, true));
-        }
-
-        synchronized (mTramDataHashMap) {
-            for (TramData tramData : mTramDataHashMap.values()) {
-                if (!mFavoriteManager.isFavorite(tramData.getFirstLine())) {
-                    favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), false));
-                }
-            }
-        }
-        return new ArrayList<>(favoriteTrams);
+    public SortedMap<String, Boolean> getFavoriteTramData() {
+        return mFavoriteTramDatas;
     }
+//
+//    public List<FavoriteTramData> getFavoriteTramData() {
+//        SortedSet<FavoriteTramData> favoriteTrams = new TreeSet<>();
+//        for (String str : mFavoriteManager.getFavoriteTramData()) {
+//            favoriteTrams.add(new FavoriteTramData(str, true));
+//        }
+//
+//        synchronized (mTramDataHashMap) {
+//            for (TramData tramData : mTramDataHashMap.values()) {
+//                if (!mFavoriteManager.isFavorite(tramData.getFirstLine())) {
+//                    favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), false));
+//                }
+//            }
+//        }
+//        return new ArrayList<>(favoriteTrams);
+//    }
 
     private static class Holder {
         static final Model instance = new Model();

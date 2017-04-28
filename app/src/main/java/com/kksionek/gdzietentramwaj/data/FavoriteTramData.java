@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.data;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 public class FavoriteTramData implements Comparable {
     private final String mLine;

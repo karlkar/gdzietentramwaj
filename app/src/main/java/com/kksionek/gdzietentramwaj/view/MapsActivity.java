@@ -180,7 +180,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
 
         addNewMarkers(tramDataHashMap);
-        tramDataHashMap.clear();
     }
 
     @UiThread
