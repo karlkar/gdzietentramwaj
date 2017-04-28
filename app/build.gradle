@@ -13,6 +13,7 @@ android {
             storePassword keystoreProperties['storePassword']
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
+            v2SigningEnabled false
         }
     }
     compileSdkVersion 25
@@ -21,8 +22,8 @@ android {
         applicationId "com.kksionek.gdzietentramwaj"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 12
-        versionName "1.11"
+        versionCode 13
+        versionName "1.12"
     }
     buildTypes {
         release {
@@ -41,9 +42,9 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.google.maps.android:android-maps-utils:0.4.3'
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.google.android.gms:play-services-maps:10.0.1'
-    compile 'com.google.firebase:firebase-ads:10.0.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.google.android.gms:play-services-maps:10.2.4'
+    compile 'com.google.firebase:firebase-ads:10.2.4'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
@@ -51,7 +52,7 @@ dependencies {
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
     // DEBUG:
-//        compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
+    //    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

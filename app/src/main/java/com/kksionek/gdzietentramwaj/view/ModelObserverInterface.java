@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 public interface ModelObserverInterface {
 
+    void notifyRefreshStarted();
     void notifyRefreshEnded();
     void updateMarkers(@NonNull HashMap<String, TramData> tramDataHashMap);
 }

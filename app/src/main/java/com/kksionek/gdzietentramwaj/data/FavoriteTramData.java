@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.data;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 public class FavoriteTramData implements Comparable {
     private final String mLine;
@@ -37,6 +38,25 @@ public class FavoriteTramData implements Comparable {
     public int compareTo(@NonNull Object another) {
         if (!(another instanceof FavoriteTramData))
             return -1;
-        return Integer.valueOf(mLine).compareTo(Integer.valueOf(((FavoriteTramData)another).getLine()));
+        if (isNumber(mLine) && isNumber(((FavoriteTramData) another).getLine()))
+            return Integer.valueOf(mLine).compareTo(Integer.valueOf(((FavoriteTramData)another).getLine()));
+        else
+            return mLine.compareTo(((FavoriteTramData) another).getLine());
+    }
+
+    private boolean isNumber(String str) {
+        short count = 0;
+        char chc[]  = {'0','1','2','3','4','5','6','7','8','9'};
+        for (int j = 0; j < str.length(); ++j) {
+            for (int i = 0; i < chc.length; i++) {
+                if (str.charAt(j) == chc[i]) {
+                    count++;
+                    break;
+                }
+            }
+            if (count <= j )
+                return false;
+        }
+        return true;
     }
 }

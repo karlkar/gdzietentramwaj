@@ -81,12 +81,22 @@ public class Model {
     }
 
     private Observable<List<TramData>> getIntervalObservable() {
-        return Observable.interval(0, 30, TimeUnit.SECONDS)
+        return Observable.interval(0, 10, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(val -> {
                     synchronized (mTramDataHashMap) {
                         mTramDataHashMap.clear();
                     }
-                    return mTramInterface.getTrams(TramInterface.ID, TramInterface.APIKEY)
+                    mModelObserver.get().notifyRefreshStarted();
+                    return Observable.merge(
+                            mTramInterface.getTrams(
+                                    TramInterface.ID,
+                                    TramInterface.APIKEY,
+                                    TramInterface.TYPE_BUS),
+                            mTramInterface.getTrams(
+                                    TramInterface.ID,
+                                    TramInterface.APIKEY,
+                                    TramInterface.TYPE_TRAM))
                             .subscribeOn(Schedulers.io())
                             .doOnNext(tramList -> Log.d(TAG, "getIntervalObservable: " + tramList.getList().size()))
                             .filter(tramList -> tramList.getList().size() > 0)

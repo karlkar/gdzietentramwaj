@@ -6,9 +6,14 @@ import retrofit2.http.Query;
 
 public interface TramInterface {
 
-    String ID = "c7238cfe-8b1f-4c38-bb4a-de386db7e776";
+    String ID = "f2e5503e-927d-4ad3-9500-4ab9e55deb59";
+    int TYPE_BUS = 1;
+    int TYPE_TRAM = 2;
     String APIKEY = "***REMOVED***";
 
-    @GET("/api/action/wsstore_get/")
-    Observable<TramList> getTrams(@Query("id") String id, @Query("apikey") String apikey);
+    @GET("/api/action/busestrams_get/")
+    Observable<TramList> getTrams(
+            @Query("resource_id") String id,
+            @Query("apikey") String apikey,
+            @Query("type") int type);
 }

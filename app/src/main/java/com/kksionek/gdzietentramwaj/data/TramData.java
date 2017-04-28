@@ -18,17 +18,11 @@ public class TramData {
     @SerializedName("Lon")
     private String mLng;
 
-    @SerializedName("FirstLine")
+    @SerializedName("Lines")
     private String mFirstLine;
 
     @SerializedName("Brigade")
     private String mBrigade;
-
-    @SerializedName("Status")
-    private String mStatus;
-
-    @SerializedName("LowFloor")
-    private boolean mLowFloor;
 
     private transient LatLng mLatLng = null;
 
@@ -48,21 +42,11 @@ public class TramData {
 
     public String getBrigade() { return mBrigade; }
 
-    public String getStatus() {
-        return mStatus;
-    }
-
-    public boolean isLowFloor() {
-        return mLowFloor;
-    }
-
     public LatLng getLatLng() {
         if (mLatLng == null)
             mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
         return mLatLng;
     }
-
-    public boolean isRunning() { return mStatus.equals("RUNNING"); }
 
     public void trimStrings() {
         mFirstLine = mFirstLine.trim();
@@ -71,6 +55,6 @@ public class TramData {
 
     public boolean shouldBeVisible() {
         // Sometimes trams have position outside of Poland (in most cases it is 0, 0)
-        return isRunning() && getLatLng().latitude > MIN_LATITUDE && getLatLng().longitude > MIN_LONGITUDE;
+        return getLatLng().latitude > MIN_LATITUDE && getLatLng().longitude > MIN_LONGITUDE;
     }
 }

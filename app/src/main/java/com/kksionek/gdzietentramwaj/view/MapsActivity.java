@@ -155,6 +155,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     @UiThread
+    public void notifyRefreshStarted() {
+        if (mMenuItemRefresh == null)
+            return;
+        mMenuItemRefresh.startAnimation();
+    }
+
+    @Override
+    @UiThread
     public void notifyRefreshEnded() {
         if (mMenuItemRefresh == null)
             return;
@@ -164,7 +172,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     @UiThread
     public void updateMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
-        Toast.makeText(getApplicationContext(), "Aktualizacja pozycji tramwajów", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
 
         updateExistingMarkers(tramDataHashMap);
 
@@ -172,6 +180,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
 
         addNewMarkers(tramDataHashMap);
+        tramDataHashMap.clear();
     }
 
     @UiThread
