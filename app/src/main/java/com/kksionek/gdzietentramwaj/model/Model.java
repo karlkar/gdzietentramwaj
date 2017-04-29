@@ -115,7 +115,6 @@ public class Model {
                                                     mFavoriteManager.isFavorite(line));
                                         }
                                     })
-                                    .filter(TramData::shouldBeVisible)
                                     .filter(tramData -> tramData.isCloseTo(lastLocation))
                                     .doOnNext(TramData::trimStrings)
                                     .subscribeOn(Schedulers.computation()))
@@ -161,22 +160,6 @@ public class Model {
     public SortedMap<String, Boolean> getFavoriteTramData() {
         return mFavoriteTramDatas;
     }
-//
-//    public List<FavoriteTramData> getFavoriteTramData() {
-//        SortedSet<FavoriteTramData> favoriteTrams = new TreeSet<>();
-//        for (String str : mFavoriteManager.getFavoriteTramData()) {
-//            favoriteTrams.add(new FavoriteTramData(str, true));
-//        }
-//
-//        synchronized (mTramDataHashMap) {
-//            for (TramData tramData : mTramDataHashMap.values()) {
-//                if (!mFavoriteManager.isFavorite(tramData.getFirstLine())) {
-//                    favoriteTrams.add(new FavoriteTramData(tramData.getFirstLine(), false));
-//                }
-//            }
-//        }
-//        return new ArrayList<>(favoriteTrams);
-//    }
 
     private static class Holder {
         static final Model instance = new Model();

@@ -27,9 +27,12 @@ public class TramMarker {
 
     private static IconGenerator mIconGenerator = null;
     private static HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
+
     private final TramData mTramData;
     private final Marker mMarker;
     private final Polyline mPolyline;
+
+    private LatLng mFinalPosition;
     private boolean mVisible;
 
     @UiThread
@@ -39,10 +42,8 @@ public class TramMarker {
 
         mTramData = tramData;
 
-        BitmapDescriptor bitmapDescriptor;
-        if (mBitmaps.containsKey(tramData.getFirstLine())) {
-            bitmapDescriptor = mBitmaps.get(tramData.getFirstLine());
-        } else {
+        BitmapDescriptor bitmapDescriptor = mBitmaps.get(tramData.getFirstLine());
+        if (bitmapDescriptor == null) {
             bitmapDescriptor =
                     BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(tramData.getFirstLine()));
             mBitmaps.put(tramData.getFirstLine(), bitmapDescriptor);
@@ -80,8 +81,12 @@ public class TramMarker {
         return mPolyline;
     }
 
-    public LatLng getMarkerPosition() {
-        return mMarker.getPosition();
+    public LatLng getFinalPosition() {
+        return mFinalPosition;
+    }
+
+    public void setFinalPosition(LatLng finalPosition) {
+        mFinalPosition = finalPosition;
     }
 
     @UiThread
@@ -98,10 +103,5 @@ public class TramMarker {
         points.add(newPosition);
         mPolyline.setPoints(points);
         mMarker.setPosition(newPosition);
-    }
-
-    @UiThread
-    public void animateMovement(@NonNull LatLng newPosition, @NonNull Handler mAnimHandler) {
-        mAnimHandler.post(new MarkerMoveAnimation(this, newPosition, mAnimHandler));
     }
 }

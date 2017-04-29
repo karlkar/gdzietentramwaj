@@ -1,6 +1,8 @@
 package com.kksionek.gdzietentramwaj.view;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -13,8 +15,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -23,6 +27,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
@@ -31,9 +37,14 @@ import com.kksionek.gdzietentramwaj.model.Geolocalizer;
 import com.kksionek.gdzietentramwaj.model.Model;
 import com.kksionek.gdzietentramwaj.model.PrefManager;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ModelObserverInterface, Geolocalizer.LocationUpdateListener {
 
@@ -43,13 +54,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final Model mModel = Model.getInstance();
 
     private GoogleMap mMap = null;
+    private Circle mCircle = null;
+    private boolean mFirstLoad = true;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
     private boolean mFavoriteView;
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
     private MenuItem mMenuItemFavoriteSwitch = null;
-    private final Handler mAnimHandler = new Handler();
     private AdView mAdView;
+
+    private ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
+    private ValueAnimator mValueAnimator = ValueAnimator
+            .ofFloat(0, 1)
+            .setDuration(3000);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +92,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mAdView = (AdView) findViewById(R.id.adView);
         reloadAds(loc);
+
+        mValueAnimator.addUpdateListener(animation -> {
+            LatLng a, b, intermediatePos;
+            Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
+            float fraction = animation.getAnimatedFraction();
+            Log.d(TAG, "onCreate: fraction = " + fraction);
+            for (TramMarker tramMarker : mAnimationMarkers) {
+                a = tramMarker.getMarker().getPosition();
+                b = tramMarker.getFinalPosition();
+                double lat = (b.latitude - a.latitude) * fraction + a.latitude;
+                double lng = (b.longitude - a.longitude) * fraction + a.longitude;
+                intermediatePos = new LatLng(lat, lng);
+                tramMarker.getMarker().setPosition(intermediatePos);
+
+                pointsQueue.clear();
+                List<LatLng> points = tramMarker.getPolyline().getPoints();
+                if (!points.get(points.size() - 1).equals(intermediatePos)) {
+                    pointsQueue.addAll(points);
+                    pointsQueue.add(intermediatePos);
+                    tramMarker.getPolyline().setPoints(new ArrayList<>(pointsQueue));
+                }
+            }
+        });
     }
 
     @Override
@@ -153,7 +193,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @UiThread
     private void updateMarkersVisibility() {
         for (TramMarker tramMarker : mTramMarkerHashMap.values())
-            tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
+            updateMarkerVisibility(tramMarker);
+    }
+
+    private void updateMarkerVisibility(TramMarker tramMarker) {
+        tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
     }
 
     @Override
@@ -188,32 +232,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @UiThread
     private void updateExistingMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
+        mAnimationMarkers.clear();
         while (iter.hasNext()) {
             Map.Entry<String, TramMarker> element = iter.next();
             TramMarker tramMarker = element.getValue();
             if (tramDataHashMap.containsKey(element.getKey())) {
                 TramData updatedData = tramDataHashMap.get(element.getKey());
 
-                LatLng prevPosition = tramMarker.getMarkerPosition();
+                LatLng prevPosition = tramMarker.getMarker().getPosition();
                 LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
                     continue;
 
-                if (shouldAnimateMarkerMovement(tramMarker, newPosition))
-                    tramMarker.animateMovement(newPosition, mAnimHandler);
-                else
+                if (shouldAnimateMarkerMovement(tramMarker, newPosition)) {
+                    tramMarker.setFinalPosition(newPosition);
+                    mAnimationMarkers.add(tramMarker);
+                } else
                     tramMarker.updateMarker(prevPosition, newPosition);
             } else {
                 tramMarker.remove();
                 iter.remove();
             }
         }
+        if (!mAnimationMarkers.isEmpty())
+            mValueAnimator.start();
     }
 
     private boolean shouldAnimateMarkerMovement(@NonNull TramMarker tramMarker, @NonNull LatLng newPosition) {
         return tramMarker.isVisible() &&
-                (mMap.getProjection().getVisibleRegion().latLngBounds.contains(tramMarker.getMarkerPosition())
-                        || mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition));
+                (mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)
+                        || mMap.getProjection().getVisibleRegion().latLngBounds.contains(tramMarker.getMarker().getPosition()));
     }
 
     @UiThread
@@ -221,7 +269,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker tramMarker = new TramMarker(this, element.getValue(), mMap);
-                tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
+                updateMarkerVisibility(tramMarker);
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
             }
         }
@@ -287,10 +335,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationUpdated(Location location) {
-        reloadAds(location);
-        if (mMap != null)
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(
-                    new LatLng(location.getLatitude(), location.getLongitude())));
-        ((TramApplication)getApplication()).getGeolocalizer().removeLocationUpdateListener(this);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if (mFirstLoad) {
+            reloadAds(location);
+            mFirstLoad = false;
+            if (mMap != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            }
+        }
+        if (mMap != null) {
+            if (mCircle != null) {
+                mCircle.setCenter(latLng);
+            } else {
+                mCircle = mMap.addCircle(new CircleOptions()
+                        .center(latLng)
+                        .radius(TramData.DISTANCE_CLOSE)
+                        .clickable(false));
+            }
+        }
     }
 }
