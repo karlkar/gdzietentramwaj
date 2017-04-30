@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
@@ -44,6 +45,10 @@ public class TramMarker {
 
         BitmapDescriptor bitmapDescriptor = mBitmaps.get(tramData.getFirstLine());
         if (bitmapDescriptor == null) {
+            if (tramData.getFirstLine().length() < 3)
+                mIconGenerator.setColor(ContextCompat.getColor(ctx, R.color.tramColor));
+            else
+                mIconGenerator.setColor(Color.WHITE);
             bitmapDescriptor =
                     BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(tramData.getFirstLine()));
             mBitmaps.put(tramData.getFirstLine(), bitmapDescriptor);

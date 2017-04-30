@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -126,7 +128,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (mAdView != null)
             mAdView.resume();
-        ((TramApplication)getApplication()).getGeolocalizer().onResume();
+        Geolocalizer geolocalizer = ((TramApplication) getApplication()).getGeolocalizer();
+        geolocalizer.onResume();
+        geolocalizer.addLocationUpdateListener(this);
     }
 
     @Override
@@ -134,7 +138,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mModel.stopUpdates();
         if (mAdView != null)
             mAdView.pause();
-        ((TramApplication)getApplication()).getGeolocalizer().onPause();
+        Geolocalizer geolocalizer = ((TramApplication) getApplication()).getGeolocalizer();
+        geolocalizer.onPause();
+        geolocalizer.removeLocationUpdateListener(this);
         super.onPause();
     }
 
@@ -306,8 +312,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Location location = geolocalizer.getLastLocation();
         if (location != null) {
             onLocationUpdated(location);
-        } else {
-            geolocalizer.addLocationUpdateListener(this);
         }
         mMap.setOnMarkerClickListener(marker -> true);
     }
@@ -350,7 +354,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mCircle = mMap.addCircle(new CircleOptions()
                         .center(latLng)
                         .radius(TramData.DISTANCE_CLOSE)
-                        .clickable(false));
+                        .clickable(false)
+                        .strokeWidth(16)
+                        .strokeColor(ContextCompat.getColor(this, R.color.borderColor)));
             }
         }
     }

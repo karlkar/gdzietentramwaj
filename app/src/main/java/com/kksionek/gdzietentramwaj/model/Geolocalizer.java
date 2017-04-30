@@ -72,7 +72,7 @@ public class Geolocalizer implements GoogleApiClient.ConnectionCallbacks,
 
     public void removeLocationUpdateListener(LocationUpdateListener listener) {
         synchronized (mLocationUpdateListeners) {
-            mLocationUpdateListeners.removeIf(ref -> ref.get() == listener);
+            mLocationUpdateListeners.removeIf(ref -> ref.get() == null || ref.get() == listener);
         }
     }
 
