@@ -1,12 +1,9 @@
 package com.kksionek.gdzietentramwaj.view;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -14,22 +11,17 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
-import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.data.TramData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TramMarker {
 
     public static final int POLYLINE_WIDTH = 8;
 
-    private static IconGenerator mIconGenerator = null;
-    private static HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
+    private static final HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
 
     private final TramData mTramData;
     private Marker mMarker = null;
@@ -40,10 +32,7 @@ public class TramMarker {
     private boolean mVisible;
 
     @UiThread
-    public TramMarker(@NonNull Context ctx, @NonNull TramData tramData) {
-        if (mIconGenerator == null)
-            mIconGenerator = new IconGenerator(ctx);
-
+    public TramMarker(@NonNull TramData tramData) {
         mTramData = tramData;
         mPrevPosition = tramData.getLatLng();
         mFinalPosition = tramData.getLatLng();
@@ -113,15 +102,15 @@ public class TramMarker {
             mPolyline.setVisible(visible);
     }
 
-    public static BitmapDescriptor getBitmap(String line) {
+    public static BitmapDescriptor getBitmap(String line, @NonNull IconGenerator iconGenerator) {
         BitmapDescriptor bitmapDescriptor = mBitmaps.get(line);
         if (bitmapDescriptor == null) {
             if (line.length() < 3)
-                mIconGenerator.setColor(Color.argb(255, 249, 245, 206));
+                iconGenerator.setColor(Color.argb(255, 249, 245, 206));
             else
-                mIconGenerator.setColor(Color.WHITE);
+                iconGenerator.setColor(Color.WHITE);
             bitmapDescriptor =
-                    BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(line));
+                    BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(line));
             mBitmaps.put(line, bitmapDescriptor);
         }
         return bitmapDescriptor;

@@ -25,8 +25,4 @@ public class FavoriteManager {
             mFavoriteTramData.remove(line);
         PrefManager.setFavoriteTramData(mFavoriteTramData);
     }
-
-    public Set<String> getFavoriteTramData() {
-        return mFavoriteTramData;
-    }
 }

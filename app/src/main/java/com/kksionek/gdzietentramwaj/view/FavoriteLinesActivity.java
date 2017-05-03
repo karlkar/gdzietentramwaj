@@ -2,9 +2,9 @@ package com.kksionek.gdzietentramwaj.view;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,13 +13,12 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.model.Model;
-import com.kksionek.gdzietentramwaj.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 
 public class FavoriteLinesActivity extends AppCompatActivity {

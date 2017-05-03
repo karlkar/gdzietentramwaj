@@ -27,11 +27,11 @@ public class Geolocalizer implements GoogleApiClient.ConnectionCallbacks,
 
     private GoogleApiClient mGoogleApi = null;
     private Location mLastLocation = null;
-    private LocationRequest mLocationRequest;
+    private final LocationRequest mLocationRequest;
     private boolean mConnected = false;
     private boolean mLocationUpdates = false;
     private final ArrayList<WeakReference<LocationUpdateListener>> mLocationUpdateListeners = new ArrayList<>();
-    private Context mCtx;
+    private final Context mCtx;
 
     public Geolocalizer(Context ctx) {
         mCtx = ctx;

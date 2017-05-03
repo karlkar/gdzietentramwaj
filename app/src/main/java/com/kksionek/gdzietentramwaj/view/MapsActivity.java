@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.ui.IconGenerator;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.data.TramData;
@@ -62,8 +63,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MenuItem mMenuItemFavoriteSwitch = null;
     private AdView mAdView;
 
-    private ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
-    private ValueAnimator mValueAnimator = ValueAnimator
+    private IconGenerator mIconGenerator;
+    private final ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
+    private final ValueAnimator mValueAnimator = ValueAnimator
             .ofFloat(0, 1)
             .setDuration(3000);
 
@@ -92,6 +94,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mAdView = (AdView) findViewById(R.id.adView);
         reloadAds(loc);
 
+        mIconGenerator = new IconGenerator(this);
         mValueAnimator.addUpdateListener(animation -> {
             LatLng a, b, intermediatePos;
             Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
@@ -196,8 +199,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @UiThread
     private void updateMarkersVisibility() {
-        for (TramMarker tramMarker : mTramMarkerHashMap.values())
-            updateMarkerVisibility(tramMarker);
+        for (TramMarker marker : mTramMarkerHashMap.values()) {
+            updateMarkerVisibility(marker);
+            if (marker.isVisible(mMap)) {
+                createNewFullMarker(marker);
+            } else {
+                marker.remove();
+            }
+        }
     }
 
     private void updateMarkerVisibility(TramMarker tramMarker) {
@@ -255,7 +264,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (tramMarker.getMarker() == null) {
                         Marker m = mMap.addMarker(new MarkerOptions()
                                 .position(tramMarker.getPrevPosition())
-                                .icon(TramMarker.getBitmap(tramMarker.getTramLine())));
+                                .icon(TramMarker.getBitmap(tramMarker.getTramLine(), mIconGenerator)));
                         tramMarker.setMarker(m);
                     }
                     if (tramMarker.getPolyline() == null) {
@@ -281,7 +290,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addNewMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
-                TramMarker tramMarker = new TramMarker(this, element.getValue());
+                TramMarker tramMarker = new TramMarker(element.getValue());
                 updateMarkerVisibility(tramMarker);
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
                 if (tramMarker.isVisible(mMap)) {
@@ -297,7 +306,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (tramMarker.getMarker() == null) {
             Marker m = mMap.addMarker(new MarkerOptions()
                     .position(tramMarker.getFinalPosition())
-                    .icon(TramMarker.getBitmap(tramMarker.getTramLine())));
+                    .icon(TramMarker.getBitmap(tramMarker.getTramLine(), mIconGenerator)));
             tramMarker.setMarker(m);
         }
         if (tramMarker.getPolyline() == null) {
