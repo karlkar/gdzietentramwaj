@@ -1,14 +1,11 @@
 package com.kksionek.gdzietentramwaj.model;
 
 import android.content.Context;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.util.Log;
 import android.util.Pair;
 
-import com.kksionek.gdzietentramwaj.TramApplication;
-import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.data.TramData;
 import com.kksionek.gdzietentramwaj.data.TramInterface;
 import com.kksionek.gdzietentramwaj.view.ModelObserverInterface;
@@ -18,9 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -93,7 +88,6 @@ public class Model {
                         mTramDataHashMap.clear();
                     }
                     mModelObserver.get().notifyRefreshStarted();
-                    Location lastLocation = TramApplication.getInstance().getGeolocalizer().getLastLocation();
                     return Observable.merge(
                             mTramInterface.getTrams(
                                     TramInterface.ID,
@@ -115,7 +109,6 @@ public class Model {
                                                     mFavoriteManager.isFavorite(line));
                                         }
                                     })
-                                    .filter(tramData -> tramData.isCloseTo(lastLocation))
                                     .doOnNext(TramData::trimStrings)
                                     .subscribeOn(Schedulers.computation()))
                             .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v4.content.ContextCompat;
 
@@ -11,6 +12,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -24,58 +26,65 @@ import java.util.HashMap;
 
 public class TramMarker {
 
-    private static final int POLYLINE_WIDTH = 8;
+    public static final int POLYLINE_WIDTH = 8;
 
     private static IconGenerator mIconGenerator = null;
     private static HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
 
     private final TramData mTramData;
-    private final Marker mMarker;
-    private final Polyline mPolyline;
+    private Marker mMarker = null;
+    private Polyline mPolyline = null;
 
+    private LatLng mPrevPosition;
     private LatLng mFinalPosition;
     private boolean mVisible;
 
     @UiThread
-    public TramMarker(@NonNull Context ctx, @NonNull TramData tramData, @NonNull GoogleMap map) {
+    public TramMarker(@NonNull Context ctx, @NonNull TramData tramData) {
         if (mIconGenerator == null)
             mIconGenerator = new IconGenerator(ctx);
 
         mTramData = tramData;
+        mPrevPosition = tramData.getLatLng();
+        mFinalPosition = tramData.getLatLng();
+    }
 
-        BitmapDescriptor bitmapDescriptor = mBitmaps.get(tramData.getFirstLine());
-        if (bitmapDescriptor == null) {
-            if (tramData.getFirstLine().length() < 3)
-                mIconGenerator.setColor(ContextCompat.getColor(ctx, R.color.tramColor));
-            else
-                mIconGenerator.setColor(Color.WHITE);
-            bitmapDescriptor =
-                    BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(tramData.getFirstLine()));
-            mBitmaps.put(tramData.getFirstLine(), bitmapDescriptor);
-        }
+    public void setMarker(Marker marker) {
+        if (mMarker != null)
+            mMarker.remove();
+        mMarker = marker;
+    }
 
-        mMarker = map.addMarker(new MarkerOptions()
-                .icon(bitmapDescriptor)
-                .position(tramData.getLatLng()));
-        mPolyline = map.addPolyline(
-                new PolylineOptions()
-                        .add(tramData.getLatLng())
-                        .color(ContextCompat.getColor(ctx, R.color.polylineColor))
-                        .width(POLYLINE_WIDTH));
+    public void setPolyline(Polyline polyline) {
+        if (mPolyline != null)
+            mPolyline.remove();
+        mPolyline = polyline;
     }
 
     @UiThread
     public void remove() {
-        mMarker.remove();
-        mPolyline.remove();
+        if (mMarker != null) {
+            mMarker.remove();
+            mMarker = null;
+        }
+        if (mPolyline != null) {
+            mPolyline.remove();
+            mPolyline = null;
+        }
     }
 
     public String getTramLine() {
         return mTramData.getFirstLine();
     }
 
-    public boolean isVisible() {
-        return mVisible;
+    public boolean isVisible(@Nullable GoogleMap map) {
+        LatLngBounds bounds = null;
+        if (map != null) {
+            bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        }
+        return mVisible
+                && bounds != null
+                && (bounds.contains(mFinalPosition) || bounds.contains(mPrevPosition));
     }
 
     public Marker getMarker() {
@@ -90,23 +99,35 @@ public class TramMarker {
         return mFinalPosition;
     }
 
-    public void setFinalPosition(LatLng finalPosition) {
+    public void updatePosition(LatLng finalPosition) {
+        mPrevPosition = mFinalPosition;
         mFinalPosition = finalPosition;
     }
 
     @UiThread
     public void setVisible(boolean visible) {
         mVisible = visible;
-        mMarker.setVisible(visible);
-        mPolyline.setVisible(visible);
+        if (mMarker != null)
+            mMarker.setVisible(visible);
+        if (mPolyline != null)
+            mPolyline.setVisible(visible);
     }
 
-    @UiThread
-    public void updateMarker(@NonNull LatLng prevPosition, @NonNull LatLng newPosition) {
-        ArrayList<LatLng> points = new ArrayList<>();
-        points.add(prevPosition);
-        points.add(newPosition);
-        mPolyline.setPoints(points);
-        mMarker.setPosition(newPosition);
+    public static BitmapDescriptor getBitmap(String line) {
+        BitmapDescriptor bitmapDescriptor = mBitmaps.get(line);
+        if (bitmapDescriptor == null) {
+            if (line.length() < 3)
+                mIconGenerator.setColor(Color.argb(255, 249, 245, 206));
+            else
+                mIconGenerator.setColor(Color.WHITE);
+            bitmapDescriptor =
+                    BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(line));
+            mBitmaps.put(line, bitmapDescriptor);
+        }
+        return bitmapDescriptor;
+    }
+
+    public LatLng getPrevPosition() {
+        return mPrevPosition;
     }
 }

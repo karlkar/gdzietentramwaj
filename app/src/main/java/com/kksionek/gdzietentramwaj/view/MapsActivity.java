@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.view;
 
 import android.Manifest;
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,14 +12,11 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -29,9 +25,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.data.TramData;
@@ -56,7 +54,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final Model mModel = Model.getInstance();
 
     private GoogleMap mMap = null;
-    private Circle mCircle = null;
     private boolean mFirstLoad = true;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
     private boolean mFavoriteView;
@@ -99,9 +96,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng a, b, intermediatePos;
             Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
             float fraction = animation.getAnimatedFraction();
-            Log.d(TAG, "onCreate: fraction = " + fraction);
             for (TramMarker tramMarker : mAnimationMarkers) {
-                a = tramMarker.getMarker().getPosition();
+                if (tramMarker.getMarker() == null)
+                    continue;
+                a = tramMarker.getPrevPosition();
                 b = tramMarker.getFinalPosition();
                 double lat = (b.latitude - a.latitude) * fraction + a.latitude;
                 double lng = (b.longitude - a.longitude) * fraction + a.longitude;
@@ -245,16 +243,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (tramDataHashMap.containsKey(element.getKey())) {
                 TramData updatedData = tramDataHashMap.get(element.getKey());
 
-                LatLng prevPosition = tramMarker.getMarker().getPosition();
+                LatLng prevPosition = tramMarker.getFinalPosition();
                 LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
                     continue;
 
-                if (shouldAnimateMarkerMovement(tramMarker, newPosition)) {
-                    tramMarker.setFinalPosition(newPosition);
+                tramMarker.updatePosition(newPosition);
+                updateMarkerVisibility(tramMarker);
+
+                if (tramMarker.isVisible(mMap)) {
+                    if (tramMarker.getMarker() == null) {
+                        Marker m = mMap.addMarker(new MarkerOptions()
+                                .position(tramMarker.getPrevPosition())
+                                .icon(TramMarker.getBitmap(tramMarker.getTramLine())));
+                        tramMarker.setMarker(m);
+                    }
+                    if (tramMarker.getPolyline() == null) {
+                        Polyline p = mMap.addPolyline(new PolylineOptions()
+                                .add(tramMarker.getPrevPosition())
+                                .color(Color.argb(255, 236, 57, 57))
+                                .width(TramMarker.POLYLINE_WIDTH));
+                        tramMarker.setPolyline(p);
+                    }
                     mAnimationMarkers.add(tramMarker);
                 } else
-                    tramMarker.updateMarker(prevPosition, newPosition);
+                    tramMarker.remove();
             } else {
                 tramMarker.remove();
                 iter.remove();
@@ -264,20 +277,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mValueAnimator.start();
     }
 
-    private boolean shouldAnimateMarkerMovement(@NonNull TramMarker tramMarker, @NonNull LatLng newPosition) {
-        return tramMarker.isVisible() &&
-                (mMap.getProjection().getVisibleRegion().latLngBounds.contains(newPosition)
-                        || mMap.getProjection().getVisibleRegion().latLngBounds.contains(tramMarker.getMarker().getPosition()));
-    }
-
     @UiThread
     private void addNewMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
-                TramMarker tramMarker = new TramMarker(this, element.getValue(), mMap);
+                TramMarker tramMarker = new TramMarker(this, element.getValue());
                 updateMarkerVisibility(tramMarker);
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
+                if (tramMarker.isVisible(mMap)) {
+                    createNewFullMarker(tramMarker);
+                } else {
+                    tramMarker.remove();
+                }
             }
+        }
+    }
+
+    private void createNewFullMarker(TramMarker tramMarker) {
+        if (tramMarker.getMarker() == null) {
+            Marker m = mMap.addMarker(new MarkerOptions()
+                    .position(tramMarker.getFinalPosition())
+                    .icon(TramMarker.getBitmap(tramMarker.getTramLine())));
+            tramMarker.setMarker(m);
+        }
+        if (tramMarker.getPolyline() == null) {
+            Polyline p = mMap.addPolyline(new PolylineOptions()
+                    .add(tramMarker.getPrevPosition())
+                    .add(tramMarker.getFinalPosition())
+                    .color(Color.argb(255, 236, 57, 57))
+                    .width(TramMarker.POLYLINE_WIDTH));
+            tramMarker.setPolyline(p);
         }
     }
 
@@ -297,6 +326,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setMinZoomPreference(14.5f);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -314,6 +344,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             onLocationUpdated(location);
         }
         mMap.setOnMarkerClickListener(marker -> true);
+        mMap.setOnCameraIdleListener(() -> {
+            for (TramMarker marker : mTramMarkerHashMap.values()) {
+                if (marker.isVisible(mMap)) {
+                    createNewFullMarker(marker);
+                } else {
+                    marker.remove();
+                }
+            }
+        });
     }
 
     private void reloadAds(Location location) {
@@ -345,18 +384,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mFirstLoad = false;
             if (mMap != null) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
-        }
-        if (mMap != null) {
-            if (mCircle != null) {
-                mCircle.setCenter(latLng);
-            } else {
-                mCircle = mMap.addCircle(new CircleOptions()
-                        .center(latLng)
-                        .radius(TramData.DISTANCE_CLOSE)
-                        .clickable(false)
-                        .strokeWidth(16)
-                        .strokeColor(ContextCompat.getColor(this, R.color.borderColor)));
             }
         }
     }
