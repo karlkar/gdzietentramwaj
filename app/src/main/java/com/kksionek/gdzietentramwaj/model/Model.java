@@ -11,6 +11,7 @@ import com.kksionek.gdzietentramwaj.data.TramInterface;
 import com.kksionek.gdzietentramwaj.view.ModelObserverInterface;
 
 import java.lang.ref.WeakReference;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,15 +115,15 @@ public class Model {
                             .doOnNext(tramData -> mTramDataHashMap.put(tramData.getId(), tramData))
                             .toList()
                             .toObservable()
-                            .retryWhen(errors -> Observable.zip(
-                                    errors,
+                            .retryWhen(errors -> errors.zipWith(
                                     Observable.just(1, 3, 5, 7),
                                     Pair::new)
                                     .flatMap(pair -> {
-                                        if (pair.second > 5)
-                                            return Observable.<Long>error(pair.first);
+                                        if (pair.first instanceof UnknownHostException || pair.second > 5)
+                                            return Observable.error(pair.first);
                                         return Observable.timer((long) pair.second, TimeUnit.SECONDS);
-                                    }))
+                                    })
+                                    .doOnNext(aLong -> Log.d(TAG, "getIntervalObservable: " + aLong)))
                             .onErrorResumeNext(throwable -> {
                                 throwable.printStackTrace();
                                 return Observable.just(new ArrayList<>());

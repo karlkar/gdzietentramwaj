@@ -29,3 +29,12 @@
 
 -dontwarn okio.**
 -dontwarn java.lang.invoke.*
+
+# Needed by google-api-client to keep generic types and @Key annotations accessed via reflection
+-keepclassmembers class * {
+  @com.google.api.client.util.Key <fields>;
+}
+
+-keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault,*Annotation*
+
+-dontwarn sun.misc.Unsafe

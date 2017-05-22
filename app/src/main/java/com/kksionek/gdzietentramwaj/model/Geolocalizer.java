@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationServices;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Geolocalizer implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -72,7 +73,11 @@ public class Geolocalizer implements GoogleApiClient.ConnectionCallbacks,
 
     public void removeLocationUpdateListener(LocationUpdateListener listener) {
         synchronized (mLocationUpdateListeners) {
-            mLocationUpdateListeners.removeIf(ref -> ref.get() == null || ref.get() == listener);
+            for (Iterator<WeakReference<LocationUpdateListener>> it = mLocationUpdateListeners.iterator(); it.hasNext();) {
+                WeakReference<LocationUpdateListener> ref = it.next();
+                if (ref.get() == null || ref.get() == listener)
+                    it.remove();
+            }
         }
     }
 
