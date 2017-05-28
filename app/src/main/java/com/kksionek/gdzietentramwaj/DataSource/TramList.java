@@ -1,7 +1,6 @@
-package com.kksionek.gdzietentramwaj.data;
+package com.kksionek.gdzietentramwaj.DataSource;
 
 import com.google.gson.annotations.SerializedName;
-import com.kksionek.gdzietentramwaj.data.TramData;
 
 import java.util.ArrayList;
 import java.util.List;

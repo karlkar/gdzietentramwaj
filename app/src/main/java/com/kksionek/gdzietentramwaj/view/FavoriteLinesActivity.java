@@ -14,7 +14,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.kksionek.gdzietentramwaj.R;
-import com.kksionek.gdzietentramwaj.data.FavoriteTramData;
+import com.kksionek.gdzietentramwaj.DataSource.FavoriteTramData;
 import com.kksionek.gdzietentramwaj.model.Model;
 
 import java.util.ArrayList;

@@ -2,19 +2,23 @@ package com.kksionek.gdzietentramwaj.view;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.LifecycleRegistryOwner;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.UiThread;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -32,11 +36,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
 import com.kksionek.gdzietentramwaj.R;
-import com.kksionek.gdzietentramwaj.TramApplication;
-import com.kksionek.gdzietentramwaj.data.TramData;
-import com.kksionek.gdzietentramwaj.model.Geolocalizer;
-import com.kksionek.gdzietentramwaj.model.Model;
-import com.kksionek.gdzietentramwaj.model.PrefManager;
+import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
+import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
@@ -47,17 +48,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ModelObserverInterface, Geolocalizer.LocationUpdateListener {
+public class MapsActivity extends AppCompatActivity implements LifecycleRegistryOwner, OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
 
-    private final Model mModel = Model.getInstance();
+    private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
 
     private GoogleMap mMap = null;
-    private boolean mFirstLoad = true;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
-    private boolean mFavoriteView;
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
     private MenuItem mMenuItemFavoriteSwitch = null;
@@ -69,14 +68,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             .ofFloat(0, 1)
             .setDuration(3000);
 
+    private MainActivityViewModel mViewModel;
+    private LiveData<Boolean> mFavoriteView = null;
+    private LiveData<Location> mLocationLiveData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
-        mModel.setObserver(this, getApplicationContext(), ((TramApplication) getApplication()).getTramInterface());
-        PrefManager.init(getApplicationContext());
-        mFavoriteView = PrefManager.isFavoriteViewOn();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -85,7 +84,43 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        checkLocationPermission();
+        mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+
+        mViewModel.getTramData().observe(this, tramDataList -> {
+            if (tramDataList == null)
+                return;
+            Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
+            HashMap<String, TramData> tramDataHashMap = new HashMap<>();
+            for (TramData tramData : tramDataList) {
+                tramDataHashMap.put(tramData.getId(), tramData);
+            }
+            updateExistingMarkers(tramDataHashMap);
+            if (tramDataHashMap.size() == mTramMarkerHashMap.size())
+                return;
+            addNewMarkers(tramDataHashMap);
+        });
+
+        mFavoriteView = mViewModel.isFavoriteView();
+        mFavoriteView.observe(this, aBoolean -> {
+            if (aBoolean != null && mMenuItemFavoriteSwitch != null)
+                mMenuItemFavoriteSwitch.setIcon(
+                        aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
+            updateMarkersVisibility();
+        });
+
+        mViewModel.getLoadingLiveData().observe(this, aBoolean -> {
+            if (mMenuItemRefresh == null || aBoolean == null)
+                return;
+            if (aBoolean)
+                mMenuItemRefresh.startAnimation();
+            else
+                mMenuItemRefresh.endAnimation();
+
+        });
+
+        if (checkLocationPermission()) {
+            subscribeLocationLiveData();
+        }
 
         Location loc = new Location("");
         loc.setLatitude(52.231841);
@@ -120,28 +155,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    private void subscribeLocationLiveData() {
+        mLocationLiveData = mViewModel.getLocationLiveData();
+        mLocationLiveData.observe(this, location -> {
+            if (location == null)
+                return;
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            if (mMap != null) {
+                reloadAds(location);
+                Log.d(TAG, "subscribeLocationLiveData: DUPA");
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                mLocationLiveData.removeObservers(this);
+                mLocationLiveData = null;
+            }
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        if (mMap != null) {
-            startFetchingData();
-            updateMarkersVisibility();
-        }
         if (mAdView != null)
             mAdView.resume();
-        Geolocalizer geolocalizer = ((TramApplication) getApplication()).getGeolocalizer();
-        geolocalizer.onResume();
-        geolocalizer.addLocationUpdateListener(this);
     }
 
     @Override
     protected void onPause() {
-        mModel.stopUpdates();
         if (mAdView != null)
             mAdView.pause();
-        Geolocalizer geolocalizer = ((TramApplication) getApplication()).getGeolocalizer();
-        geolocalizer.onPause();
-        geolocalizer.removeLocationUpdateListener(this);
         super.onPause();
     }
 
@@ -153,17 +193,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
-        updateFavoriteSwitchIcon();
-
-        new Handler().postDelayed(this::startFetchingData, 1000);
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @UiThread
-    private void updateFavoriteSwitchIcon() {
-        if (mMenuItemFavoriteSwitch != null)
-            mMenuItemFavoriteSwitch.setIcon(mFavoriteView ? R.drawable.fav_on : R.drawable.fav_off);
     }
 
     @Override
@@ -176,25 +207,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             builder.show();
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
-            startFetchingData();
+            mViewModel.forceReload();
             return true;
         } else if (item.getItemId() == R.id.menu_item_favorite) {
             Intent intent = new Intent(this, FavoriteLinesActivity.class);
             startActivity(intent);
             return true;
         } else if (item.getItemId() == R.id.menu_item_favorite_switch) {
-            mFavoriteView = !mFavoriteView;
-            updateFavoriteSwitchIcon();
-            PrefManager.setFavoriteViewOn(mFavoriteView);
-            updateMarkersVisibility();
+            mViewModel.toggleFavorite();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @UiThread
-    private void startFetchingData() {
-        mMenuItemRefresh.startAnimation();
-        mModel.startFetchingData();
     }
 
     @UiThread
@@ -210,36 +232,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void updateMarkerVisibility(TramMarker tramMarker) {
-        tramMarker.setVisible(!mFavoriteView || mModel.getFavoriteManager().isFavorite(tramMarker.getTramLine()));
-    }
-
-    @Override
-    @UiThread
-    public void notifyRefreshStarted() {
-        if (mMenuItemRefresh == null)
-            return;
-        mMenuItemRefresh.startAnimation();
-    }
-
-    @Override
-    @UiThread
-    public void notifyRefreshEnded() {
-        if (mMenuItemRefresh == null)
-            return;
-        mMenuItemRefresh.endAnimation();
-    }
-
-    @Override
-    @UiThread
-    public void updateMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
-        Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
-
-        updateExistingMarkers(tramDataHashMap);
-
-        if (tramDataHashMap.size() == mTramMarkerHashMap.size())
-            return;
-
-        addNewMarkers(tramDataHashMap);
+        tramMarker.setVisible(!mFavoriteView.getValue()
+                || mViewModel.isTramFavorite(tramMarker.getTramLine()));
     }
 
     @UiThread
@@ -320,14 +314,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @UiThread
-    private void checkLocationPermission() {
+    private boolean checkLocationPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            return;
+            return true;
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -338,20 +334,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMinZoomPreference(14.5f);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            mMap.setMyLocationEnabled(
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED);
-        else
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED)
+                mMap.setMyLocationEnabled(true);
+            else
+                mMap.setMyLocationEnabled(false);
+        } else
             mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
-        LatLng warsaw = new LatLng(52.231841, 21.005940);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(warsaw, 15));
-        Geolocalizer geolocalizer = ((TramApplication)getApplication()).getGeolocalizer();
-        Location location = geolocalizer.getLastLocation();
-        if (location != null) {
-            onLocationUpdated(location);
-        }
+        LatLng position;
+        if (mLocationLiveData != null && mLocationLiveData.getValue() != null)
+            position = new LatLng(mLocationLiveData.getValue().getLatitude(), mLocationLiveData.getValue().getLongitude());
+        else
+            position = new LatLng(52.231841, 21.005940);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
         mMap.setOnMarkerClickListener(marker -> true);
         mMap.setOnCameraIdleListener(() -> {
             for (TramMarker marker : mTramMarkerHashMap.values()) {
@@ -368,32 +365,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceS5))
                 .addTestDevice(getString(R.string.adMobTestDeviceS7))
+                .addTestDevice(getString(R.string.adMobTestDeviceS8Plus))
                 .setLocation(location)
                 .build();
         mAdView.loadAd(adRequest);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ((TramApplication)getApplication()).getGeolocalizer().onResume();
-                mMap.setMyLocationEnabled(
-                        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                                == PackageManager.PERMISSION_GRANTED);
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                    subscribeLocationLiveData();
+                } else
+                    mMap.setMyLocationEnabled(false);
             }
         }
     }
 
     @Override
-    public void onLocationUpdated(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        if (mFirstLoad) {
-            reloadAds(location);
-            mFirstLoad = false;
-            if (mMap != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
-        }
+    public LifecycleRegistry getLifecycle() {
+        return mLifecycleRegistry;
     }
 }

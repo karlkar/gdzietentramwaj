@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.data;
+package com.kksionek.gdzietentramwaj.DataSource;
 
 import android.support.annotation.NonNull;
 

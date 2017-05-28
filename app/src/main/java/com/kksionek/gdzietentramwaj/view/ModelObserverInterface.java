@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.view;
 
 import android.support.annotation.NonNull;
 
-import com.kksionek.gdzietentramwaj.data.TramData;
+import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import java.util.HashMap;
 
