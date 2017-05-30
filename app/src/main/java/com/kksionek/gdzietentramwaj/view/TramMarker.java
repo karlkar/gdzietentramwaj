@@ -27,7 +27,7 @@ public class TramMarker {
             = new LruCache<>((int) Runtime.getRuntime().maxMemory() / 1024 / 8);
 //    private static final HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
 
-    private final TramData mTramData;
+    private final String mLineId;
     private Marker mMarker = null;
     private Polyline mPolyline = null;
 
@@ -37,7 +37,7 @@ public class TramMarker {
 
     @UiThread
     public TramMarker(@NonNull TramData tramData) {
-        mTramData = tramData;
+        mLineId = tramData.getFirstLine();
         mPrevPosition = null;
         mFinalPosition = tramData.getLatLng();
     }
@@ -67,7 +67,7 @@ public class TramMarker {
     }
 
     public String getTramLine() {
-        return mTramData.getFirstLine();
+        return mLineId;
     }
 
     public boolean isVisible(@Nullable GoogleMap map) {

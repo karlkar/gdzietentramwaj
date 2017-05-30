@@ -53,9 +53,9 @@ class TramLiveData extends LiveData<List<TramData>> {
                     ).subscribeOn(Schedulers.io())
                             .doOnNext(tramList -> Log.d(TAG, "getIntervalObservable: " + tramList.size()))
                             .filter(tramList -> tramList.size() > 0)
-                            .doOnNext(tramData -> {
+                            .doOnNext(tramList -> {
                                 if (listener != null)
-                                    listener.onTramList(tramData);
+                                    listener.onTramList(tramList);
                             })
                             .retryWhen(errors -> errors.zipWith(
                                     Observable.just(1, 3, 5, 7),
