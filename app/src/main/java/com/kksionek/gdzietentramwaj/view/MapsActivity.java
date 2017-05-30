@@ -70,8 +70,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             .setDuration(3000);
 
     private MainActivityViewModel mViewModel;
-    private LiveData<Boolean> mFavoriteView = null;
+    private LiveData<Boolean> mFavoriteView;
     private LiveData<Location> mLocationLiveData;
+    private List<String> mFavoriteTrams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +81,6 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
@@ -103,14 +100,17 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
         mFavoriteView = mViewModel.isFavoriteView();
         mFavoriteView.observe(this, aBoolean -> {
-            if (aBoolean != null && mMenuItemFavoriteSwitch != null) {
+            if (aBoolean != null && mMenuItemFavoriteSwitch != null)
                 mMenuItemFavoriteSwitch.setIcon(
                         aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
-                if (aBoolean)
-                    mMap.setMinZoomPreference(0);
-                else
-                    mMap.setMinZoomPreference(14.5f);
+            if (aBoolean != null && mMap != null) {
+                mMap.setMinZoomPreference(aBoolean ? 0 : 14.5f);
             }
+            updateMarkersVisibility();
+        });
+
+        mViewModel.getFavoriteTramsLiveData().observe(this, strings -> {
+            mFavoriteTrams = strings;
             updateMarkersVisibility();
         });
 
@@ -128,10 +128,13 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             subscribeLocationLiveData();
         }
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         Location loc = new Location("");
         loc.setLatitude(52.231841);
         loc.setLongitude(21.005940);
-
         mAdView = (AdView) findViewById(R.id.adView);
         reloadAds(loc);
 
@@ -169,10 +172,11 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             if (mMap != null) {
                 reloadAds(location);
-                Log.d(TAG, "subscribeLocationLiveData: DUPA");
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                mLocationLiveData.removeObservers(this);
-                mLocationLiveData = null;
+                if (mLocationLiveData != null) {
+                    mLocationLiveData.removeObservers(this);
+                    mLocationLiveData = null;
+                }
             }
         });
     }
@@ -199,6 +203,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
+        if (mFavoriteView != null)
+           mMenuItemFavoriteSwitch.setIcon(
+                   mFavoriteView.getValue() ? R.drawable.fav_on : R.drawable.fav_off);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -237,9 +244,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         }
     }
 
-    private void updateMarkerVisibility(TramMarker tramMarker) {
+    private void updateMarkerVisibility(@NonNull TramMarker tramMarker) {
         tramMarker.setVisible(!mFavoriteView.getValue()
-                || mViewModel.isTramFavorite(tramMarker.getTramLine()));
+                || mFavoriteTrams.contains(tramMarker.getTramLine()));
     }
 
     @UiThread
@@ -249,9 +256,8 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         while (iter.hasNext()) {
             Map.Entry<String, TramMarker> element = iter.next();
             TramMarker tramMarker = element.getValue();
-            if (tramDataHashMap.containsKey(element.getKey())) {
-                TramData updatedData = tramDataHashMap.get(element.getKey());
-
+            TramData updatedData = tramDataHashMap.get(element.getKey());
+            if (updatedData != null) {
                 LatLng prevPosition = tramMarker.getFinalPosition();
                 LatLng newPosition = updatedData.getLatLng();
                 if (prevPosition.equals(newPosition))
@@ -295,8 +301,6 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
                 if (tramMarker.isVisible(mMap)) {
                     createNewFullMarker(tramMarker);
-                } else {
-                    tramMarker.remove();
                 }
             }
         }
@@ -337,9 +341,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         mMap = googleMap;
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-//        mMap.setMinZoomPreference(14.5f);
-        //TODO: Remove markers when invisible?
-        //TODO: set min zoom when no favorites
+        if (!mFavoriteView.getValue()) {
+            mMap.setMinZoomPreference(14.5f);
+        }
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -353,7 +357,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         mMap.setTrafficEnabled(false);
         LatLng position;
         if (mLocationLiveData != null && mLocationLiveData.getValue() != null)
-            position = new LatLng(mLocationLiveData.getValue().getLatitude(), mLocationLiveData.getValue().getLongitude());
+            position = new LatLng(
+                    mLocationLiveData.getValue().getLatitude(),
+                    mLocationLiveData.getValue().getLongitude());
         else
             position = new LatLng(52.231841, 21.005940);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));

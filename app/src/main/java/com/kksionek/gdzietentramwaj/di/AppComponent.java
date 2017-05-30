@@ -1,5 +1,7 @@
 package com.kksionek.gdzietentramwaj.di;
 
+import android.content.Context;
+
 import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
 import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
@@ -13,4 +15,5 @@ import dagger.Component;
 public interface AppComponent {
     TramRepository getTramRepository();
     LocationRepository getLocationRepository();
+    Context getAppContext();
 }

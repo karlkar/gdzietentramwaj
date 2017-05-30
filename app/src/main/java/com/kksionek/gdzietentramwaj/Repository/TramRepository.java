@@ -19,24 +19,18 @@ public class TramRepository {
 
     private final TramLiveData mTramLiveData;
     private final TramDao mTramDao;
-    private List<String> mFavoriteTrams = new ArrayList<>();
 
     @Inject
     public TramRepository(TramDao tramDao, TramInterface tramInterface) {
         mTramDao = tramDao;
         mTramLiveData = new TramLiveData(tramInterface, tramData -> {
-            Log.d(TAG, "TramRepository: Hello.");
             HashSet<String> done = new HashSet<>();
             for (TramData tram : tramData) {
                 if (!done.contains(tram.getFirstLine())) {
                     tramDao.save(new FavoriteTram(tram.getFirstLine(), false));
                     done.add(tram.getFirstLine());
-                    Log.d(TAG, "TramRepository: Saved " + tram.getFirstLine());
                 }
             }
-        });
-        mTramDao.getFavoriteTrams().observeForever(favoriteTrams -> {
-            mFavoriteTrams = favoriteTrams;
         });
     }
 
@@ -56,11 +50,11 @@ public class TramRepository {
         return mTramDao.getAllFavTrams();
     }
 
-    public void setTramFavorite(String lineId, boolean favorite) {
-        mTramDao.setFavorite(lineId, favorite);
+    public LiveData<List<String>> getFavoriteTrams() {
+        return mTramDao.getFavoriteTrams();
     }
 
-    public boolean isTramFavorite(String tramLine) {
-        return mFavoriteTrams.contains(tramLine);
+    public void setTramFavorite(String lineId, boolean favorite) {
+        mTramDao.setFavorite(lineId, favorite);
     }
 }

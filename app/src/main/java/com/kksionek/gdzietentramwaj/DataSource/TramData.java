@@ -30,13 +30,11 @@ public class TramData {
     }
 
     public LatLng getLatLng() {
-        if (mLatLng == null)
+        if (mLatLng == null) {
             mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
+            mLat = null;
+            mLng = null;
+        }
         return mLatLng;
-    }
-
-    public void trimStrings() {
-        mFirstLine = mFirstLine.trim();
-        mBrigade = mBrigade.trim();
     }
 }

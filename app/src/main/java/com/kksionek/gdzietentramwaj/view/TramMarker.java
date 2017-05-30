@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.util.Log;
+import android.util.LruCache;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -21,7 +23,9 @@ public class TramMarker {
 
     public static final int POLYLINE_WIDTH = 8;
 
-    private static final HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
+    private static final LruCache<String, BitmapDescriptor> mBitmaps
+            = new LruCache<>((int) Runtime.getRuntime().maxMemory() / 1024 / 8);
+//    private static final HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
 
     private final TramData mTramData;
     private Marker mMarker = null;
@@ -34,7 +38,7 @@ public class TramMarker {
     @UiThread
     public TramMarker(@NonNull TramData tramData) {
         mTramData = tramData;
-        mPrevPosition = tramData.getLatLng();
+        mPrevPosition = null;
         mFinalPosition = tramData.getLatLng();
     }
 
@@ -73,7 +77,8 @@ public class TramMarker {
         }
         return mVisible
                 && bounds != null
-                && (bounds.contains(mFinalPosition) || bounds.contains(mPrevPosition));
+                && (bounds.contains(mFinalPosition)
+                    || (mPrevPosition != null && bounds.contains(mPrevPosition)));
     }
 
     public Marker getMarker() {
@@ -89,8 +94,12 @@ public class TramMarker {
     }
 
     public void updatePosition(LatLng finalPosition) {
-        mPrevPosition = mFinalPosition;
-        mFinalPosition = finalPosition;
+        if (finalPosition == mFinalPosition)
+            mPrevPosition = null;
+        else {
+            mPrevPosition = mFinalPosition;
+            mFinalPosition = finalPosition;
+        }
     }
 
     @UiThread
@@ -117,6 +126,8 @@ public class TramMarker {
     }
 
     public LatLng getPrevPosition() {
+        if (mPrevPosition == null)
+            return mFinalPosition;
         return mPrevPosition;
     }
 }
