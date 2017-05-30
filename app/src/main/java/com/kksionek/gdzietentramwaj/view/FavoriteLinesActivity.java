@@ -1,11 +1,15 @@
 package com.kksionek.gdzietentramwaj.view;
 
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.LifecycleRegistryOwner;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +17,20 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.R;
-import com.kksionek.gdzietentramwaj.DataSource.FavoriteTramData;
-import com.kksionek.gdzietentramwaj.model.Model;
+import com.kksionek.gdzietentramwaj.ViewModel.FavoriteLinesActivityViewModel;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.SortedMap;
 
-public class FavoriteLinesActivity extends AppCompatActivity {
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+
+public class FavoriteLinesActivity extends AppCompatActivity implements LifecycleRegistryOwner {
+
+    private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
+    private FavoriteLinesActivityViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +45,23 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
         GridView gridView = (GridView) findViewById(R.id.gridView);
 
-        ArrayList<FavoriteTramData> tramDatas = new ArrayList<>();
-        for (SortedMap.Entry<String, Boolean> entry : Model.getInstance().getFavoriteTramData().entrySet()) {
-            tramDatas.add(new FavoriteTramData(entry.getKey(), entry.getValue()));
-        }
-        FavoritesAdapter adapter = new FavoritesAdapter(tramDatas);
+        mViewModel = ViewModelProviders.of(this)
+                .get(FavoriteLinesActivityViewModel.class);
+
+        FavoritesAdapter adapter = new FavoritesAdapter();
         gridView.setAdapter(adapter);
+        mViewModel.getFavoriteTrams().observe(this, adapter::setData);
     }
 
-    private class FavoritesAdapter extends ArrayAdapter<FavoriteTramData> {
+    @Override
+    public LifecycleRegistry getLifecycle() {
+        return mLifecycleRegistry;
+    }
 
-        public FavoritesAdapter(List<FavoriteTramData> objects) {
-            super(FavoriteLinesActivity.this, R.layout.grid_favorite_element, objects);
+    private class FavoritesAdapter extends ArrayAdapter<FavoriteTram> {
+
+        public FavoritesAdapter() {
+            super(FavoriteLinesActivity.this, R.layout.grid_favorite_element);
         }
 
         @Override
@@ -63,8 +77,8 @@ public class FavoriteLinesActivity extends AppCompatActivity {
             } else
                 holder = (ViewHolder) convertView.getTag();
 
-            final FavoriteTramData tramData = getItem(position);
-            holder.textView.setText(tramData.getLine());
+            final FavoriteTram tramData = getItem(position);
+            holder.textView.setText(tramData.getLineId());
             if (tramData.isFavorite())
                 convertView.setBackgroundResource(R.color.favoriteLineColor);
             else {
@@ -74,12 +88,21 @@ public class FavoriteLinesActivity extends AppCompatActivity {
                     convertView.setBackgroundDrawable(null);
             }
 
-            convertView.setOnClickListener(v -> {
-                tramData.setFavorite(!tramData.isFavorite());
-                Model.getInstance().getFavoriteManager().setFavorite(tramData.getLine(), tramData.isFavorite());
-                notifyDataSetChanged();
-            });
+            convertView.setOnClickListener(
+                    v -> {
+                        Observable.fromCallable(() -> {
+                            mViewModel.setTramFavorite(tramData.getLineId(), !tramData.isFavorite());
+                            return 1;
+                        }).subscribeOn(Schedulers.io())
+                        .subscribe();
+                    });
             return convertView;
+        }
+
+        public void setData(List<FavoriteTram> favoriteTrams) {
+            clear();
+            Collections.sort(favoriteTrams, new NaturalOrderComparator());
+            addAll(favoriteTrams);
         }
 
         private class ViewHolder {

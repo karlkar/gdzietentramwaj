@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.model;
+package com.kksionek.gdzietentramwaj.view;
 
 /*
  NaturalOrderComparator.java -- Perform 'natural order' comparisons of strings in Java.

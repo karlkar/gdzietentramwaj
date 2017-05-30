@@ -1,5 +1,7 @@
 package com.kksionek.gdzietentramwaj.model;
 
+import com.kksionek.gdzietentramwaj.view.NaturalOrderComparator;
+
 import java.util.SortedMap;
 import java.util.TreeMap;
 

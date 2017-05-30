@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
+import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
@@ -102,9 +103,14 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
         mFavoriteView = mViewModel.isFavoriteView();
         mFavoriteView.observe(this, aBoolean -> {
-            if (aBoolean != null && mMenuItemFavoriteSwitch != null)
+            if (aBoolean != null && mMenuItemFavoriteSwitch != null) {
                 mMenuItemFavoriteSwitch.setIcon(
                         aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
+                if (aBoolean)
+                    mMap.setMinZoomPreference(0);
+                else
+                    mMap.setMinZoomPreference(14.5f);
+            }
             updateMarkersVisibility();
         });
 
@@ -331,7 +337,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         mMap = googleMap;
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.setMinZoomPreference(14.5f);
+//        mMap.setMinZoomPreference(14.5f);
+        //TODO: Remove markers when invisible?
+        //TODO: set min zoom when no favorites
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

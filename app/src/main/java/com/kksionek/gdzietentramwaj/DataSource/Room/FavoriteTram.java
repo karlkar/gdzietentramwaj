@@ -9,6 +9,11 @@ public class FavoriteTram {
     private String mLineId;
     private boolean mFavorite;
 
+    public FavoriteTram(String lineId, boolean favorite) {
+        mLineId = lineId;
+        mFavorite = favorite;
+    }
+
     public String getLineId() {
         return mLineId;
     }
@@ -23,5 +28,10 @@ public class FavoriteTram {
 
     public void setFavorite(boolean favorite) {
         mFavorite = favorite;
+    }
+
+    @Override
+    public String toString() {
+        return mLineId;
     }
 }

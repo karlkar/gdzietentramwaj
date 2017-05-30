@@ -1,8 +1,11 @@
 package com.kksionek.gdzietentramwaj.di;
 
+import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.kksionek.gdzietentramwaj.DataSource.Room.MyDatabase;
+import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
 import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
 
 import javax.inject.Singleton;
@@ -27,6 +30,16 @@ public class AppModule {
     @Singleton @Provides
     Context provideContext() {
         return mContext;
+    }
+
+    @Singleton @Provides
+    MyDatabase getMyDatabase(Context context) {
+        return Room.databaseBuilder(context, MyDatabase.class, "favorites.db").build();
+    }
+
+    @Singleton @Provides
+    TramDao getTramDao(MyDatabase myDatabase) {
+        return myDatabase.tramDao();
     }
 
     @Singleton @Provides

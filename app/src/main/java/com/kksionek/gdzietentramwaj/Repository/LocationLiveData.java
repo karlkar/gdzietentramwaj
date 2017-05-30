@@ -47,7 +47,7 @@ class LocationLiveData extends LiveData<Location> {
         setValue(mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
         mLocationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                500,
+                100,
                 0,
                 mLocationListener);
     }

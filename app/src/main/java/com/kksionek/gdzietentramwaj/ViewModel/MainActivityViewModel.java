@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 
+import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
 import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.TramApplication;
@@ -52,7 +53,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public boolean isTramFavorite(String tramLine) {
-        return false;
+        return mTramRepository.isTramFavorite(tramLine);
     }
 
     public LiveData<Location> getLocationLiveData() {
