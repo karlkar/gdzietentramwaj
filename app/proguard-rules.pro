@@ -37,26 +37,26 @@
 
 -dontwarn sun.misc.Unsafe
 
--keepnames class com.google.ads.** # Don't proguard AdMob classes
--keepnames class com.google.android.gms.ads.** # Don't proguard AdMob classes
+#-keepnames class com.google.ads.** # Don't proguard AdMob classes
+#-keepnames class com.google.android.gms.ads.** # Don't proguard AdMob classes
+#
+#-keep public class com.google.android.gms.ads.** {
+#public *;
+#}
+#
+#-keep public class com.google.ads.** {
+#public *;
+#}
+#
+#-keepnames class com.google.maps.android.ui.**
+#
+#-keep public class com.google.maps.android.ui.** {
+#public *;
+#}
 
--keep public class com.google.android.gms.ads.** {
-public *;
-}
-
--keep public class com.google.ads.** {
-public *;
-}
-
--keepnames class com.google.maps.android.ui.**
-
--keep public class com.google.maps.android.ui.** {
-public *;
-}
-
--dontwarn android.support.v7.**
--keep class android.support.v7.** { *; }
--keep interface android.support.v7.** { *; }
+#-dontwarn android.support.v7.**
+#-keep class android.support.v7.** { *; }
+#-keep interface android.support.v7.** { *; }
 
 #-keep class com.kksionek.gdzietentramwaj.**
 #
@@ -64,7 +64,7 @@ public *;
 #public *;
 #}
 
--keep class com.kksionek.gdzietentramwaj.ViewModel.**
--keep public class com.kksionek.gdzietentramwaj.ViewModel.** {
-public *;
-}
+#-keep class com.kksionek.gdzietentramwaj.ViewModel.**
+#-keep public class com.kksionek.gdzietentramwaj.ViewModel.** {
+#public *;
+#}

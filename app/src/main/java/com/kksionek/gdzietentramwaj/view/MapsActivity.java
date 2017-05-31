@@ -54,6 +54,7 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
+    private static final int MAX_VISIBLE_MARKERS = 50;
 
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
 
@@ -233,15 +234,23 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
     @UiThread
     private void updateMarkersVisibility() {
+        int count = 0;
         for (TramMarker marker : mTramMarkerHashMap.values()) {
-            updateMarkerVisibility(marker);
+            if (updateMarkerVisibility(marker))
+                ++count;
+            if (count > MAX_VISIBLE_MARKERS) {
+                mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                return;
+            }
         }
         showOrZoom();
     }
 
-    private void updateMarkerVisibility(@NonNull TramMarker tramMarker) {
-        tramMarker.setVisible(!mFavoriteView.getValue()
-                || mFavoriteTrams.contains(tramMarker.getTramLine()));
+    private boolean updateMarkerVisibility(@NonNull TramMarker tramMarker) {
+        boolean visible = !mFavoriteView.getValue()
+                || mFavoriteTrams.contains(tramMarker.getTramLine());
+        tramMarker.setVisible(visible);
+        return visible;
     }
 
     @UiThread
@@ -376,7 +385,7 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
                 marker.remove();
             }
         }
-        if (markersToBeCreated.size() <= 50) {
+        if (markersToBeCreated.size() <= MAX_VISIBLE_MARKERS) {
             for (TramMarker marker : markersToBeCreated)
                 createNewFullMarker(marker);
         } else {
