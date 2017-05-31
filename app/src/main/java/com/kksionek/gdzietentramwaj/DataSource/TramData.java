@@ -10,10 +10,10 @@ public class TramData {
 //    private String mTime;
 
     @SerializedName("Lat")
-    private String mLat;
+    private double mLat;
 
     @SerializedName("Lon")
-    private String mLng;
+    private double mLng;
 
     @SerializedName("Lines")
     private String mFirstLine;
@@ -31,9 +31,7 @@ public class TramData {
 
     public LatLng getLatLng() {
         if (mLatLng == null) {
-            mLatLng = new LatLng(Double.valueOf(mLat), Double.valueOf(mLng));
-            mLat = null;
-            mLng = null;
+            mLatLng = new LatLng(mLat, mLng);
         }
         return mLatLng;
     }
