@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapsActivity extends AppCompatActivity implements LifecycleRegistryOwner, OnMapReadyCallback {
 
@@ -73,6 +74,7 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
     private LiveData<Boolean> mFavoriteView;
     private LiveData<Location> mLocationLiveData;
     private List<String> mFavoriteTrams;
+    private AtomicBoolean mCameraMoveInProgress = new AtomicBoolean(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,9 +105,6 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             if (aBoolean != null && mMenuItemFavoriteSwitch != null)
                 mMenuItemFavoriteSwitch.setIcon(
                         aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
-            if (aBoolean != null && mMap != null) {
-                mMap.setMinZoomPreference(aBoolean ? 0 : 14.5f);
-            }
             updateMarkersVisibility();
         });
 
@@ -236,12 +235,8 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
     private void updateMarkersVisibility() {
         for (TramMarker marker : mTramMarkerHashMap.values()) {
             updateMarkerVisibility(marker);
-            if (marker.isVisible(mMap)) {
-                createNewFullMarker(marker);
-            } else {
-                marker.remove();
-            }
         }
+        showOrZoom();
     }
 
     private void updateMarkerVisibility(@NonNull TramMarker tramMarker) {
@@ -253,6 +248,7 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
     private void updateExistingMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
         Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
         mAnimationMarkers.clear();
+        boolean cameraMoveInProgress = mCameraMoveInProgress.get();
         while (iter.hasNext()) {
             Map.Entry<String, TramMarker> element = iter.next();
             TramMarker tramMarker = element.getValue();
@@ -266,23 +262,26 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
                 tramMarker.updatePosition(newPosition);
                 updateMarkerVisibility(tramMarker);
 
-                if (tramMarker.isVisible(mMap)) {
-                    if (tramMarker.getMarker() == null) {
-                        Marker m = mMap.addMarker(new MarkerOptions()
-                                .position(tramMarker.getPrevPosition())
-                                .icon(TramMarker.getBitmap(tramMarker.getTramLine(), mIconGenerator)));
-                        tramMarker.setMarker(m);
-                    }
-                    if (tramMarker.getPolyline() == null) {
-                        Polyline p = mMap.addPolyline(new PolylineOptions()
-                                .add(tramMarker.getPrevPosition())
-                                .color(Color.argb(255, 236, 57, 57))
-                                .width(TramMarker.POLYLINE_WIDTH));
-                        tramMarker.setPolyline(p);
-                    }
-                    mAnimationMarkers.add(tramMarker);
-                } else
-                    tramMarker.remove();
+                if (!cameraMoveInProgress) {
+                    if (tramMarker.isVisible(mMap)) {
+                        if (tramMarker.getMarker() == null) {
+                            Marker m = mMap.addMarker(new MarkerOptions()
+                                    .position(tramMarker.getPrevPosition())
+                                    .icon(TramMarker.getBitmap(tramMarker.getTramLine(),
+                                            mIconGenerator)));
+                            tramMarker.setMarker(m);
+                        }
+                        if (tramMarker.getPolyline() == null) {
+                            Polyline p = mMap.addPolyline(new PolylineOptions()
+                                    .add(tramMarker.getPrevPosition())
+                                    .color(Color.argb(255, 236, 57, 57))
+                                    .width(TramMarker.POLYLINE_WIDTH));
+                            tramMarker.setPolyline(p);
+                        }
+                        mAnimationMarkers.add(tramMarker);
+                    } else
+                        tramMarker.remove();
+                }
             } else {
                 tramMarker.remove();
                 iter.remove();
@@ -294,14 +293,14 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
     @UiThread
     private void addNewMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
+        boolean cameraMoveInProgress = mCameraMoveInProgress.get();
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker tramMarker = new TramMarker(element.getValue());
                 updateMarkerVisibility(tramMarker);
                 mTramMarkerHashMap.put(element.getKey(), tramMarker);
-                if (tramMarker.isVisible(mMap)) {
+                if (!cameraMoveInProgress && tramMarker.isVisible(mMap))
                     createNewFullMarker(tramMarker);
-                }
             }
         }
     }
@@ -341,9 +340,6 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         mMap = googleMap;
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        if (!mFavoriteView.getValue()) {
-            mMap.setMinZoomPreference(14.5f);
-        }
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -364,15 +360,28 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             position = new LatLng(52.231841, 21.005940);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
         mMap.setOnMarkerClickListener(marker -> true);
+        mMap.setOnCameraMoveStartedListener(i -> mCameraMoveInProgress.set(true));
         mMap.setOnCameraIdleListener(() -> {
-            for (TramMarker marker : mTramMarkerHashMap.values()) {
-                if (marker.isVisible(mMap)) {
-                    createNewFullMarker(marker);
-                } else {
-                    marker.remove();
-                }
-            }
+            mCameraMoveInProgress.set(false);
+            showOrZoom();
         });
+    }
+
+    private void showOrZoom() {
+        ArrayList<TramMarker> markersToBeCreated = new ArrayList<>();
+        for (TramMarker marker : mTramMarkerHashMap.values()) {
+            if (marker.isVisible(mMap)) {
+                markersToBeCreated.add(marker);
+            } else {
+                marker.remove();
+            }
+        }
+        if (markersToBeCreated.size() <= 50) {
+            for (TramMarker marker : markersToBeCreated)
+                createNewFullMarker(marker);
+        } else {
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        }
     }
 
     private void reloadAds(Location location) {
