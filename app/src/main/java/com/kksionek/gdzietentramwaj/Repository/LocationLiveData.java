@@ -44,7 +44,7 @@ class LocationLiveData extends LiveData<Location> {
     @SuppressLint("MissingPermission")
     @Override
     protected void onActive() {
-        setValue(mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        setValue(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
         mLocationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 100,

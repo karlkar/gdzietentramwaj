@@ -18,8 +18,6 @@
 
 # Platform calls Class.forName on types which do not exist on Android to determine platform.
 -dontnote retrofit2.Platform
-# Platform used when running on RoboVM on iOS. Will not be used at runtime.
--dontnote retrofit2.Platform$IOS$MainThreadExecutor
 # Platform used when running on Java 8 VMs. Will not be used at runtime.
 -dontwarn retrofit2.Platform$Java8
 # Retain generic type information for use by reflection by converters and adapters.
@@ -38,3 +36,35 @@
 -keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault,*Annotation*
 
 -dontwarn sun.misc.Unsafe
+
+-keepnames class com.google.ads.** # Don't proguard AdMob classes
+-keepnames class com.google.android.gms.ads.** # Don't proguard AdMob classes
+
+-keep public class com.google.android.gms.ads.** {
+public *;
+}
+
+-keep public class com.google.ads.** {
+public *;
+}
+
+-keepnames class com.google.maps.android.ui.**
+
+-keep public class com.google.maps.android.ui.** {
+public *;
+}
+
+-dontwarn android.support.v7.**
+-keep class android.support.v7.** { *; }
+-keep interface android.support.v7.** { *; }
+
+#-keep class com.kksionek.gdzietentramwaj.**
+#
+#-keep public class com.kksionek.gdzietentramwaj.** {
+#public *;
+#}
+
+-keep class com.kksionek.gdzietentramwaj.ViewModel.**
+-keep public class com.kksionek.gdzietentramwaj.ViewModel.** {
+public *;
+}
