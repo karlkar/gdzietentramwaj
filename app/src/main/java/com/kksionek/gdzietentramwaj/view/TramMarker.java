@@ -33,7 +33,7 @@ public class TramMarker {
 
     private LatLng mPrevPosition;
     private LatLng mFinalPosition;
-    private boolean mVisible;
+    private boolean mFavoriteVisible = true;
 
     @UiThread
     public TramMarker(@NonNull TramData tramData) {
@@ -70,15 +70,14 @@ public class TramMarker {
         return mLineId;
     }
 
-    public boolean isVisible(@Nullable GoogleMap map) {
+    public boolean isOnMap(@Nullable GoogleMap map) {
         LatLngBounds bounds = null;
         if (map != null) {
             bounds = map.getProjection().getVisibleRegion().latLngBounds;
         }
-        return mVisible
-                && bounds != null
+        return bounds != null
                 && (bounds.contains(mFinalPosition)
-                    || (mPrevPosition != null && bounds.contains(mPrevPosition)));
+                || (mPrevPosition != null && bounds.contains(mPrevPosition)));
     }
 
     public Marker getMarker() {
@@ -102,15 +101,6 @@ public class TramMarker {
         }
     }
 
-    @UiThread
-    public void setVisible(boolean visible) {
-        mVisible = visible;
-        if (mMarker != null)
-            mMarker.setVisible(visible);
-        if (mPolyline != null)
-            mPolyline.setVisible(visible);
-    }
-
     public static BitmapDescriptor getBitmap(String line, @NonNull IconGenerator iconGenerator) {
         BitmapDescriptor bitmapDescriptor = mBitmaps.get(line);
         if (bitmapDescriptor == null) {
@@ -129,5 +119,13 @@ public class TramMarker {
         if (mPrevPosition == null)
             return mFinalPosition;
         return mPrevPosition;
+    }
+
+    public void setFavoriteVisible(boolean favoriteVisible) {
+        mFavoriteVisible = favoriteVisible;
+    }
+
+    public boolean isFavoriteVisible() {
+        return mFavoriteVisible;
     }
 }
