@@ -26,6 +26,8 @@
 -keepattributes Exceptions
 
 -dontwarn okio.**
+-dontwarn javax.annotation.**
+
 -dontwarn java.lang.invoke.*
 
 # Needed by google-api-client to keep generic types and @Key annotations accessed via reflection
@@ -37,34 +39,58 @@
 
 -dontwarn sun.misc.Unsafe
 
-#-keepnames class com.google.ads.** # Don't proguard AdMob classes
-#-keepnames class com.google.android.gms.ads.** # Don't proguard AdMob classes
-#
-#-keep public class com.google.android.gms.ads.** {
-#public *;
-#}
-#
-#-keep public class com.google.ads.** {
-#public *;
-#}
-#
-#-keepnames class com.google.maps.android.ui.**
-#
-#-keep public class com.google.maps.android.ui.** {
-#public *;
-#}
+## Android architecture components: Lifecycle
+# LifecycleObserver's empty constructor is considered to be unused by proguard
+-keep class * implements android.arch.lifecycle.LifecycleObserver {
+    <init>(...);
+}
+# ViewModel's empty constructor is considered to be unused by proguard
+-keepclassmembers class * extends android.arch.lifecycle.ViewModel {
+    <init>(...);
+}
 
-#-dontwarn android.support.v7.**
-#-keep class android.support.v7.** { *; }
-#-keep interface android.support.v7.** { *; }
+-keep class android.arch.lifecycle.GenericLifecycleObserver {*;}
+-keep class android.arch.lifecycle.ProcessLifecycleOwner* {*;}
+-keep class android.arch.lifecycle.Lifecycle* {*;}
+-keep class android.arch.lifecycle.Lifecycling {*;}
+-keep class android.arch.lifecycle.LifecycleDispatcher* { *; }
+-keep class android.arch.lifecycle.LifecycleOwner {*;}
+-keep class android.arch.lifecycle.LifecycleRegistry {*;}
+-keep class android.arch.lifecycle.ReportFragment* {*;}
+-keep class android.arch.lifecycle.ViewModel* {*;}
+-keep class android.arch.lifecycle.HolderFragment* {*;}
+-keep class android.arch.lifecycle.Observer {*;}
+-keep class android.arch.lifecycle.EmptyActivityLifecycleCallbacks { *; }
+-keep class android.arch.lifecycle.state.SavedStateProvider {*;}
+-keep class android.arch.lifecycle.state.StateMap {*;}
+-keep class android.arch.lifecycle.AndroidViewModel {*;}
+-keep class android.arch.lifecycle.MutableLiveData {*;}
+-keep class android.arch.lifecycle.LiveData* {*;}
+-keep class android.arch.lifecycle.OnLifecycleEvent {*;}
+-keep class android.arch.lifecycle.ReflectiveGenericLifecycleObserver* {*;}
+-keep class android.arch.lifecycle.ComputableLiveData* {*;}
+-keep class android.arch.core.executor.AppToolkitTaskExecutor {*;}
+-keep class android.arch.core.executor.TaskExecutor {*;}
+-keep class android.arch.core.executor.DefaultTaskExecutor {*;}
+-keep class android.arch.core.internal.** {*;}
+-keep class android.support.v4.app.Fragment {*;}
 
-#-keep class com.kksionek.gdzietentramwaj.**
-#
-#-keep public class com.kksionek.gdzietentramwaj.** {
-#public *;
-#}
-
-#-keep class com.kksionek.gdzietentramwaj.ViewModel.**
-#-keep public class com.kksionek.gdzietentramwaj.ViewModel.** {
-#public *;
-#}
+-keep class android.arch.persistence.room.DatabaseConfiguration {*;}
+-keep class android.arch.persistence.room.EntityInsertionAdapter {*;}
+-keep class android.arch.persistence.room.InvalidationTracker* {*;}
+-keep class android.arch.persistence.room.Room {*;}
+-keep class android.arch.persistence.room.RoomDatabase* {*;}
+-keep class android.arch.persistence.room.RoomOpenHelper* {*;}
+-keep class android.arch.persistence.room.RoomSQLiteQuery {*;}
+-keep class android.arch.persistence.room.SharedSQLiteStatement {*;}
+-keep class android.arch.persistence.db.framework.FrameworkSQLiteOpenHelper* {*;}
+-keep class android.arch.persistence.db.framework.FrameworkSQLiteDatabase* {*;}
+-keep class android.arch.persistence.db.framework.FrameworkSQLiteProgram {*;}
+-keep class android.arch.persistence.db.framework.FrameworkSQLiteStatement {*;}
+-keep class android.arch.persistence.db.SupportSQLiteOpenHelper* {*;}
+-keep class android.arch.persistence.db.SupportSQLiteQuery {*;}
+-keep class android.arch.persistence.db.SupportSQLiteProgram {*;}
+-keep class android.arch.persistence.db.SupportSQLiteDatabase {*;}
+-keep class android.arch.persistence.db.SupportSQLiteStatement {*;}
+-keep class android.arch.persistence.db.SimpleSQLiteQuery {*;}
+-keep class android.arch.persistence.room.RoomMasterTable {*;}
