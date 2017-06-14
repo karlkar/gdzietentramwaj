@@ -45,11 +45,11 @@ class LocationLiveData extends LiveData<Location> {
     @Override
     protected void onActive() {
         setValue(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
-        mLocationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                100,
-                0,
-                mLocationListener);
+//        mLocationManager.requestLocationUpdates(
+//                LocationManager.GPS_PROVIDER,
+//                100,
+//                0,
+//                mLocationListener);
     }
 
     @Override
