@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName;
 public class TramData {
     private static final String TAG = "TRAMDATA";
 
-//    @SerializedName("Time")
-//    private String mTime;
+    @SerializedName("Time")
+    private String mTime;
 
     @SerializedName("Lat")
     private double mLat;
@@ -27,6 +27,10 @@ public class TramData {
 
     public String getFirstLine() {
         return mFirstLine;
+    }
+
+    public String getTime() {
+        return mTime;
     }
 
     public LatLng getLatLng() {

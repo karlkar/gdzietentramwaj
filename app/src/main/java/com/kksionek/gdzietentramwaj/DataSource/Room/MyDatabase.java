@@ -3,7 +3,7 @@ package com.kksionek.gdzietentramwaj.DataSource.Room;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
-@Database(entities = {FavoriteTram.class}, version = 1)
+@Database(entities = {FavoriteTram.class}, version = 1, exportSchema = false)
 public abstract class MyDatabase extends RoomDatabase {
     public abstract TramDao tramDao();
 }

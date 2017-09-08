@@ -94,3 +94,5 @@
 -keep class android.arch.persistence.db.SupportSQLiteStatement {*;}
 -keep class android.arch.persistence.db.SimpleSQLiteQuery {*;}
 -keep class android.arch.persistence.room.RoomMasterTable {*;}
+-keep class android.arch.util.paging.CountedDataSource {*;}
+-dontwarn android.arch.persistence.room.paging.LimitOffsetDataSource

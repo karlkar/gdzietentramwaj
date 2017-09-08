@@ -42,10 +42,13 @@ import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,6 +60,8 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
     private static final int MAX_VISIBLE_MARKERS = 50;
 
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
+
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
     private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
@@ -93,6 +98,15 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
             HashMap<String, TramData> tramDataHashMap = new HashMap<>();
             for (TramData tramData : tramDataList) {
+                try {
+                    if (System.currentTimeMillis()
+                            - mDateFormat.parse(tramData.getTime()).getTime() > 60000) {
+                        continue;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    continue;
+                }
                 tramDataHashMap.put(tramData.getId(), tramData);
             }
             updateExistingMarkers(tramDataHashMap);
