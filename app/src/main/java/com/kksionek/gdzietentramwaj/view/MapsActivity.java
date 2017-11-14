@@ -61,8 +61,6 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
 
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
 
-    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
     private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
 
@@ -98,15 +96,8 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
             HashMap<String, TramData> tramDataHashMap = new HashMap<>();
             for (TramData tramData : tramDataList) {
-                try {
-                    if (System.currentTimeMillis()
-                            - mDateFormat.parse(tramData.getTime()).getTime() > 60000) {
-                        continue;
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (tramData.isTooOld())
                     continue;
-                }
                 tramDataHashMap.put(tramData.getId(), tramData);
             }
             updateExistingMarkers(tramDataHashMap);
@@ -308,7 +299,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
                 mTramMarkerHashMap.put(element.getKey(), marker);
                 marker.setFavoriteVisible(!mFavoriteView.getValue()
                         || mFavoriteTrams.contains(marker.getTramLine()));
-                if (!mCameraMoveInProgress.get() && marker.isOnMap(mMap))
+                if (!mCameraMoveInProgress.get()
+                        && marker.isFavoriteVisible()
+                        && marker.isOnMap(mMap))
                     createNewFullMarker(marker);
             }
         }

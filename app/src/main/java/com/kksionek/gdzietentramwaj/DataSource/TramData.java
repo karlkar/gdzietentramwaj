@@ -23,6 +23,8 @@ public class TramData {
 
     private transient LatLng mLatLng = null;
 
+    private boolean mTooOld = false;
+
     public String getId() { return mFirstLine + "/" + mBrigade; }
 
     public String getFirstLine() {
@@ -38,5 +40,13 @@ public class TramData {
             mLatLng = new LatLng(mLat, mLng);
         }
         return mLatLng;
+    }
+
+    public void setTooOld() {
+        mTooOld = true;
+    }
+
+    public boolean isTooOld() {
+        return mTooOld;
     }
 }
