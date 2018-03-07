@@ -27,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -118,9 +119,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mFavoriteView = mViewModel.isFavoriteView();
         mFavoriteView.observe(this, aBoolean -> {
-            if (aBoolean != null && mMenuItemFavoriteSwitch != null)
+            if (aBoolean != null && mMenuItemFavoriteSwitch != null) {
                 mMenuItemFavoriteSwitch.setIcon(
                         aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
+            }
             updateMarkersVisibility();
         });
 
@@ -130,13 +132,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         mViewModel.getLoadingLiveData().observe(this, aBoolean -> {
-            if (mMenuItemRefresh == null || aBoolean == null)
+            if (mMenuItemRefresh == null || aBoolean == null) {
                 return;
-            if (aBoolean)
+            }
+            if (aBoolean) {
                 mMenuItemRefresh.startAnimation();
-            else
+            } else {
                 mMenuItemRefresh.endAnimation();
-
+            }
         });
 
         if (checkLocationPermission()) {
@@ -159,8 +162,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
             float fraction = animation.getAnimatedFraction();
             for (TramMarker tramMarker : mAnimationMarkers) {
-                if (tramMarker.getMarker() == null)
+                if (tramMarker.getMarker() == null) {
                     continue;
+                }
                 a = tramMarker.getPrevPosition();
                 b = tramMarker.getFinalPosition();
                 double lat = (b.latitude - a.latitude) * fraction + a.latitude;
@@ -182,8 +186,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void subscribeLocationLiveData() {
         mLocationLiveData = mViewModel.getLocationLiveData();
         mLocationLiveData.observe(this, location -> {
-            if (location == null)
+            if (location == null) {
                 return;
+            }
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             if (mMap != null) {
                 reloadAds(location);
@@ -199,14 +204,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        if (mAdView != null)
+        if (mAdView != null) {
             mAdView.resume();
+        }
     }
 
     @Override
     protected void onPause() {
-        if (mAdView != null)
+        if (mAdView != null) {
             mAdView.pause();
+        }
         super.onPause();
     }
 
@@ -214,8 +221,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.menu_item_refresh);
-        if (menuItem != null)
+        if (menuItem != null) {
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
+        }
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         if (mFavoriteView != null) {
@@ -290,16 +298,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             tramMarker.setPolyline(p);
                         }
                         mAnimationMarkers.add(tramMarker);
-                    } else
+                    } else {
                         tramMarker.remove();
+                    }
                 }
             } else {
                 tramMarker.remove();
                 iter.remove();
             }
         }
-        if (!mAnimationMarkers.isEmpty())
+        if (!mAnimationMarkers.isEmpty()) {
             mValueAnimator.start();
+        }
     }
 
     @UiThread
@@ -337,8 +347,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @UiThread
     private boolean checkLocationPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
+        }
 
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -351,26 +362,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED)
+                    == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
-            else
+            } else {
                 mMap.setMyLocationEnabled(false);
-        } else
+            }
+        } else {
             mMap.setMyLocationEnabled(true);
+        }
         mMap.setTrafficEnabled(false);
         LatLng position;
-        if (mLocationLiveData != null && mLocationLiveData.getValue() != null)
+        if (mLocationLiveData != null && mLocationLiveData.getValue() != null) {
             position = new LatLng(
                     mLocationLiveData.getValue().getLatitude(),
                     mLocationLiveData.getValue().getLongitude());
-        else
+        } else {
             position = new LatLng(52.231841, 21.005940);
+        }
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
         mMap.setOnMarkerClickListener(marker -> true);
         mMap.setOnCameraMoveStartedListener(i -> mCameraMoveInProgress.set(true));
@@ -390,8 +405,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
         if (markersToBeCreated.size() <= MAX_VISIBLE_MARKERS) {
-            for (TramMarker marker : markersToBeCreated)
+            for (TramMarker marker : markersToBeCreated) {
                 createNewFullMarker(marker);
+            }
         } else {
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
         }
@@ -416,8 +432,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         == PackageManager.PERMISSION_GRANTED) {
                     mMap.setMyLocationEnabled(true);
                     subscribeLocationLiveData();
-                } else
+                } else {
                     mMap.setMyLocationEnabled(false);
+                }
             }
         }
     }
