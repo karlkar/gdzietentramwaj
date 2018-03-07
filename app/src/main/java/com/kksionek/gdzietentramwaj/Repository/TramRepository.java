@@ -1,10 +1,12 @@
 package com.kksionek.gdzietentramwaj.Repository;
 
 import android.arch.lifecycle.LiveData;
+import android.util.Log;
 
 import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
+import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
 
 import java.text.ParseException;
@@ -15,36 +17,23 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import io.reactivex.functions.Consumer;
+
 public class TramRepository {
     private static final String TAG = "TramRepository";
 
-    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     private final TramLiveData mTramLiveData;
     private final TramDao mTramDao;
+    private final FavoriteLinesConsumer mListConsumer;
 
     @Inject
     public TramRepository(TramDao tramDao, TramInterface tramInterface) {
         mTramDao = tramDao;
-        mTramLiveData = new TramLiveData(tramInterface, tramData -> {
-            HashSet<String> done = new HashSet<>();
-            long currentTime = System.currentTimeMillis();
-            for (TramData tram : tramData) {
-                try {
-                    if (currentTime - mDateFormat.parse(tram.getTime()).getTime() > 60000) {
-                        tram.setTooOld();
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                if (!done.contains(tram.getFirstLine())) {
-                    tramDao.save(new FavoriteTram(tram.getFirstLine(), false));
-                    done.add(tram.getFirstLine());
-                }
-            }
-        });
+        mListConsumer = new FavoriteLinesConsumer(mTramDao);
+        mTramLiveData = new TramLiveData(tramInterface, mListConsumer);
     }
 
-    public LiveData<List<TramData>> getDataStream() {
+    public LiveData<TramDataWrapper> getDataStream() {
         return mTramLiveData;
     }
 

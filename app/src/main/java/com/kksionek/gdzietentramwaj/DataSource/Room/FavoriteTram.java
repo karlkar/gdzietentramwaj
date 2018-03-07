@@ -2,10 +2,11 @@ package com.kksionek.gdzietentramwaj.DataSource.Room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity
 public class FavoriteTram {
-    @PrimaryKey
+    @NonNull @PrimaryKey
     private String mLineId;
     private boolean mFavorite;
 

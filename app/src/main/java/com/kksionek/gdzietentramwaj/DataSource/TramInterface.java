@@ -13,9 +13,9 @@ public interface TramInterface {
     int TYPE_TRAM = 2;
     String APIKEY = "***REMOVED***";
 
-    @GET("/api/action/busestrams_get/")
-    Observable<TramList> getTrams(
-            @Query("resource_id") String id,
-            @Query("apikey") String apikey,
-            @Query("type") int type);
+    @GET("/api/action/busestrams_get/?resource_id=" + ID + "&apikey=" + APIKEY + "&type=" + TYPE_BUS)
+    Observable<TramList> getBuses();
+
+    @GET("/api/action/busestrams_get/?resource_id=" + ID + "&apikey=" + APIKEY + "&type=" + TYPE_TRAM)
+    Observable<TramList> getTrams();
 }

@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.util.Log;
 import android.util.LruCache;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -16,8 +15,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.maps.android.ui.IconGenerator;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
-
-import java.util.HashMap;
 
 public class TramMarker {
 
@@ -104,10 +101,11 @@ public class TramMarker {
     public static BitmapDescriptor getBitmap(String line, @NonNull IconGenerator iconGenerator) {
         BitmapDescriptor bitmapDescriptor = mBitmaps.get(line);
         if (bitmapDescriptor == null) {
-            if (line.length() < 3)
+            if (line.length() < 3) {
                 iconGenerator.setColor(Color.argb(255, 249, 245, 206));
-            else
+            } else {
                 iconGenerator.setColor(Color.WHITE);
+            }
             bitmapDescriptor =
                     BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(line));
             mBitmaps.put(line, bitmapDescriptor);

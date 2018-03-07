@@ -2,8 +2,6 @@ package com.kksionek.gdzietentramwaj.view;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
-import android.arch.lifecycle.LifecycleRegistry;
-import android.arch.lifecycle.LifecycleRegistryOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -18,7 +16,6 @@ import android.support.annotation.UiThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -35,31 +32,26 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
-import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MapsActivity extends AppCompatActivity implements LifecycleRegistryOwner, OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
     private static final int MAX_VISIBLE_MARKERS = 50;
-
-    private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
 
     private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
@@ -85,24 +77,42 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
         mViewModel.getTramData().observe(this, tramDataList -> {
-            if (tramDataList == null)
+            if (tramDataList == null
+                    || tramDataList.throwable instanceof UnknownHostException) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        R.string.error_internet,
+                        Toast.LENGTH_LONG).show();
                 return;
-            Toast.makeText(getApplicationContext(), "Aktualizacja pozycji pojazdów", Toast.LENGTH_SHORT).show();
+            }
+            if (tramDataList.throwable != null) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        R.string.error_ztm,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            Toast.makeText(
+                    getApplicationContext(),
+                    R.string.position_update_sucessful,
+                    Toast.LENGTH_SHORT).show();
             HashMap<String, TramData> tramDataHashMap = new HashMap<>();
-            for (TramData tramData : tramDataList) {
-                if (tramData.isTooOld())
+            for (TramData tramData : tramDataList.tramDataList) {
+                if (tramData.isTooOld()) {
                     continue;
+                }
                 tramDataHashMap.put(tramData.getId(), tramData);
             }
             updateExistingMarkers(tramDataHashMap);
-            if (tramDataHashMap.size() == mTramMarkerHashMap.size())
+            if (tramDataHashMap.size() == mTramMarkerHashMap.size()) {
                 return;
+            }
             addNewMarkers(tramDataHashMap);
         });
 
@@ -140,7 +150,7 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
         Location loc = new Location("");
         loc.setLatitude(52.231841);
         loc.setLongitude(21.005940);
-        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView = findViewById(R.id.adView);
         reloadAds(loc);
 
         mIconGenerator = new IconGenerator(this);
@@ -208,9 +218,10 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
-        if (mFavoriteView != null)
-           mMenuItemFavoriteSwitch.setIcon(
-                   mFavoriteView.getValue() ? R.drawable.fav_on : R.drawable.fav_off);
+        if (mFavoriteView != null) {
+            mMenuItemFavoriteSwitch.setIcon(
+                    mFavoriteView.getValue() ? R.drawable.fav_on : R.drawable.fav_off);
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -219,9 +230,9 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_item_info) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("O aplikacji");
-            builder.setMessage("Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl");
-            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            builder.setTitle(R.string.about_app);
+            builder.setMessage(R.string.disclaimer);
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss());
             builder.show();
             return true;
         } else if (item.getItemId() == R.id.menu_item_refresh) {
@@ -409,10 +420,5 @@ public class MapsActivity extends AppCompatActivity implements LifecycleRegistry
                     mMap.setMyLocationEnabled(false);
             }
         }
-    }
-
-    @Override
-    public LifecycleRegistry getLifecycle() {
-        return mLifecycleRegistry;
     }
 }

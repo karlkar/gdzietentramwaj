@@ -6,10 +6,10 @@ import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
+import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
 import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.TramApplication;
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class MainActivityViewModel extends ViewModel {
 
     private final MutableLiveData<Boolean> mFavoriteView = new MutableLiveData<>();
     private LiveData<Boolean> mLoadingLiveData = null;
-    private LiveData<List<TramData>> mTramLiveData = null;
+    private LiveData<TramDataWrapper> mTramLiveData = null;
     private TramRepository mTramRepository;
     private LocationRepository mLocationRepository;
 
@@ -31,7 +31,7 @@ public class MainActivityViewModel extends ViewModel {
         mLocationRepository = TramApplication.getAppComponent().getLocationRepository();
     }
 
-    public LiveData<List<TramData>> getTramData() {
+    public LiveData<TramDataWrapper> getTramData() {
         if (mTramLiveData == null) {
             mLoadingLiveData = mTramRepository.getLoadingStream();
             mTramLiveData = mTramRepository.getDataStream();
