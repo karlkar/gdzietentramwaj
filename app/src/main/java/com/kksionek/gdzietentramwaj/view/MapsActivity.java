@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.ui.IconGenerator;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.R;
@@ -158,18 +159,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mIconGenerator = new IconGenerator(this);
         mValueAnimator.addUpdateListener(animation -> {
-            LatLng a, b, intermediatePos;
+            LatLng intermediatePos;
             Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
             float fraction = animation.getAnimatedFraction();
             for (TramMarker tramMarker : mAnimationMarkers) {
                 if (tramMarker.getMarker() == null) {
                     continue;
                 }
-                a = tramMarker.getPrevPosition();
-                b = tramMarker.getFinalPosition();
-                double lat = (b.latitude - a.latitude) * fraction + a.latitude;
-                double lng = (b.longitude - a.longitude) * fraction + a.longitude;
-                intermediatePos = new LatLng(lat, lng);
+                intermediatePos = SphericalUtil.interpolate(
+                        tramMarker.getPrevPosition(),
+                        tramMarker.getFinalPosition(),
+                        fraction);
                 tramMarker.getMarker().setPosition(intermediatePos);
 
                 pointsQueue.clear();

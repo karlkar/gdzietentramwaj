@@ -114,8 +114,9 @@ public class TramMarker {
     }
 
     public LatLng getPrevPosition() {
-        if (mPrevPosition == null)
+        if (mPrevPosition == null) {
             return mFinalPosition;
+        }
         return mPrevPosition;
     }
 
