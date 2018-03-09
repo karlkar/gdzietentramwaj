@@ -16,6 +16,7 @@ import android.support.annotation.UiThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -54,6 +55,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
     private static final String TAG = "MAPSACTIVITY";
     private static final int MAX_VISIBLE_MARKERS = 50;
+    private static final double DISTANCE = 0.1 / 6371.0;
 
     private GoogleMap mMap = null;
     private final HashMap<String, TramMarker> mTramMarkerHashMap = new HashMap<>();
@@ -160,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mIconGenerator = new IconGenerator(this);
         mValueAnimator.addUpdateListener(animation -> {
             LatLng intermediatePos;
-            Queue<LatLng> pointsQueue = new CircularFifoQueue<>(100);
+            List<LatLng> pointsQueue = new ArrayList<>();
             float fraction = animation.getAnimatedFraction();
             for (TramMarker tramMarker : mAnimationMarkers) {
                 if (tramMarker.getMarker() == null) {
@@ -173,15 +175,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 tramMarker.getMarker().setPosition(intermediatePos);
 
                 pointsQueue.clear();
-                List<LatLng> points = tramMarker.getPolyline().getPoints();
-                if (!points.get(points.size() - 1).equals(intermediatePos)) {
-                    pointsQueue.addAll(points);
-                    pointsQueue.add(intermediatePos);
-                    tramMarker.getPolyline().setPoints(new ArrayList<>(pointsQueue));
+                LatLng prevPoint;
+                if (tramMarker.getPolyline().getPoints().size() != 0) {
+                    prevPoint = tramMarker.getPolyline().getPoints().get(0);
+                } else {
+                    prevPoint = tramMarker.getPrevPosition();
                 }
+                if (SphericalUtil.computeDistanceBetween(
+                        intermediatePos,
+                        prevPoint) < 100) {
+                    pointsQueue.add(tramMarker.getPrevPosition());
+                    pointsQueue.add(intermediatePos);
+                } else {
+                    pointsQueue.add(computeDistanceAndBearing(
+                            intermediatePos,
+                            prevPoint));
+                    pointsQueue.add(intermediatePos);
+                }
+                tramMarker.getPolyline().setPoints(new ArrayList<>(pointsQueue));
             }
         });
     }
+
+
+    private static LatLng computeDistanceAndBearing(LatLng dst, LatLng src) {
+        double brng = Math.toRadians(bearingInRadians(dst, src));
+        double lat1 = Math.toRadians(dst.latitude);
+        double lon1 = Math.toRadians(dst.longitude);
+
+        double lat2 = Math.asin( Math.sin(lat1)*Math.cos(DISTANCE) + Math.cos(lat1)*Math.sin(DISTANCE)*Math.cos(brng) );
+        double a = Math.atan2(Math.sin(brng)*Math.sin(DISTANCE)*Math.cos(lat1), Math.cos(DISTANCE)-Math.sin(lat1)*Math.sin(lat2));
+        double lon2 = lon1 + a;
+
+        lon2 = (lon2+ 3*Math.PI) % (2*Math.PI) - Math.PI;
+        return new LatLng(Math.toDegrees(lat2), Math.toDegrees(lon2));
+    }
+
+    public static double bearingInRadians(LatLng src, LatLng dst) {
+        double degToRad = Math.PI / 180.0;
+        double phi1 = src.latitude * degToRad;
+        double phi2 = dst.latitude * degToRad;
+        double lam1 = src.longitude * degToRad;
+        double lam2 = dst.longitude * degToRad;
+
+        return Math.atan2(Math.sin(lam2-lam1)*Math.cos(phi2),
+                          Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(lam2-lam1)
+        ) * 180/Math.PI;
+
+    }
+
 
     private void subscribeLocationLiveData() {
         mLocationLiveData = mViewModel.getLocationLiveData();
@@ -417,7 +459,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceS5))
                 .addTestDevice(getString(R.string.adMobTestDeviceS7))
-                .addTestDevice(getString(R.string.adMobTestDeviceS8Plus))
+                .addTestDevice(getString(R.string.adMobTestDeviceS9plus))
                 .setLocation(location)
                 .build();
         mAdView.loadAd(adRequest);
