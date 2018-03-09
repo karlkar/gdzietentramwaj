@@ -1,25 +1,20 @@
 package com.kksionek.gdzietentramwaj.Repository;
 
-import android.util.Log;
-
 import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
-public class FavoriteLinesConsumer implements Consumer<List<TramData>> {
+public class FavoriteLinesConsumer implements Function<List<TramData>, ObservableSource<List<TramData>>> {
     private static final String TAG = "FavoriteLinesConsumer";
 
-    private final SimpleDateFormat mDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.getDefault());
     private final TramDao mTramDao;
     private final HashSet<String> mSavedLines = new HashSet<>();
 
@@ -28,21 +23,15 @@ public class FavoriteLinesConsumer implements Consumer<List<TramData>> {
     }
 
     @Override
-    public void accept(List<TramData> tramData) throws Exception {
-        long currentTime = System.currentTimeMillis();
-        for (TramData tram : tramData) {
-            if (!mSavedLines.contains(tram.getFirstLine())) {
-                try {
-                    if (currentTime - mDateFormat.parse(tram.getTime()).getTime() > 60000) {
-                        tram.setTooOld();
+    public ObservableSource<List<TramData>> apply(List<TramData> list) throws Exception {
+        return Observable.fromIterable(list)
+                .doOnNext(tram -> {
+                    if (!mSavedLines.contains(tram.getFirstLine())) {
+                        mTramDao.save(new FavoriteTram(tram.getFirstLine(), false));
+                        mSavedLines.add(tram.getFirstLine());
                     }
-                } catch (ParseException e) {
-                    Log.e(TAG, "TramRepository: ", e);
-                    continue;
-                }
-                mTramDao.save(new FavoriteTram(tram.getFirstLine(), false));
-                mSavedLines.add(tram.getFirstLine());
-            }
-        }
+                })
+                .toList()
+                .toObservable();
     }
 }

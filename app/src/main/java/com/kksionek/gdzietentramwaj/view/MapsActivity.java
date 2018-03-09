@@ -108,9 +108,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.LENGTH_SHORT).show();
             HashMap<String, TramData> tramDataHashMap = new HashMap<>();
             for (TramData tramData : tramDataList.tramDataList) {
-                if (tramData.isTooOld()) {
-                    continue;
-                }
                 tramDataHashMap.put(tramData.getId(), tramData);
             }
             updateExistingMarkers(tramDataHashMap);
@@ -196,7 +193,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
-
 
     private static LatLng computeDistanceAndBearing(LatLng dst, LatLng src) {
         double brng = Math.toRadians(bearingInRadians(dst, src));

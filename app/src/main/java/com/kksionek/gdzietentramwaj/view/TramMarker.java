@@ -20,8 +20,7 @@ public class TramMarker {
 
     public static final int POLYLINE_WIDTH = 8;
 
-    private static final LruCache<String, BitmapDescriptor> mBitmaps
-            = new LruCache<>((int) Runtime.getRuntime().maxMemory() / 1024 / 8);
+    private static final LruCache<String, BitmapDescriptor> mBitmaps = new LruCache<>(50);
 //    private static final HashMap<String, BitmapDescriptor> mBitmaps = new HashMap<>();
 
     private final String mLineId;
