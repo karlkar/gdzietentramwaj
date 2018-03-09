@@ -67,6 +67,9 @@ class TramLiveData extends LiveData<TramDataWrapper> {
                                 .toObservable();
                     })
                     .flatMap(listConsumer)
+                    .flatMap(tramData -> Observable.fromIterable(tramData)
+                            .toMap(TramData::getId, tramData1 -> tramData1)
+                            .toObservable())
                     .map(tramData -> new TramDataWrapper(tramData, null))
                     .onErrorResumeNext(throwable -> {
                         Log.e(TAG, "TramLiveData: Error occurred", throwable);

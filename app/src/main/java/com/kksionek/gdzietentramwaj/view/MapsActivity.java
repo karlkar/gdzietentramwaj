@@ -16,7 +16,6 @@ import android.support.annotation.UiThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -39,15 +38,12 @@ import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -86,30 +82,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
-        mViewModel.getTramData().observe(this, tramDataList -> {
-            if (tramDataList == null
-                    || tramDataList.throwable instanceof UnknownHostException) {
+        mViewModel.getTramData().observe(this, tramDataWrapper -> {
+            if (tramDataWrapper == null
+                    || tramDataWrapper.throwable instanceof UnknownHostException) {
                 Toast.makeText(
                         getApplicationContext(),
                         R.string.error_internet,
                         Toast.LENGTH_LONG).show();
                 return;
             }
-            if (tramDataList.throwable != null) {
+            if (tramDataWrapper.throwable != null) {
                 Toast.makeText(
                         getApplicationContext(),
                         R.string.error_ztm,
                         Toast.LENGTH_LONG).show();
                 return;
             }
+            Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
             Toast.makeText(
                     getApplicationContext(),
                     R.string.position_update_sucessful,
+//                    "Zaktualizowano pozycję " + tramDataHashMap.size() + " pojazdów.",
                     Toast.LENGTH_SHORT).show();
-            HashMap<String, TramData> tramDataHashMap = new HashMap<>();
-            for (TramData tramData : tramDataList.tramDataList) {
-                tramDataHashMap.put(tramData.getId(), tramData);
-            }
             updateExistingMarkers(tramDataHashMap);
             if (tramDataHashMap.size() == mTramMarkerHashMap.size()) {
                 return;
@@ -159,7 +153,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mIconGenerator = new IconGenerator(this);
         mValueAnimator.addUpdateListener(animation -> {
             LatLng intermediatePos;
-            List<LatLng> pointsQueue = new ArrayList<>();
             float fraction = animation.getAnimatedFraction();
             for (TramMarker tramMarker : mAnimationMarkers) {
                 if (tramMarker.getMarker() == null) {
@@ -171,7 +164,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         fraction);
                 tramMarker.getMarker().setPosition(intermediatePos);
 
-                pointsQueue.clear();
+                List<LatLng> pointsList = new ArrayList<>();
                 LatLng prevPoint;
                 if (tramMarker.getPolyline().getPoints().size() != 0) {
                     prevPoint = tramMarker.getPolyline().getPoints().get(0);
@@ -181,21 +174,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (SphericalUtil.computeDistanceBetween(
                         intermediatePos,
                         prevPoint) < 100) {
-                    pointsQueue.add(tramMarker.getPrevPosition());
-                    pointsQueue.add(intermediatePos);
+                    pointsList.add(tramMarker.getPrevPosition());
+                    pointsList.add(intermediatePos);
                 } else {
-                    pointsQueue.add(computeDistanceAndBearing(
+                    pointsList.add(computeDistanceAndBearing(
                             intermediatePos,
                             prevPoint));
-                    pointsQueue.add(intermediatePos);
+                    pointsList.add(intermediatePos);
                 }
-                tramMarker.getPolyline().setPoints(new ArrayList<>(pointsQueue));
+                tramMarker.getPolyline().setPoints(pointsList);
             }
         });
     }
 
     private static LatLng computeDistanceAndBearing(LatLng dst, LatLng src) {
-        double brng = Math.toRadians(bearingInRadians(dst, src));
+        double brng = Math.toRadians(bearing(dst, src));
         double lat1 = Math.toRadians(dst.latitude);
         double lon1 = Math.toRadians(dst.longitude);
 
@@ -207,7 +200,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return new LatLng(Math.toDegrees(lat2), Math.toDegrees(lon2));
     }
 
-    public static double bearingInRadians(LatLng src, LatLng dst) {
+    private static double bearing(LatLng src, LatLng dst) {
         double degToRad = Math.PI / 180.0;
         double phi1 = src.latitude * degToRad;
         double phi2 = dst.latitude * degToRad;
@@ -217,9 +210,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return Math.atan2(Math.sin(lam2-lam1)*Math.cos(phi2),
                           Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(lam2-lam1)
         ) * 180/Math.PI;
-
     }
-
 
     private void subscribeLocationLiveData() {
         mLocationLiveData = mViewModel.getLocationLiveData();
@@ -304,7 +295,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @UiThread
-    private void updateExistingMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
+    private void updateExistingMarkers(@NonNull Map<String, TramData> tramDataHashMap) {
         Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
         mAnimationMarkers.clear();
         while (iter.hasNext()) {
@@ -314,8 +305,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (updatedData != null) {
                 LatLng prevPosition = tramMarker.getFinalPosition();
                 LatLng newPosition = updatedData.getLatLng();
-                if (prevPosition.equals(newPosition))
+                if (prevPosition.equals(newPosition)) {
                     continue;
+                }
 
                 tramMarker.updatePosition(newPosition);
 
@@ -324,7 +316,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (tramMarker.getMarker() == null) {
                             Marker m = mMap.addMarker(new MarkerOptions()
                                     .position(tramMarker.getPrevPosition())
-                                    .icon(TramMarker.getBitmap(tramMarker.getTramLine(),
+                                    .icon(TramMarker.getBitmap(
+                                            tramMarker.getTramLine(),
                                             mIconGenerator)));
                             tramMarker.setMarker(m);
                         }
@@ -351,7 +344,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @UiThread
-    private void addNewMarkers(@NonNull HashMap<String, TramData> tramDataHashMap) {
+    private void addNewMarkers(@NonNull Map<String, TramData> tramDataHashMap) {
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker marker = new TramMarker(element.getValue());
@@ -360,8 +353,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         || mFavoriteTrams.contains(marker.getTramLine()));
                 if (!mCameraMoveInProgress.get()
                         && marker.isFavoriteVisible()
-                        && marker.isOnMap(mMap))
+                        && marker.isOnMap(mMap)) {
                     createNewFullMarker(marker);
+                }
             }
         }
     }
@@ -374,11 +368,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             tramMarker.setMarker(m);
         }
         if (tramMarker.getPolyline() == null) {
+            List<LatLng> pointsList = new ArrayList<>();
+            if (SphericalUtil.computeDistanceBetween(
+                    tramMarker.getFinalPosition(),
+                    tramMarker.getPrevPosition()) < 100) {
+                pointsList.add(tramMarker.getPrevPosition());
+                pointsList.add(tramMarker.getFinalPosition());
+            } else {
+                pointsList.add(computeDistanceAndBearing(
+                        tramMarker.getFinalPosition(),
+                        tramMarker.getPrevPosition()));
+                pointsList.add(tramMarker.getFinalPosition());
+            }
+
             Polyline p = mMap.addPolyline(new PolylineOptions()
-                    .add(tramMarker.getPrevPosition())
-                    .add(tramMarker.getFinalPosition())
                     .color(Color.argb(255, 236, 57, 57))
                     .width(TramMarker.POLYLINE_WIDTH));
+            p.setPoints(pointsList);
             tramMarker.setPolyline(p);
         }
     }
@@ -463,7 +469,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
