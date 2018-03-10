@@ -125,6 +125,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             updateMarkersVisibility();
         });
 
+        // TODO: Merge it and #getTramData to single LiveData
         mViewModel.getLoadingLiveData().observe(this, aBoolean -> {
             if (mMenuItemRefresh == null || aBoolean == null) {
                 return;
