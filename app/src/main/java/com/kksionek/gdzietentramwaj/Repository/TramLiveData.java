@@ -46,8 +46,10 @@ class TramLiveData extends LiveData<TramDataWrapper> {
                 .flatMap(val -> {
                     mLoadingData.postValue(true);
                     return Observable.merge(
-                            mTramInterface.getTrams().flatMap(tramList -> Observable.fromIterable(tramList.getList())),
-                            mTramInterface.getBuses().flatMap(tramList -> Observable.fromIterable(tramList.getList()))
+                            mTramInterface.getTrams()
+                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList())),
+                            mTramInterface.getBuses()
+                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
                             ).filter(tramData -> {
                                 try {
                                     return (System.currentTimeMillis() - mDateFormat.parse(tramData.getTime()).getTime()) < 60000;

@@ -27,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -297,6 +298,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @UiThread
     private void updateExistingMarkers(@NonNull Map<String, TramData> tramDataHashMap) {
+        LatLngBounds visibleRegion = null;
+        if (mMap != null) {
+            visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
+        }
         Iterator<Map.Entry<String, TramMarker>> iter = mTramMarkerHashMap.entrySet().iterator();
         mAnimationMarkers.clear();
         while (iter.hasNext()) {
@@ -313,7 +318,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 tramMarker.updatePosition(newPosition);
 
                 if (!mCameraMoveInProgress.get() && tramMarker.isFavoriteVisible()) {
-                    if (tramMarker.isOnMap(mMap)) {
+                    if (tramMarker.isOnMap(visibleRegion)) {
                         if (tramMarker.getMarker() == null) {
                             Marker m = mMap.addMarker(new MarkerOptions()
                                     .position(tramMarker.getPrevPosition())
@@ -346,6 +351,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @UiThread
     private void addNewMarkers(@NonNull Map<String, TramData> tramDataHashMap) {
+        LatLngBounds visibleRegion = null;
+        if (mMap != null) {
+            visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
+        }
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker marker = new TramMarker(element.getValue());
@@ -354,7 +363,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         || mFavoriteTrams.contains(marker.getTramLine()));
                 if (!mCameraMoveInProgress.get()
                         && marker.isFavoriteVisible()
-                        && marker.isOnMap(mMap)) {
+                        && marker.isOnMap(visibleRegion)) {
                     createNewFullMarker(marker);
                 }
             }
@@ -442,8 +451,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void showOrZoom() {
         ArrayList<TramMarker> markersToBeCreated = new ArrayList<>();
+        LatLngBounds visibleRegion = null;
+        if (mMap != null) {
+            visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
+        }
         for (TramMarker marker : mTramMarkerHashMap.values()) {
-            if (marker.isFavoriteVisible() && marker.isOnMap(mMap)) {
+            if (marker.isFavoriteVisible() && marker.isOnMap(visibleRegion)) {
                 markersToBeCreated.add(marker);
             } else {
                 marker.remove();

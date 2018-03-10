@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.util.LruCache;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -66,11 +65,7 @@ public class TramMarker {
         return mLineId;
     }
 
-    public boolean isOnMap(@Nullable GoogleMap map) {
-        LatLngBounds bounds = null;
-        if (map != null) {
-            bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        }
+    public boolean isOnMap(@Nullable LatLngBounds bounds) {
         return bounds != null
                 && (bounds.contains(mFinalPosition)
                 || (mPrevPosition != null && bounds.contains(mPrevPosition)));
