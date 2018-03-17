@@ -293,7 +293,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
-        if (mFavoriteView != null) {
+        if (mFavoriteView != null && mMenuItemFavoriteSwitch != null) {
             mMenuItemFavoriteSwitch.setIcon(
                     mFavoriteView.getValue() ? R.drawable.fav_on : R.drawable.fav_off);
         }
