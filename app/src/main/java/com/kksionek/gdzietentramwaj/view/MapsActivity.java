@@ -105,7 +105,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     || tramDataWrapper.throwable instanceof UnknownHostException
                     || tramDataWrapper.throwable instanceof SocketTimeoutException) {
                 Toast.makeText(
-                        getApplicationContext(),
+                        this,
                         R.string.error_internet,
                         Toast.LENGTH_LONG).show();
                 return;
@@ -117,12 +117,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 if (BuildConfig.DEBUG) {
                     Toast.makeText(
-                            getApplicationContext(),
+                            this,
                             tramDataWrapper.throwable.getClass().getSimpleName() + ": " + tramDataWrapper.throwable.getMessage(),
                             Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(
-                            getApplicationContext(),
+                            this,
                             R.string.error_ztm,
                             Toast.LENGTH_LONG).show();
                 }
