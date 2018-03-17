@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.DataSource;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
-import retrofit2.http.Query;
+import retrofit2.http.Headers;
 
 public interface TramInterface {
 
@@ -13,9 +13,11 @@ public interface TramInterface {
     int TYPE_TRAM = 2;
     String APIKEY = "***REMOVED***";
 
+    @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=" + ID + "&apikey=" + APIKEY + "&type=" + TYPE_BUS)
     Observable<TramList> getBuses();
 
+    @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=" + ID + "&apikey=" + APIKEY + "&type=" + TYPE_TRAM)
     Observable<TramList> getTrams();
 }

@@ -33,12 +33,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.gson.JsonSyntaxException;
 import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.ui.IconGenerator;
+import com.kksionek.gdzietentramwaj.BuildConfig;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +89,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mViewModel.getTramData().observe(this, tramDataWrapper -> {
             if (tramDataWrapper == null
-                    || tramDataWrapper.throwable instanceof UnknownHostException) {
+                    || tramDataWrapper.throwable instanceof UnknownHostException
+                    || tramDataWrapper.throwable instanceof SocketTimeoutException) {
                 Toast.makeText(
                         getApplicationContext(),
                         R.string.error_internet,
@@ -93,10 +98,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return;
             }
             if (tramDataWrapper.throwable != null) {
-                Toast.makeText(
-                        getApplicationContext(),
-                        R.string.error_ztm,
-                        Toast.LENGTH_LONG).show();
+                if (!BuildConfig.DEBUG
+                        && !(tramDataWrapper.throwable instanceof JsonSyntaxException)) {
+                    FirebaseCrash.report(tramDataWrapper.throwable);
+                }
+                if (BuildConfig.DEBUG) {
+                    Toast.makeText(
+                            getApplicationContext(),
+                            tramDataWrapper.throwable.getClass().getSimpleName() + ": " + tramDataWrapper.throwable.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(
+                            getApplicationContext(),
+                            R.string.error_ztm,
+                            Toast.LENGTH_LONG).show();
+                }
                 return;
             }
             Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;

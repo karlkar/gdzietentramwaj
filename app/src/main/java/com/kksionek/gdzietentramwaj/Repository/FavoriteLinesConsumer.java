@@ -25,10 +25,12 @@ public class FavoriteLinesConsumer implements Consumer<Map<String, TramData>> {
 
     @Override
     public void accept(Map<String, TramData> tramDataMap) throws Exception {
-        for (String line : tramDataMap.keySet()) {
-            if (!mSavedLines.contains(line)) {
-                mTramDao.save(new FavoriteTram(line, false));
-                mSavedLines.add(line);
+        String firstLine;
+        for (TramData line : tramDataMap.values()) {
+            firstLine = line.getFirstLine();
+            if (!mSavedLines.contains(firstLine)) {
+                mTramDao.save(new FavoriteTram(firstLine, false));
+                mSavedLines.add(firstLine);
             }
         }
     }
