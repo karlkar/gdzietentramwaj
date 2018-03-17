@@ -4,10 +4,12 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -293,6 +295,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (item.getItemId() == R.id.menu_item_refresh) {
             mViewModel.forceReload();
             return true;
+        } else if (item.getItemId() == R.id.menu_item_rate) {
+            rateApp();
         } else if (item.getItemId() == R.id.menu_item_favorite) {
             Intent intent = new Intent(this, FavoriteLinesActivity.class);
             startActivity(intent);
@@ -513,6 +517,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.setMyLocationEnabled(false);
                 }
             }
+        }
+    }
+
+    void rateApp() {
+        Uri uri = Uri.parse("market://details?id=" + getPackageName());
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + getPackageName())));
         }
     }
 }

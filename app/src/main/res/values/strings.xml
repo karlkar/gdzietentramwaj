@@ -10,8 +10,9 @@
     <string name="fav_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
     <string name="toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
     <string name="about_app">O aplikacji</string>
-    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl</string>
+    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl\n\nAutor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.\n\nJeśli aplikacja Ci się podoba oceń ją w sklepie Google Play!</string>
     <string name="error_internet">Sprawdź swoje połączenie z internetem.</string>
     <string name="error_ztm">Wystąpił błąd po stronie ZTM. Musimy poczekać, aż go naprawią :(</string>
     <string name="position_update_sucessful">Aktualizacja pozycji pojazdów</string>
+    <string name="rate_app">Oceń aplikację</string>
 </resources>
