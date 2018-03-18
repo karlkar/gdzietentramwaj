@@ -35,7 +35,7 @@ public class AppModule {
     @Singleton @Provides
     MyDatabase getMyDatabase(Context context) {
         return Room.databaseBuilder(context, MyDatabase.class, "favorites.db")
-                .addMigrations(MyDatabase.MIGRATION_1_2)
+                .addMigrations(MyDatabase.MIGRATION_1_2, MyDatabase.MIGRATION_2_3)
                 .build();
     }
 

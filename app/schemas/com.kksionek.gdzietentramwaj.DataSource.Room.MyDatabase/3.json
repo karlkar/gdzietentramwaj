@@ -1,0 +1,39 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "8032c25036b8aae2ca746a9b9e104383",
+    "entities": [
+      {
+        "tableName": "FavoriteTram",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mLineId` TEXT NOT NULL, `mFavorite` INTEGER NOT NULL, PRIMARY KEY(`mLineId`))",
+        "fields": [
+          {
+            "fieldPath": "mLineId",
+            "columnName": "mLineId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mFavorite",
+            "columnName": "mFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "mLineId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8032c25036b8aae2ca746a9b9e104383\")"
+    ]
+  }
+}
