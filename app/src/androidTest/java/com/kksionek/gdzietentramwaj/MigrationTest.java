@@ -31,6 +31,7 @@ import static com.kksionek.gdzietentramwaj.DataSource.Room.MyDatabase.MIGRATION_
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+//TODO: They are not working properly. They pass, but migrations on production fail
 @RunWith(AndroidJUnit4.class)
 public class MigrationTest {
     private static final String TEST_DB = "migration-test";

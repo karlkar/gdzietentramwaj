@@ -21,7 +21,10 @@ public abstract class MyDatabase extends RoomDatabase {
     public static Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase supportSQLiteDatabase) {
-            supportSQLiteDatabase.execSQL("ALTER TABLE `FavoriteTram` MODIFY `mLineId` TEXT NOT NULL");
+            supportSQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `tmp` (`mFavorite` INTEGER NOT NULL, `mLineId` TEXT NOT NULL, PRIMARY KEY(`mLineId`))");
+            supportSQLiteDatabase.execSQL("INSERT INTO `tmp` (`mLineId`, `mFavorite`) SELECT `mLineId`, `mFavorite` FROM `FavoriteTram`");
+            supportSQLiteDatabase.execSQL("DROP TABLE `FavoriteTram`");
+            supportSQLiteDatabase.execSQL("ALTER TABLE `tmp` RENAME TO `FavoriteTram`");
         }
     };
 
