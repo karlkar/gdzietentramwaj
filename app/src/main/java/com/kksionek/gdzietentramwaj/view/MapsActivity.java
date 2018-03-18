@@ -28,6 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,10 +42,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.JsonSyntaxException;
 import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.ui.IconGenerator;
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.kksionek.gdzietentramwaj.BuildConfig;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.R;
@@ -112,8 +113,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             if (tramDataWrapper.throwable != null) {
                 if (!BuildConfig.DEBUG
-                        && !(tramDataWrapper.throwable instanceof JsonSyntaxException)) {
-                    FirebaseCrash.report(tramDataWrapper.throwable);
+                        && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
+                        && !(tramDataWrapper.throwable instanceof HttpException)) {
+                    Crashlytics.logException(tramDataWrapper.throwable);
                 }
                 if (BuildConfig.DEBUG) {
                     Toast.makeText(
