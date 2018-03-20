@@ -15,4 +15,6 @@
     <string name="error_ztm">Wystąpił błąd po stronie ZTM. Musimy poczekać, aż go naprawią :(</string>
     <string name="position_update_sucessful">Aktualizacja pozycji pojazdów</string>
     <string name="rate_app">Oceń aplikację</string>
+    <string name="none_position_is_up_to_date">Na serwerze nie ma informacji o aktualnej pozycji pojazdów.</string>
+    <string name="position_update_successful_amount">Zaktualizowano pozycję %1$d pojazdów</string>
 </resources>

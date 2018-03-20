@@ -167,11 +167,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 return;
             }
+            if (tramDataWrapper.tramDataHashMap.size() == 0) {
+                Toast.makeText(
+                        this,
+                        R.string.none_position_is_up_to_date,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
             Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
             Toast.makeText(
                     getApplicationContext(),
                     (BuildConfig.DEBUG ?
-                            "Zaktualizowano pozycję " + tramDataHashMap.size() + " pojazdów."
+                            getString(
+                                    R.string.position_update_successful_amount,
+                                    tramDataHashMap.size())
                             : getString(R.string.position_update_sucessful)),
                     Toast.LENGTH_SHORT).show();
             updateExistingMarkers(tramDataHashMap);
