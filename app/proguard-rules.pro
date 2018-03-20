@@ -16,3 +16,8 @@
 -keepclassmembers class * {
   @com.google.api.client.util.Key <fields>;
 }
+
+# Crashlytics
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception

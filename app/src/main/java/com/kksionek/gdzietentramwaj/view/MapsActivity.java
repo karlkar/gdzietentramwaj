@@ -91,6 +91,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private List<String> mFavoriteTrams;
     private AtomicBoolean mCameraMoveInProgress = new AtomicBoolean(false);
 
+    private ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener = animation -> {
+        LatLng intermediatePos;
+        float fraction = animation.getAnimatedFraction();
+        for (TramMarker tramMarker : mAnimationMarkers) {
+            if (tramMarker.getMarker() == null) {
+                continue;
+            }
+            intermediatePos = SphericalUtil.interpolate(
+                    tramMarker.getPrevPosition(),
+                    tramMarker.getFinalPosition(),
+                    fraction);
+            tramMarker.getMarker().setPosition(intermediatePos);
+
+            List<LatLng> pointsList = new ArrayList<>();
+            LatLng prevPoint;
+            if (tramMarker.getPolyline().getPoints().size() != 0) {
+                prevPoint = tramMarker.getPolyline().getPoints().get(0);
+            } else {
+                prevPoint = tramMarker.getPrevPosition();
+            }
+            if (SphericalUtil.computeDistanceBetween(
+                    intermediatePos,
+                    prevPoint) < 100) {
+                pointsList.add(tramMarker.getPrevPosition());
+                pointsList.add(intermediatePos);
+            } else {
+                pointsList.add(computeDistanceAndBearing(
+                        intermediatePos,
+                        prevPoint));
+                pointsList.add(intermediatePos);
+            }
+            tramMarker.getPolyline().setPoints(pointsList);
+        }
+    };;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +149,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (tramDataWrapper.throwable != null) {
                 if (!BuildConfig.DEBUG
                         && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
+                        && !(tramDataWrapper.throwable instanceof IllegalStateException)
                         && !(tramDataWrapper.throwable instanceof HttpException)) {
+                    Crashlytics.log("Error handled with a toast.");
                     Crashlytics.logException(tramDataWrapper.throwable);
                 }
                 if (BuildConfig.DEBUG) {
@@ -133,8 +170,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
             Toast.makeText(
                     getApplicationContext(),
-                    R.string.position_update_sucessful,
-//                    "Zaktualizowano pozycję " + tramDataHashMap.size() + " pojazdów.",
+                    (BuildConfig.DEBUG ?
+                            "Zaktualizowano pozycję " + tramDataHashMap.size() + " pojazdów."
+                            : getString(R.string.position_update_sucessful)),
                     Toast.LENGTH_SHORT).show();
             updateExistingMarkers(tramDataHashMap);
             if (tramDataHashMap.size() == mTramMarkerHashMap.size()) {
@@ -184,40 +222,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         reloadAds(loc);
 
         mIconGenerator = new IconGenerator(this);
-        mValueAnimator.addUpdateListener(animation -> {
-            LatLng intermediatePos;
-            float fraction = animation.getAnimatedFraction();
-            for (TramMarker tramMarker : mAnimationMarkers) {
-                if (tramMarker.getMarker() == null) {
-                    continue;
-                }
-                intermediatePos = SphericalUtil.interpolate(
-                        tramMarker.getPrevPosition(),
-                        tramMarker.getFinalPosition(),
-                        fraction);
-                tramMarker.getMarker().setPosition(intermediatePos);
-
-                List<LatLng> pointsList = new ArrayList<>();
-                LatLng prevPoint;
-                if (tramMarker.getPolyline().getPoints().size() != 0) {
-                    prevPoint = tramMarker.getPolyline().getPoints().get(0);
-                } else {
-                    prevPoint = tramMarker.getPrevPosition();
-                }
-                if (SphericalUtil.computeDistanceBetween(
-                        intermediatePos,
-                        prevPoint) < 100) {
-                    pointsList.add(tramMarker.getPrevPosition());
-                    pointsList.add(intermediatePos);
-                } else {
-                    pointsList.add(computeDistanceAndBearing(
-                            intermediatePos,
-                            prevPoint));
-                    pointsList.add(intermediatePos);
-                }
-                tramMarker.getPolyline().setPoints(pointsList);
-            }
-        });
+        mValueAnimator.addUpdateListener(mAnimatorUpdateListener);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         int lastVersion = sharedPreferences.getInt(PREF_LAST_VERSION, 0);
@@ -554,7 +559,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         builder.setTitle(R.string.about_app);
         builder.setView(container);
-//        builder.setMessage(R.string.disclaimer);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss());
         builder.show();
     }
