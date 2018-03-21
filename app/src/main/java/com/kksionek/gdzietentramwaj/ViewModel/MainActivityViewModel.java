@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
+import com.google.android.gms.tasks.Task;
 import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
 import com.kksionek.gdzietentramwaj.Repository.TramRepository;
@@ -61,11 +62,11 @@ public class MainActivityViewModel extends ViewModel {
         mTramRepository.forceReload();
     }
 
-    public LiveData<Location> getLocationLiveData() {
-        return mLocationRepository.getLocationLiveData();
-    }
-
     public LiveData<List<String>> getFavoriteTramsLiveData() {
         return mTramRepository.getFavoriteTrams();
+    }
+
+    public Task<Location> getLastKnownLocation() {
+        return mLocationRepository.getLastKnownLocation();
     }
 }

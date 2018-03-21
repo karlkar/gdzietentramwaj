@@ -22,8 +22,8 @@ android {
         applicationId "com.kksionek.gdzietentramwaj"
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 27
-        versionName "1.27"
+        versionCode 28
+        versionName "1.28"
         resConfigs "pl"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 

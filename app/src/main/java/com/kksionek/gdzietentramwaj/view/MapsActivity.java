@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.view;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import com.google.maps.android.ui.IconGenerator;
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.kksionek.gdzietentramwaj.BuildConfig;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
+import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 
@@ -67,7 +69,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
 
     private static final int MAX_VISIBLE_MARKERS = 50;
-    private static final double DISTANCE = 0.1 / 6371.0;
+    private static final double MAX_DISTANCE = 150;
+    private static final double MAX_DISTANCE_RAD = MAX_DISTANCE / 6371000;
 
     private static final int BUILD_VERSION_WELCOME_WINDOW_ADDED = 23;
     private static final String PREF_LAST_VERSION = "LAST_VERSION";
@@ -87,7 +90,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private MainActivityViewModel mViewModel;
     private LiveData<Boolean> mFavoriteView;
-    private LiveData<Location> mLocationLiveData;
     private List<String> mFavoriteTrams;
     private AtomicBoolean mCameraMoveInProgress = new AtomicBoolean(false);
 
@@ -104,27 +106,86 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     fraction);
             tramMarker.getMarker().setPosition(intermediatePos);
 
-            List<LatLng> pointsList = new ArrayList<>();
-            LatLng prevPoint;
+            LatLng prevPos;
             if (tramMarker.getPolyline().getPoints().size() != 0) {
-                prevPoint = tramMarker.getPolyline().getPoints().get(0);
+                prevPos = tramMarker.getPolyline().getPoints().get(0);
             } else {
-                prevPoint = tramMarker.getPrevPosition();
+                prevPos = tramMarker.getPrevPosition();
             }
-            if (SphericalUtil.computeDistanceBetween(
-                    intermediatePos,
-                    prevPoint) < 100) {
-                pointsList.add(tramMarker.getPrevPosition());
-                pointsList.add(intermediatePos);
-            } else {
-                pointsList.add(computeDistanceAndBearing(
-                        intermediatePos,
-                        prevPoint));
-                pointsList.add(intermediatePos);
-            }
+            List<LatLng> pointsList = generatePolylinePoints(intermediatePos, prevPos);
             tramMarker.getPolyline().setPoints(pointsList);
         }
-    };;
+    };
+
+    private final Observer<TramDataWrapper> mTramDataObserver = tramDataWrapper -> {
+        if (tramDataWrapper == null
+                || tramDataWrapper.throwable instanceof UnknownHostException
+                || tramDataWrapper.throwable instanceof SocketTimeoutException) {
+            Toast.makeText(
+                    this,
+                    R.string.error_internet,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (tramDataWrapper.throwable != null) {
+            if (!BuildConfig.DEBUG
+                    && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
+                    && !(tramDataWrapper.throwable instanceof IllegalStateException)
+                    && !(tramDataWrapper.throwable instanceof HttpException)) {
+                Crashlytics.log("Error handled with a toast.");
+                Crashlytics.logException(tramDataWrapper.throwable);
+            }
+            Toast.makeText(
+                    this,
+                    BuildConfig.DEBUG ?
+                            tramDataWrapper.throwable.getClass().getSimpleName() + ": " + tramDataWrapper.throwable.getMessage()
+                            : getString(R.string.error_ztm),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (tramDataWrapper.tramDataHashMap.size() == 0) {
+            Toast.makeText(
+                    this,
+                    R.string.none_position_is_up_to_date,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
+        Toast.makeText(
+                getApplicationContext(),
+                (BuildConfig.DEBUG ?
+                        getString(
+                                R.string.position_update_successful_amount,
+                                tramDataHashMap.size())
+                        : getString(R.string.position_update_sucessful)),
+                Toast.LENGTH_SHORT).show();
+        updateExistingMarkers(tramDataHashMap);
+        addNewMarkers(tramDataHashMap);
+    };
+
+    private final Observer<Boolean> mFavoriteModeObserver = it -> {
+        if (it != null && mMenuItemFavoriteSwitch != null) {
+            mMenuItemFavoriteSwitch.setIcon(
+                    it ? R.drawable.fav_on : R.drawable.fav_off);
+        }
+        updateMarkersVisibility();
+    };
+
+    private Observer<List<String>> mFavoriteTramsObserver = strings -> {
+        mFavoriteTrams = strings;
+        updateMarkersVisibility();
+    };
+
+    private Observer<Boolean> mLoadingObserver = aBoolean -> {
+        if (mMenuItemRefresh == null || aBoolean == null) {
+            return;
+        }
+        if (aBoolean) {
+            mMenuItemRefresh.startAnimation();
+        } else {
+            mMenuItemRefresh.endAnimation();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,103 +197,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
-        mViewModel.getTramData().observe(this, tramDataWrapper -> {
-            if (tramDataWrapper == null
-                    || tramDataWrapper.throwable instanceof UnknownHostException
-                    || tramDataWrapper.throwable instanceof SocketTimeoutException) {
-                Toast.makeText(
-                        this,
-                        R.string.error_internet,
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (tramDataWrapper.throwable != null) {
-                if (!BuildConfig.DEBUG
-                        && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
-                        && !(tramDataWrapper.throwable instanceof IllegalStateException)
-                        && !(tramDataWrapper.throwable instanceof HttpException)) {
-                    Crashlytics.log("Error handled with a toast.");
-                    Crashlytics.logException(tramDataWrapper.throwable);
-                }
-                if (BuildConfig.DEBUG) {
-                    Toast.makeText(
-                            this,
-                            tramDataWrapper.throwable.getClass().getSimpleName() + ": " + tramDataWrapper.throwable.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(
-                            this,
-                            R.string.error_ztm,
-                            Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-            if (tramDataWrapper.tramDataHashMap.size() == 0) {
-                Toast.makeText(
-                        this,
-                        R.string.none_position_is_up_to_date,
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
-            Toast.makeText(
-                    getApplicationContext(),
-                    (BuildConfig.DEBUG ?
-                            getString(
-                                    R.string.position_update_successful_amount,
-                                    tramDataHashMap.size())
-                            : getString(R.string.position_update_sucessful)),
-                    Toast.LENGTH_SHORT).show();
-            updateExistingMarkers(tramDataHashMap);
-            if (tramDataHashMap.size() == mTramMarkerHashMap.size()) {
-                return;
-            }
-            addNewMarkers(tramDataHashMap);
-        });
-
-        mFavoriteView = mViewModel.isFavoriteView();
-        mFavoriteView.observe(this, aBoolean -> {
-            if (aBoolean != null && mMenuItemFavoriteSwitch != null) {
-                mMenuItemFavoriteSwitch.setIcon(
-                        aBoolean ? R.drawable.fav_on : R.drawable.fav_off);
-            }
-            updateMarkersVisibility();
-        });
-
-        mViewModel.getFavoriteTramsLiveData().observe(this, strings -> {
-            mFavoriteTrams = strings;
-            updateMarkersVisibility();
-        });
-
+        mViewModel.getTramData().observe(this, mTramDataObserver);
+        mViewModel.getFavoriteTramsLiveData().observe(this, mFavoriteTramsObserver);
         // TODO: Merge it and #getTramData to single LiveData
-        mViewModel.getLoadingLiveData().observe(this, aBoolean -> {
-            if (mMenuItemRefresh == null || aBoolean == null) {
-                return;
-            }
-            if (aBoolean) {
-                mMenuItemRefresh.startAnimation();
-            } else {
-                mMenuItemRefresh.endAnimation();
-            }
-        });
-
-        if (checkLocationPermission()) {
-            subscribeLocationLiveData();
-        }
+        mViewModel.getLoadingLiveData().observe(this, mLoadingObserver);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Location loc = new Location("");
-        loc.setLatitude(52.231841);
-        loc.setLongitude(21.005940);
         mAdView = findViewById(R.id.adView);
-        reloadAds(loc);
+        if (checkLocationPermission()) {
+            mViewModel.getLastKnownLocation().addOnSuccessListener(
+                    this,
+                    location -> {
+                        if (location != null) {
+                            reloadAds(location);
+                        }
+                    }
+            );
+        } else {
+            reloadAds(null);
+        }
 
         mIconGenerator = new IconGenerator(this);
         mValueAnimator.addUpdateListener(mAnimatorUpdateListener);
 
+        handleWelcomeDialog();
+    }
+
+    private void handleWelcomeDialog() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         int lastVersion = sharedPreferences.getInt(PREF_LAST_VERSION, 0);
         if (lastVersion < BUILD_VERSION_WELCOME_WINDOW_ADDED) {
@@ -241,47 +235,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         sharedPreferences.edit().putInt(PREF_LAST_VERSION, BuildConfig.VERSION_CODE).apply();
     }
 
-    private static LatLng computeDistanceAndBearing(LatLng dst, LatLng src) {
-        double brng = Math.toRadians(bearing(dst, src));
-        double lat1 = Math.toRadians(dst.latitude);
-        double lon1 = Math.toRadians(dst.longitude);
-
-        double lat2 = Math.asin( Math.sin(lat1)*Math.cos(DISTANCE) + Math.cos(lat1)*Math.sin(DISTANCE)*Math.cos(brng) );
-        double a = Math.atan2(Math.sin(brng)*Math.sin(DISTANCE)*Math.cos(lat1), Math.cos(DISTANCE)-Math.sin(lat1)*Math.sin(lat2));
-        double lon2 = lon1 + a;
-
-        lon2 = (lon2+ 3*Math.PI) % (2*Math.PI) - Math.PI;
-        return new LatLng(Math.toDegrees(lat2), Math.toDegrees(lon2));
-    }
-
-    private static double bearing(LatLng src, LatLng dst) {
-        double degToRad = Math.PI / 180.0;
-        double phi1 = src.latitude * degToRad;
-        double phi2 = dst.latitude * degToRad;
-        double lam1 = src.longitude * degToRad;
-        double lam2 = dst.longitude * degToRad;
-
-        return Math.atan2(Math.sin(lam2-lam1)*Math.cos(phi2),
-                          Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(lam2-lam1)
-        ) * 180/Math.PI;
-    }
-
-    private void subscribeLocationLiveData() {
-        mLocationLiveData = mViewModel.getLocationLiveData();
-        mLocationLiveData.observe(this, location -> {
-            if (location == null) {
-                return;
-            }
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            if (mMap != null) {
-                reloadAds(location);
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                if (mLocationLiveData != null) {
-                    mLocationLiveData.removeObservers(this);
-                    mLocationLiveData = null;
+    private void applyLastKnownLocation() {
+        mViewModel.getLastKnownLocation().addOnSuccessListener(
+                this,
+                location -> {
+                    if (location != null) {
+                        reloadAds(location);
+                        if (mMap != null) {
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                        }
+                    }
                 }
-            }
-        });
+        );
     }
 
     @Override
@@ -309,10 +275,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
-        if (mFavoriteView != null && mMenuItemFavoriteSwitch != null) {
-            mMenuItemFavoriteSwitch.setIcon(
-                    mFavoriteView.getValue() ? R.drawable.fav_on : R.drawable.fav_off);
-        }
+        mFavoriteView = mViewModel.isFavoriteView();
+        mFavoriteView.observe(this, mFavoriteModeObserver);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -428,18 +392,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             tramMarker.setMarker(m);
         }
         if (tramMarker.getPolyline() == null) {
-            List<LatLng> pointsList = new ArrayList<>();
-            if (SphericalUtil.computeDistanceBetween(
-                    tramMarker.getFinalPosition(),
-                    tramMarker.getPrevPosition()) < 100) {
-                pointsList.add(tramMarker.getPrevPosition());
-                pointsList.add(tramMarker.getFinalPosition());
-            } else {
-                pointsList.add(computeDistanceAndBearing(
-                        tramMarker.getFinalPosition(),
-                        tramMarker.getPrevPosition()));
-                pointsList.add(tramMarker.getFinalPosition());
-            }
+            LatLng finalPosition = tramMarker.getFinalPosition();
+            LatLng prevPosition = tramMarker.getPrevPosition();
+            List<LatLng> pointsList = generatePolylinePoints(finalPosition, prevPosition);
 
             Polyline p = mMap.addPolyline(new PolylineOptions()
                     .color(Color.argb(255, 236, 57, 57))
@@ -447,6 +402,60 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             p.setPoints(pointsList);
             tramMarker.setPolyline(p);
         }
+    }
+
+    @NonNull
+    private static List<LatLng> generatePolylinePoints(LatLng finalPosition, LatLng prevPosition) {
+        List<LatLng> pointsList = new ArrayList<>();
+        if (finalPosition == null) {
+            if (prevPosition == null) {
+                return pointsList;
+            } else {
+                pointsList.add(prevPosition);
+                return pointsList;
+            }
+        } else if (prevPosition == null) {
+            pointsList.add(finalPosition);
+            return pointsList;
+        }
+
+        if (SphericalUtil.computeDistanceBetween(
+                finalPosition,
+                prevPosition) < MAX_DISTANCE) {
+            pointsList.add(prevPosition);
+            pointsList.add(finalPosition);
+        } else {
+            pointsList.add(computePointInDirection(
+                    finalPosition,
+                    prevPosition));
+            pointsList.add(finalPosition);
+        }
+        return pointsList;
+    }
+
+    private static LatLng computePointInDirection(LatLng dst, LatLng src) {
+        double brng = Math.toRadians(bearing(dst, src));
+        double lat1 = Math.toRadians(dst.latitude);
+        double lon1 = Math.toRadians(dst.longitude);
+
+        double lat2 = Math.asin( Math.sin(lat1)*Math.cos(MAX_DISTANCE_RAD) + Math.cos(lat1)*Math.sin(MAX_DISTANCE_RAD)*Math.cos(brng) );
+        double a = Math.atan2(Math.sin(brng)*Math.sin(MAX_DISTANCE_RAD)*Math.cos(lat1), Math.cos(MAX_DISTANCE_RAD)-Math.sin(lat1)*Math.sin(lat2));
+        double lon2 = lon1 + a;
+
+        lon2 = (lon2+ 3*Math.PI) % (2*Math.PI) - Math.PI;
+        return new LatLng(Math.toDegrees(lat2), Math.toDegrees(lon2));
+    }
+
+    private static double bearing(LatLng src, LatLng dst) {
+        double degToRad = Math.PI / 180.0;
+        double phi1 = src.latitude * degToRad;
+        double phi2 = dst.latitude * degToRad;
+        double lam1 = src.longitude * degToRad;
+        double lam2 = dst.longitude * degToRad;
+
+        return Math.atan2(Math.sin(lam2-lam1)*Math.cos(phi2),
+                          Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(lam2-lam1)
+        ) * 180/Math.PI;
     }
 
     @UiThread
@@ -471,6 +480,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
         mMap.setIndoorEnabled(false);
+        mMap.setTrafficEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -481,16 +491,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             mMap.setMyLocationEnabled(true);
         }
-        mMap.setTrafficEnabled(false);
-        LatLng position;
-        if (mLocationLiveData != null && mLocationLiveData.getValue() != null) {
-            position = new LatLng(
-                    mLocationLiveData.getValue().getLatitude(),
-                    mLocationLiveData.getValue().getLongitude());
-        } else {
-            position = new LatLng(52.231841, 21.005940);
-        }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+
+        mViewModel.getLastKnownLocation().addOnSuccessListener(
+                this,
+                location -> {
+                    LatLng position;
+                    if (location != null) {
+                        position = new LatLng(
+                                location.getLatitude(),
+                                location.getLongitude());
+                    } else {
+                        position = new LatLng(52.231841, 21.005940);
+                    }
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+                });
         mMap.setOnMarkerClickListener(marker -> true);
         mMap.setOnCameraMoveStartedListener(i -> mCameraMoveInProgress.set(true));
         mMap.setOnCameraIdleListener(() -> {
@@ -500,28 +514,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void showOrZoom() {
-        ArrayList<TramMarker> markersToBeCreated = new ArrayList<>();
-        LatLngBounds visibleRegion = null;
-        if (mMap != null) {
-            visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
+        if (mMap == null) {
+            return;
         }
+        ArrayList<TramMarker> markersToBeCreated = new ArrayList<>();
+        LatLngBounds visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
         for (TramMarker marker : mTramMarkerHashMap.values()) {
             if (marker.isFavoriteVisible() && marker.isOnMap(visibleRegion)) {
                 markersToBeCreated.add(marker);
+                if (markersToBeCreated.size() > MAX_VISIBLE_MARKERS) {
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    return;
+                }
             } else {
                 marker.remove();
             }
         }
-        if (markersToBeCreated.size() <= MAX_VISIBLE_MARKERS) {
-            for (TramMarker marker : markersToBeCreated) {
-                createNewFullMarker(marker);
-            }
-        } else {
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        for (TramMarker marker : markersToBeCreated) {
+            createNewFullMarker(marker);
         }
     }
 
     private void reloadAds(Location location) {
+        if (mAdView == null) {
+            return;
+        }
+        if (location == null) {
+            location = new Location("");
+            location.setLatitude(52.231841);
+            location.setLongitude(21.005940);
+        }
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(getString(R.string.adMobTestDeviceS5))
                 .addTestDevice(getString(R.string.adMobTestDeviceS7))
@@ -541,10 +563,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    mMap.setMyLocationEnabled(true);
-                    subscribeLocationLiveData();
+                    if (mMap != null) {
+                        mMap.setMyLocationEnabled(true);
+                    }
+                    applyLastKnownLocation();
                 } else {
-                    mMap.setMyLocationEnabled(false);
+                    if (mMap != null) {
+                        mMap.setMyLocationEnabled(false);
+                    }
                 }
             }
         }
@@ -575,10 +601,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     void rateApp() {
         Uri uri = Uri.parse("market://details?id=" + getPackageName());
         Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-        // To count with Play market backstack, After pressing back button,
-        // to taken back to our application, we need to add following flags to intent.
         goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
                                     Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         try {
             startActivity(goToMarket);

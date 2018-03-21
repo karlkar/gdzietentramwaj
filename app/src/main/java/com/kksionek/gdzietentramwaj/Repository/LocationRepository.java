@@ -1,20 +1,21 @@
 package com.kksionek.gdzietentramwaj.Repository;
 
-import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.location.Location;
+
+import com.google.android.gms.tasks.Task;
 
 import javax.inject.Inject;
 
 public class LocationRepository {
-    private LocationLiveData mLocationLiveData;
+    private LocationGetter mLocationGetter;
 
     @Inject
     public LocationRepository(Context context) {
-        mLocationLiveData = LocationLiveData.getInstance(context);
+        mLocationGetter = new LocationGetter(context);
     }
 
-    public LiveData<Location> getLocationLiveData() {
-        return mLocationLiveData;
+    public Task<Location> getLastKnownLocation() {
+        return mLocationGetter.getLastKnownLocation();
     }
 }
