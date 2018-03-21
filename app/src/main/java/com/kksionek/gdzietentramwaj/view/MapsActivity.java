@@ -207,15 +207,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         mAdView = findViewById(R.id.adView);
-        if (checkLocationPermission()) {
-            mViewModel.getLastKnownLocation().addOnSuccessListener(
-                    this,
-                    location -> {
-                        if (location != null) {
-                            reloadAds(location);
-                        }
-                    }
-            );
+        if (checkLocationPermission(true)) {
+            applyLastKnownLocation(true, false);
         } else {
             reloadAds(null);
         }
@@ -235,13 +228,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         sharedPreferences.edit().putInt(PREF_LAST_VERSION, BuildConfig.VERSION_CODE).apply();
     }
 
-    private void applyLastKnownLocation() {
+    private void applyLastKnownLocation(boolean adView, boolean map) {
         mViewModel.getLastKnownLocation().addOnSuccessListener(
                 this,
                 location -> {
                     if (location != null) {
-                        reloadAds(location);
-                        if (mMap != null) {
+                        if (adView) {
+                            reloadAds(location);
+                        }
+                        if (map && mMap != null) {
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         }
@@ -459,14 +454,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @UiThread
-    private boolean checkLocationPermission() {
+    private boolean checkLocationPermission(boolean doRequest) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
 
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_LOCATION);
+            if (doRequest) {
+                requestPermissions(
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
             return false;
         }
         return true;
@@ -475,6 +473,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.231841, 21.005940), 15));
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -492,19 +491,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
 
-        mViewModel.getLastKnownLocation().addOnSuccessListener(
-                this,
-                location -> {
-                    LatLng position;
-                    if (location != null) {
-                        position = new LatLng(
-                                location.getLatitude(),
-                                location.getLongitude());
-                    } else {
-                        position = new LatLng(52.231841, 21.005940);
-                    }
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
-                });
+        if (checkLocationPermission(false)) {
+            applyLastKnownLocation(false, true);
+        }
         mMap.setOnMarkerClickListener(marker -> true);
         mMap.setOnCameraMoveStartedListener(i -> mCameraMoveInProgress.set(true));
         mMap.setOnCameraIdleListener(() -> {
@@ -566,7 +555,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (mMap != null) {
                         mMap.setMyLocationEnabled(true);
                     }
-                    applyLastKnownLocation();
+                    applyLastKnownLocation(true, true);
                 } else {
                     if (mMap != null) {
                         mMap.setMyLocationEnabled(false);
