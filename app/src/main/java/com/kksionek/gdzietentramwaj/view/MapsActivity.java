@@ -307,8 +307,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @UiThread
     private void updateMarkersVisibility() {
+        boolean onlyFavorites;
+        if (this.mFavoriteView == null || this.mFavoriteView.getValue() == null) {
+            onlyFavorites = false;
+        } else {
+            onlyFavorites = this.mFavoriteView.getValue();
+        }
         for (TramMarker marker : mTramMarkerHashMap.values()) {
-            marker.setFavoriteVisible(!mFavoriteView.getValue()
+            marker.setFavoriteVisible(!onlyFavorites
                     || mFavoriteTrams.contains(marker.getTramLine()));
         }
         showOrZoom();
@@ -373,11 +379,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mMap != null) {
             visibleRegion = mMap.getProjection().getVisibleRegion().latLngBounds;
         }
+        boolean onlyFavorites;
+        if (this.mFavoriteView == null || this.mFavoriteView.getValue() == null) {
+            onlyFavorites = false;
+        } else {
+            onlyFavorites = this.mFavoriteView.getValue();
+        }
         for (Map.Entry<String, TramData> element : tramDataHashMap.entrySet()) {
             if (!mTramMarkerHashMap.containsKey(element.getKey())) {
                 TramMarker marker = new TramMarker(element.getValue());
                 mTramMarkerHashMap.put(element.getKey(), marker);
-                marker.setFavoriteVisible(!mFavoriteView.getValue()
+                marker.setFavoriteVisible(!onlyFavorites
                         || mFavoriteTrams.contains(marker.getTramLine()));
                 if (!mCameraMoveInProgress.get()
                         && marker.isFavoriteVisible()
