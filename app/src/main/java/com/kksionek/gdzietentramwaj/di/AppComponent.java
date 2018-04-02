@@ -5,6 +5,7 @@ import android.content.Context;
 import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
 import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
+import com.kksionek.gdzietentramwaj.view.MapsActivity;
 
 import javax.inject.Singleton;
 
@@ -16,4 +17,6 @@ public interface AppComponent {
     TramRepository getTramRepository();
     LocationRepository getLocationRepository();
     Context getAppContext();
+
+    void inject(MapsActivity activity);
 }

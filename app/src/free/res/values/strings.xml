@@ -1,0 +1,3 @@
+<resources>
+    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl\n\nAutor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.\n\nJeśli aplikacja Ci się podoba oceń ją w <a href="http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj">sklepie Google Play!</a></string>
+</resources>

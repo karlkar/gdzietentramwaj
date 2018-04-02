@@ -3,26 +3,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_item_favorite_switch"
-        app:showAsAction="ifRoom"
+        android:icon="@drawable/fav_off"
         android:title="@string/toggle_favorite_view"
-        android:icon="@drawable/fav_off"/>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_item_refresh"
-        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_menu_refresh"
         android:title="@string/refresh"
-        android:icon="@drawable/ic_menu_refresh"/>
+        app:showAsAction="ifRoom" />
 
 
-    <item android:id="@+id/menu_item_favorite"
-          app:showAsAction="never"
-          android:title="@string/action_menu_favorite"/>
+    <item
+        android:id="@+id/menu_item_favorite"
+        android:title="@string/action_menu_favorite"
+        app:showAsAction="never" />
 
-    <item android:id="@+id/menu_item_rate"
-        app:showAsAction="never"
-        android:title="@string/rate_app"/>
+    <item
+        android:id="@+id/menu_item_remove_ads"
+        android:title="@string/remove_ads"
+        app:showAsAction="never" />
 
-    <item android:id="@+id/menu_item_info"
-        app:showAsAction="never"
-        android:title="@string/action_menu_info"/>
+    <item
+        android:id="@+id/menu_item_rate"
+        android:title="@string/rate_app"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_info"
+        android:title="@string/action_menu_info"
+        app:showAsAction="never" />
 </menu>

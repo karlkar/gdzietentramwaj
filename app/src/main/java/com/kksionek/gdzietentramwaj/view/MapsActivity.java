@@ -30,8 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -51,6 +49,7 @@ import com.kksionek.gdzietentramwaj.BuildConfig;
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.R;
+import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 
 import java.net.SocketTimeoutException;
@@ -61,6 +60,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.inject.Inject;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -80,7 +81,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private MenuItemRefreshCtrl mMenuItemRefresh = null;
     private MenuItem mMenuItemFavoriteSwitch = null;
-    private AdView mAdView;
+    @Inject
+    AdProviderInterface adProviderInterface;
+
 
     private IconGenerator mIconGenerator;
     private final ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
@@ -192,6 +195,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        TramApplication.getAppComponent().inject(this);
+
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
@@ -206,7 +211,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mAdView = findViewById(R.id.adView);
+        adProviderInterface.showAd(findViewById(R.id.adView));
         if (checkLocationPermission(true)) {
             applyLastKnownLocation(true, false);
         } else {
@@ -248,16 +253,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        adProviderInterface.resume();
     }
 
     @Override
     protected void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
-        }
+        adProviderInterface.pause();
         super.onPause();
     }
 
@@ -267,6 +268,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         MenuItem menuItem = menu.findItem(R.id.menu_item_refresh);
         if (menuItem != null) {
             mMenuItemRefresh = new MenuItemRefreshCtrl(this, menuItem);
+        }
+
+        //noinspection ConstantConditions
+        if (BuildConfig.FLAVOR.equals("paid")) {
+            MenuItem removeAds = menu.findItem(R.id.menu_item_remove_ads);
+            removeAds.setVisible(false);
         }
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
@@ -284,6 +291,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (item.getItemId() == R.id.menu_item_refresh) {
             mViewModel.forceReload();
             return true;
+        } else if (item.getItemId() == R.id.menu_item_remove_ads) {
+            removeAds();
         } else if (item.getItemId() == R.id.menu_item_rate) {
             rateApp();
         } else if (item.getItemId() == R.id.menu_item_favorite) {
@@ -525,21 +534,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void reloadAds(Location location) {
-        if (mAdView == null) {
-            return;
-        }
         if (location == null) {
             location = new Location("");
             location.setLatitude(52.231841);
             location.setLongitude(21.005940);
         }
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(getString(R.string.adMobTestDeviceS5))
-                .addTestDevice(getString(R.string.adMobTestDeviceS7))
-                .addTestDevice(getString(R.string.adMobTestDeviceS9plus))
-                .setLocation(location)
-                .build();
-        mAdView.loadAd(adRequest);
+        adProviderInterface.loadAd(this, location);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -582,6 +582,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         container.addView(text);
 
         builder.setTitle(R.string.about_app);
+        builder.setView(container);
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    private void removeAds() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        TextView text = new TextView(this);
+        text.setText(R.string.remove_info);
+        text.setMovementMethod(LinkMovementMethod.getInstance());
+
+        FrameLayout container = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int marginSize = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        params.leftMargin = marginSize;
+        params.rightMargin = marginSize;
+        params.topMargin = marginSize;
+        params.bottomMargin = marginSize;
+        text.setLayoutParams(params);
+        container.addView(text);
+
+        builder.setTitle(R.string.remove_title);
         builder.setView(container);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss());
         builder.show();

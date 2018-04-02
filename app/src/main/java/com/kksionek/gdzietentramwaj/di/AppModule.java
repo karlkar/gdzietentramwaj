@@ -7,6 +7,8 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.kksionek.gdzietentramwaj.DataSource.Room.MyDatabase;
 import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
 import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
+import com.kksionek.gdzietentramwaj.view.AdProvider;
+import com.kksionek.gdzietentramwaj.view.AdProviderInterface;
 
 import javax.inject.Singleton;
 
@@ -67,5 +69,10 @@ public class AppModule {
     @Singleton @Provides
     CallAdapter.Factory getCallAdapterFactory() {
         return RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io());
+    }
+
+    @Singleton @Provides
+    AdProviderInterface provideAdProvider() {
+        return new AdProvider();
     }
 }
