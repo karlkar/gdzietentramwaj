@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -40,7 +41,7 @@ class TramLiveData extends LiveData<TramDataWrapper> {
         mTramInterface = tramInterface;
         mObservable = Observable.interval(0, 10, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
-                .flatMap(val -> {
+                .flatMapSingle(val -> {
                     mLoadingData.postValue(true);
                     return Observable.merge(
                             mTramInterface.getTrams()
@@ -55,15 +56,13 @@ class TramLiveData extends LiveData<TramDataWrapper> {
                                 }
                             })
                             .toMap(TramData::getId, tramData -> tramData)
-                            .toObservable()
-                            .doOnNext(listConsumer)
+                            .doOnSuccess(listConsumer)
                             .map(tramData -> new TramDataWrapper(tramData, null))
                             .onErrorResumeNext(throwable -> {
                                 Log.e(TAG, "TramLiveData: Error occurred", throwable);
-                                return Observable.just(new TramDataWrapper(null, throwable));
+                                return Single.just(new TramDataWrapper(null, throwable));
                             });
-                })
-                .observeOn(AndroidSchedulers.mainThread());
+                });
     }
 
     @Override
@@ -85,8 +84,8 @@ class TramLiveData extends LiveData<TramDataWrapper> {
 
     private void startLoading() {
         mDisposable = mObservable.subscribe(tramData -> {
-            mLoadingData.setValue(false);
-            setValue(tramData);
+            mLoadingData.postValue(false);
+            postValue(tramData);
         });
     }
 
