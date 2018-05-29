@@ -8,11 +8,12 @@ import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
@@ -39,36 +40,41 @@ class TramLiveData extends LiveData<TramDataWrapper> {
         mTramInterface = tramInterface;
         mObservable = Flowable.interval(0, 10, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
-                .flatMap(val -> Single.concat(
-                        Single.just(new TramDataWrapper(
-                                null,
-                                null,
-                                true)),
-                        Observable.merge(
-                        mTramInterface.getTrams()
-                                .flatMap(tramList -> Observable.fromIterable(tramList.getList())),
-                        mTramInterface.getBuses()
-                                .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
-                        ).filter(tramData -> {
-                            try {
-                                return (System.currentTimeMillis() - mDateFormat.parse(tramData.getTime()).getTime()) < 60000;
-                            } catch (ParseException e) {
-                                return false;
-                            }
-                        })
-                        .toMap(TramData::getId, tramData -> tramData)
-                        .doOnSuccess(listConsumer)
-                        .map(tramData -> new TramDataWrapper(
-                                tramData,
-                                null,
-                                false))
-                        .onErrorResumeNext(throwable -> {
-                            Log.e(TAG, "TramLiveData: Error occurred", throwable);
-                            return Single.just(new TramDataWrapper(
+                .flatMap(val -> {
+                    AtomicReference<String> refDate = new AtomicReference<>(null);
+                    return Single.concat(
+                            Single.just(new TramDataWrapper(
                                     null,
-                                    throwable,
-                                    false));
-                        })))
+                                    null,
+                                    true)),
+                            Observable.merge(
+                            mTramInterface.getTrams()
+                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList())),
+                            mTramInterface.getBuses()
+                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
+                            )
+                            .doOnNext(tramData -> {
+                                if (refDate.get() == null) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.add(Calendar.MINUTE, -2);
+                                    refDate.set(mDateFormat.format(cal.getTime()));
+                                }
+                            })
+                            .filter(tramData -> refDate.get().compareTo(tramData.getTime()) <= 0)
+                            .toMap(TramData::getId, tramData -> tramData)
+                            .doOnSuccess(listConsumer)
+                            .map(tramData -> new TramDataWrapper(
+                                    tramData,
+                                    null,
+                                    false))
+                            .onErrorResumeNext(throwable -> {
+                                Log.e(TAG, "TramLiveData: Error occurred", throwable);
+                                return Single.just(new TramDataWrapper(
+                                        null,
+                                        throwable,
+                                        false));
+                            }));
+                })
                 .startWith(new TramDataWrapper(null, null, true));
     }
 
