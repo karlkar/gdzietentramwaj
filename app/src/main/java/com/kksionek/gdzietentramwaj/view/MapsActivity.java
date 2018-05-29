@@ -299,7 +299,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (item.getItemId() == R.id.menu_item_rate) {
             rateApp();
         } else if (item.getItemId() == R.id.menu_item_favorite) {
-            Intent intent = new Intent(this, FavoriteLinesActivity.class);
+            Intent intent = new Intent(getApplicationContext(), FavoriteLinesActivity.class);
             startActivity(intent);
             return true;
         } else if (item.getItemId() == R.id.menu_item_favorite_switch) {
@@ -497,8 +497,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(52.231841, 21.005940), 15));
-        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(52.231841, 21.005940), 15));
+        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                getApplicationContext(),
+                R.raw.map_style));
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setBuildingsEnabled(false);
@@ -554,7 +557,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             location.setLatitude(52.231841);
             location.setLongitude(21.005940);
         }
-        adProviderInterface.loadAd(this, location);
+        adProviderInterface.loadAd(getApplicationContext(), location);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
