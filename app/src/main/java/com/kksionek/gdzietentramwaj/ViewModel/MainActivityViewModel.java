@@ -17,7 +17,6 @@ import java.util.List;
 public class MainActivityViewModel extends ViewModel {
 
     private final MutableLiveData<Boolean> mFavoriteView = new MutableLiveData<>();
-    private LiveData<Boolean> mLoadingLiveData = null;
     private LiveData<TramDataWrapper> mTramLiveData = null;
     private TramRepository mTramRepository;
     private LocationRepository mLocationRepository;
@@ -34,7 +33,6 @@ public class MainActivityViewModel extends ViewModel {
 
     public LiveData<TramDataWrapper> getTramData() {
         if (mTramLiveData == null) {
-            mLoadingLiveData = mTramRepository.getLoadingStream();
             mTramLiveData = mTramRepository.getDataStream();
         }
         return mTramLiveData;
@@ -52,10 +50,6 @@ public class MainActivityViewModel extends ViewModel {
                 .putBoolean("FAVORITE_TRAM_VIEW", favoriteViewOn)
                 .apply();
         mFavoriteView.setValue(favoriteViewOn);
-    }
-
-    public LiveData<Boolean> getLoadingLiveData() {
-        return mLoadingLiveData;
     }
 
     public void forceReload() {

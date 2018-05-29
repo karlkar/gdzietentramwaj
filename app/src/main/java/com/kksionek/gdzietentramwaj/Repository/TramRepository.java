@@ -33,10 +33,6 @@ public class TramRepository {
         mTramLiveData.forceReload();
     }
 
-    public LiveData<Boolean> getLoadingStream() {
-        return mTramLiveData.getLoadingData();
-    }
-
     public LiveData<List<FavoriteTram>> getAllFavTrams() {
         return mTramDao.getAllFavTrams();
     }

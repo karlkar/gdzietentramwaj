@@ -26,9 +26,9 @@ package com.kksionek.gdzietentramwaj.view;
 
 import java.util.*;
 
-public class NaturalOrderComparator implements Comparator
+public class NaturalOrderComparator<T> implements Comparator<T>
 {
-    int compareRight(String a, String b)
+    private int compareRight(String a, String b)
     {
         int bias = 0, ia = 0, ib = 0;
 
@@ -64,13 +64,13 @@ public class NaturalOrderComparator implements Comparator
         }
     }
 
-    public int compare(Object o1, Object o2)
+    public int compare(T o1, T o2)
     {
         String a = o1.toString();
         String b = o2.toString();
 
         int ia = 0, ib = 0;
-        int nza = 0, nzb = 0;
+        int nza, nzb;
         char ca, cb;
 
         while (true) {
@@ -128,7 +128,7 @@ public class NaturalOrderComparator implements Comparator
         }
     }
 
-    static char charAt(String s, int i) {
+    private static char charAt(String s, int i) {
         return i >= s.length() ? 0 : s.charAt(i);
     }
 }

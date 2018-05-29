@@ -146,6 +146,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.LENGTH_LONG).show();
             return;
         }
+
+        if (mMenuItemRefresh != null) {
+            if (tramDataWrapper.loading) {
+                mMenuItemRefresh.startAnimation();
+            } else {
+                mMenuItemRefresh.endAnimation();
+            }
+        }
+
+        if (tramDataWrapper.tramDataHashMap == null) {
+            return;
+        }
+
         if (tramDataWrapper.tramDataHashMap.size() == 0) {
             Toast.makeText(
                     this,
@@ -179,17 +192,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateMarkersVisibility();
     };
 
-    private Observer<Boolean> mLoadingObserver = aBoolean -> {
-        if (mMenuItemRefresh == null || aBoolean == null) {
-            return;
-        }
-        if (aBoolean) {
-            mMenuItemRefresh.startAnimation();
-        } else {
-            mMenuItemRefresh.endAnimation();
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,8 +206,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mViewModel.getTramData().observe(this, mTramDataObserver);
         mViewModel.getFavoriteTramsLiveData().observe(this, mFavoriteTramsObserver);
-        // TODO: Merge it and #getTramData to single LiveData
-        mViewModel.getLoadingLiveData().observe(this, mLoadingObserver);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);

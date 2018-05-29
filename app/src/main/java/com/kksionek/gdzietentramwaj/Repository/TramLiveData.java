@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -31,19 +32,22 @@ class TramLiveData extends LiveData<TramDataWrapper> {
             Locale.getDefault());
 
     private final TramInterface mTramInterface;
-    private final MutableLiveData<Boolean> mLoadingData = new MutableLiveData<>();
-    private final Observable<TramDataWrapper> mObservable;
+    private final Flowable<TramDataWrapper> mObservable;
     private Disposable mDisposable;
 
     TramLiveData(
             @NonNull TramInterface tramInterface,
             @NonNull Consumer<Map<String, TramData>> listConsumer) {
         mTramInterface = tramInterface;
-        mObservable = Observable.interval(0, 10, TimeUnit.SECONDS)
+        mObservable = Flowable.interval(0, 10, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
-                .flatMapSingle(val -> {
-                    mLoadingData.postValue(true);
-                    return Observable.merge(
+                .flatMap(val -> {
+                    return Single.concat(
+                            Single.just(new TramDataWrapper(
+                                    null,
+                                    null,
+                                    true)),
+                            Observable.merge(
                             mTramInterface.getTrams()
                                     .flatMap(tramList -> Observable.fromIterable(tramList.getList())),
                             mTramInterface.getBuses()
@@ -57,12 +61,19 @@ class TramLiveData extends LiveData<TramDataWrapper> {
                             })
                             .toMap(TramData::getId, tramData -> tramData)
                             .doOnSuccess(listConsumer)
-                            .map(tramData -> new TramDataWrapper(tramData, null))
+                            .map(tramData -> new TramDataWrapper(
+                                    tramData,
+                                    null,
+                                    false))
                             .onErrorResumeNext(throwable -> {
                                 Log.e(TAG, "TramLiveData: Error occurred", throwable);
-                                return Single.just(new TramDataWrapper(null, throwable));
-                            });
-                });
+                                return Single.just(new TramDataWrapper(
+                                        null,
+                                        throwable,
+                                        false));
+                            }));
+                })
+                .startWith(new TramDataWrapper(null, null, true));
     }
 
     @Override
@@ -83,13 +94,6 @@ class TramLiveData extends LiveData<TramDataWrapper> {
     }
 
     private void startLoading() {
-        mDisposable = mObservable.subscribe(tramData -> {
-            mLoadingData.postValue(false);
-            postValue(tramData);
-        });
-    }
-
-    public LiveData<Boolean> getLoadingData() {
-        return mLoadingData;
+        mDisposable = mObservable.subscribe(this::postValue);
     }
 }

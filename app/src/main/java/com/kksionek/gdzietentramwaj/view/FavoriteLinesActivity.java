@@ -94,7 +94,7 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
         public void setData(List<FavoriteTram> favoriteTrams) {
             clear();
-            Collections.sort(favoriteTrams, new NaturalOrderComparator());
+            Collections.sort(favoriteTrams, new NaturalOrderComparator<>());
             addAll(favoriteTrams);
         }
 
