@@ -93,7 +93,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private MainActivityViewModel mViewModel;
     private LiveData<Boolean> mFavoriteView;
-    private List<String> mFavoriteTrams;
+    private List<String> mFavoriteTrams = new ArrayList<>();
     private AtomicBoolean mCameraMoveInProgress = new AtomicBoolean(false);
 
     private ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener = animation -> {
@@ -188,6 +188,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
     private Observer<List<String>> mFavoriteTramsObserver = strings -> {
+        if (strings == null) {
+            strings = new ArrayList<>();
+        }
         mFavoriteTrams = strings;
         updateMarkersVisibility();
     };
