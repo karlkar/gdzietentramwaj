@@ -4,13 +4,14 @@ import android.app.Application;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.kksionek.gdzietentramwaj.di.AppComponent;
 import com.kksionek.gdzietentramwaj.di.AppModule;
 import com.kksionek.gdzietentramwaj.di.DaggerAppComponent;
 
 import java.io.IOException;
-import java.net.SocketException;
 
+import io.fabric.sdk.android.Fabric;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 
@@ -27,6 +28,15 @@ public class TramApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Fabric.with(
+                this,
+                new Crashlytics.Builder()
+                        .core(
+                                new CrashlyticsCore.Builder()
+                                        .disabled(BuildConfig.DEBUG)
+                                        .build())
+                        .build());
 
         RxJavaPlugins.setErrorHandler(e -> {
             if (e instanceof UndeliverableException) {
