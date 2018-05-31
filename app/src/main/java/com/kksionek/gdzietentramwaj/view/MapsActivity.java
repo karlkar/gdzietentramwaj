@@ -14,6 +14,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -110,8 +111,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             tramMarker.getMarker().setPosition(intermediatePos);
 
             LatLng prevPos;
-            if (tramMarker.getPolyline().getPoints().size() != 0) {
-                prevPos = tramMarker.getPolyline().getPoints().get(0);
+            List<LatLng> curPointsList = tramMarker.getPolyline().getPoints();
+            if (curPointsList.size() != 0) {
+                prevPos = curPointsList.get(0);
             } else {
                 prevPos = tramMarker.getPrevPosition();
             }
@@ -222,6 +224,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         mIconGenerator = new IconGenerator(this);
+        ValueAnimator.setFrameDelay(180);
         mValueAnimator.addUpdateListener(mAnimatorUpdateListener);
 
         handleWelcomeDialog();
