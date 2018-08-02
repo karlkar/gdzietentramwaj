@@ -80,13 +80,13 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
 
-    freeImplementation 'com.google.firebase:firebase-core:16.0.0'
+    freeImplementation 'com.google.firebase:firebase-core:16.0.1'
     freeImplementation 'com.google.firebase:firebase-ads:15.0.1'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.2'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.google.code.gson:gson:2.8.5'
 
     implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
@@ -96,14 +96,14 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 
-    implementation 'android.arch.persistence.room:runtime:1.1.0'
-    annotationProcessor "android.arch.persistence.room:compiler:1.1.0"
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
 
     implementation 'com.google.dagger:dagger:2.12'
     annotationProcessor "com.google.dagger:dagger-compiler:2.12"
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'android.arch.persistence.room:testing:1.1.0'
+    androidTestImplementation 'android.arch.persistence.room:testing:1.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     // DEBUG:
     //        implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
