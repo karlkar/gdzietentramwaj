@@ -4,8 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 public class TramData {
-    private static final String TAG = "TRAMDATA";
-
     @SerializedName("Time")
     private String mTime;
 
@@ -23,8 +21,6 @@ public class TramData {
 
     private transient LatLng mLatLng = null;
 
-    private boolean mTooOld = false;
-
     public String getId() { return mFirstLine + "/" + mBrigade; }
 
     public String getFirstLine() {
@@ -40,13 +36,5 @@ public class TramData {
             mLatLng = new LatLng(mLat, mLng);
         }
         return mLatLng;
-    }
-
-    public void setTooOld() {
-        mTooOld = true;
-    }
-
-    public boolean isTooOld() {
-        return mTooOld;
     }
 }
