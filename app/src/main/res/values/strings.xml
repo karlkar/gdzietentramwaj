@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Gdzie Ten Tramwaj?</string>
+    <string name="adMobAppId">ca-app-pub-9982327151344679~9129163343</string>
     <string name="banner_ad_unit_id">ca-app-pub-9982327151344679/1605896548</string>
-    <string name="adMobTestDeviceS5">F0E0DF548AD32B9C9DF78977B9079AD2</string>
-    <string name="adMobTestDeviceS7">3795279CABB4FAC75E5F23A086CC9C9F</string>
-    <string name="adMobTestDeviceS9plus">45A79A696E1AC8ED37D8BDFC355D7360</string>
+    <string name="adMobTestDeviceS7Edge">C8A0397BECC9CDA8A3A1610EA6E92D74</string>
     <string name="action_menu_info">O aplikacji</string>
     <string name="refresh">Odśwież</string>
     <string name="action_menu_favorite">Twoje linie</string>

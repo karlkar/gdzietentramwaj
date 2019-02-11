@@ -6,6 +6,10 @@ import android.view.ViewGroup;
 
 public class AdProvider implements AdProviderInterface {
     @Override
+    public void initialize(Context context, String adMobAppId) {
+    }
+
+    @Override
     public void showAd(ViewGroup adView) {
     }
 

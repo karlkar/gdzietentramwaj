@@ -5,6 +5,7 @@ import android.location.Location;
 import android.view.ViewGroup;
 
 public interface AdProviderInterface {
+    void initialize(Context context, String adMobAppId);
     void showAd(ViewGroup adView);
     void resume();
     void pause();

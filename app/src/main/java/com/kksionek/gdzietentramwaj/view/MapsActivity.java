@@ -215,6 +215,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        adProviderInterface.initialize(this, getString(R.string.adMobAppId));
         adProviderInterface.showAd(findViewById(R.id.adView));
         if (checkLocationPermission(true)) {
             applyLastKnownLocation(true, false);
