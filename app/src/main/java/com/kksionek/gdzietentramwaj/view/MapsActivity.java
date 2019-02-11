@@ -18,8 +18,10 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.UiThread;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
@@ -279,6 +281,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             MenuItem removeAds = menu.findItem(R.id.menu_item_remove_ads);
             removeAds.setVisible(false);
         }
+
+        MenuItem menuShare = menu.findItem(R.id.menu_item_share);
+        ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuShare);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + getPackageName());
+        shareActionProvider.setShareIntent(shareIntent);
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
         mFavoriteView = mViewModel.isFavoriteView();
