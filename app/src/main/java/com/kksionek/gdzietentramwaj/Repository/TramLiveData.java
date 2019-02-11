@@ -2,7 +2,6 @@ package com.kksionek.gdzietentramwaj.Repository;
 
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.kksionek.gdzietentramwaj.DataSource.TramData;
 import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
@@ -13,18 +12,14 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 class TramLiveData extends LiveData<TramDataWrapper> {
-
-    private static final String TAG = "TramLiveData";
 
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss",
@@ -41,41 +36,27 @@ class TramLiveData extends LiveData<TramDataWrapper> {
         mObservable = Flowable.interval(0, 10, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .flatMap(val -> {
-                    AtomicReference<String> refDate = new AtomicReference<>(null);
-                    return Single.concat(
-                            Single.just(new TramDataWrapper(
-                                    null,
-                                    null,
-                                    true)),
-                            Observable.merge(
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.MINUTE, -2);
+                    final String refDate = mDateFormat.format(cal.getTime());
+                    return Observable.merge(
                             mTramInterface.getTrams()
-                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList())),
+                                    .flatMapObservable(tramList -> Observable.fromIterable(tramList.getList())),
                             mTramInterface.getBuses()
-                                    .flatMap(tramList -> Observable.fromIterable(tramList.getList()))
-                            )
-                            .doOnNext(tramData -> {
-                                if (refDate.get() == null) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.add(Calendar.MINUTE, -2);
-                                    refDate.set(mDateFormat.format(cal.getTime()));
-                                }
-                            })
-                            .filter(tramData -> refDate.get().compareTo(tramData.getTime()) <= 0)
+                                    .flatMapObservable(tramList -> Observable.fromIterable(tramList.getList()))
+                    )
+                            .subscribeOn(Schedulers.io())
+                            .filter(tramData -> refDate.compareTo(tramData.getTime()) <= 0)
                             .toMap(TramData::getId, tramData -> tramData)
                             .doOnSuccess(listConsumer)
                             .map(tramData -> new TramDataWrapper(
                                     tramData,
                                     null,
                                     false))
-                            .onErrorResumeNext(throwable -> {
-                                Log.e(TAG, "TramLiveData: Error occurred", throwable);
-                                return Single.just(new TramDataWrapper(
-                                        null,
-                                        throwable,
-                                        false));
-                            }));
-                })
-                .startWith(new TramDataWrapper(null, null, true));
+                            .onErrorReturn(throwable -> new TramDataWrapper(null, throwable, false))
+                            .toFlowable()
+                            .startWith(new TramDataWrapper(null, null, true));
+                });
     }
 
     @Override

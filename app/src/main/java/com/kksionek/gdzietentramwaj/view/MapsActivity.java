@@ -65,8 +65,6 @@ import javax.inject.Inject;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private static final String TAG = "MAPSACTIVITY";
-
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1234;
 
     private static final int MAX_VISIBLE_MARKERS = 50;
@@ -83,7 +81,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MenuItem mMenuItemFavoriteSwitch = null;
     @Inject
     AdProviderInterface adProviderInterface;
-
 
     private IconGenerator mIconGenerator;
     private final ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
@@ -131,6 +128,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.LENGTH_LONG).show();
             return;
         }
+
+        if (mMenuItemRefresh != null) {
+            if (tramDataWrapper.loading) {
+                mMenuItemRefresh.startAnimation();
+            } else {
+                mMenuItemRefresh.endAnimation();
+            }
+        }
+
         if (tramDataWrapper.throwable != null) {
             if (!BuildConfig.DEBUG
                     && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
@@ -146,14 +152,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             : getString(R.string.error_ztm),
                     Toast.LENGTH_LONG).show();
             return;
-        }
-
-        if (mMenuItemRefresh != null) {
-            if (tramDataWrapper.loading) {
-                mMenuItemRefresh.startAnimation();
-            } else {
-                mMenuItemRefresh.endAnimation();
-            }
         }
 
         if (tramDataWrapper.tramDataHashMap == null) {
@@ -573,13 +571,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    if (mMap != null) {
-                        mMap.setMyLocationEnabled(true);
+                    GoogleMap map = mMap;
+                    if (map != null) {
+                        map.setMyLocationEnabled(true);
                     }
                     applyLastKnownLocation(true, true);
                 } else {
-                    if (mMap != null) {
-                        mMap.setMyLocationEnabled(false);
+                    GoogleMap map = mMap;
+                    if (map != null) {
+                        map.setMyLocationEnabled(false);
                     }
                 }
             }
