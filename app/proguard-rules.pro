@@ -28,3 +28,7 @@
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
 ###################
+
+###### ShareActionProvider
+-keep class android.support.v7.widget.ShareActionProvider { *; }
+###################
