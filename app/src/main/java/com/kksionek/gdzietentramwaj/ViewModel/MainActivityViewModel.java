@@ -7,10 +7,10 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.Task;
-import com.kksionek.gdzietentramwaj.Repository.LocationRepository;
-import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
+import com.kksionek.gdzietentramwaj.repository.LocationRepository;
+import com.kksionek.gdzietentramwaj.repository.TramRepository;
 
 import java.util.List;
 

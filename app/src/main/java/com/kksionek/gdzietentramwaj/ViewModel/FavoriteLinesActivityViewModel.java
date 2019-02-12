@@ -3,9 +3,9 @@ package com.kksionek.gdzietentramwaj.ViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
-import com.kksionek.gdzietentramwaj.Repository.TramRepository;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.repository.TramRepository;
 
 import java.util.List;
 
