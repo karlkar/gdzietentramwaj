@@ -3,9 +3,9 @@ package com.kksionek.gdzietentramwaj.Repository;
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
-import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
-import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
+import com.kksionek.gdzietentramwaj.dataSource.TramData;
+import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
+import com.kksionek.gdzietentramwaj.dataSource.TramInterface;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

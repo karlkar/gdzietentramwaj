@@ -1,17 +1,13 @@
 package com.kksionek.gdzietentramwaj.Repository;
 
-import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
-import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
+import com.kksionek.gdzietentramwaj.dataSource.Room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.dataSource.Room.TramDao;
+import com.kksionek.gdzietentramwaj.dataSource.TramData;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 
 public class FavoriteLinesConsumer implements Consumer<Map<String, TramData>> {
     private static final String TAG = "FavoriteLinesConsumer";

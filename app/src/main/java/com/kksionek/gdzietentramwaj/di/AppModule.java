@@ -4,9 +4,9 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import com.kksionek.gdzietentramwaj.DataSource.Room.MyDatabase;
-import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
-import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
+import com.kksionek.gdzietentramwaj.dataSource.Room.MyDatabase;
+import com.kksionek.gdzietentramwaj.dataSource.Room.TramDao;
+import com.kksionek.gdzietentramwaj.dataSource.TramInterface;
 import com.kksionek.gdzietentramwaj.view.AdProvider;
 import com.kksionek.gdzietentramwaj.view.AdProviderInterface;
 

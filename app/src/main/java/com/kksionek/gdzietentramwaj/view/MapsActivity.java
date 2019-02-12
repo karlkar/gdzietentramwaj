@@ -48,11 +48,11 @@ import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.ui.IconGenerator;
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.kksionek.gdzietentramwaj.BuildConfig;
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
-import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
+import com.kksionek.gdzietentramwaj.dataSource.TramData;
+import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;

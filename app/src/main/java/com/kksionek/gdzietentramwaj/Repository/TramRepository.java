@@ -2,10 +2,10 @@ package com.kksionek.gdzietentramwaj.Repository;
 
 import android.arch.lifecycle.LiveData;
 
-import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
-import com.kksionek.gdzietentramwaj.DataSource.Room.TramDao;
-import com.kksionek.gdzietentramwaj.DataSource.TramDataWrapper;
-import com.kksionek.gdzietentramwaj.DataSource.TramInterface;
+import com.kksionek.gdzietentramwaj.dataSource.Room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.dataSource.Room.TramDao;
+import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
+import com.kksionek.gdzietentramwaj.dataSource.TramInterface;
 
 import java.util.List;
 

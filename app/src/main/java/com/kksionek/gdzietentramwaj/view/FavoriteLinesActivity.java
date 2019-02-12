@@ -13,9 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.kksionek.gdzietentramwaj.DataSource.Room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.ViewModel.FavoriteLinesActivityViewModel;
+import com.kksionek.gdzietentramwaj.dataSource.Room.FavoriteTram;
 
 import java.util.Collections;
 import java.util.List;

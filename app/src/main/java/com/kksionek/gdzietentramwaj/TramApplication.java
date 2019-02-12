@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -15,7 +15,7 @@ import io.fabric.sdk.android.Fabric;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 
-public class TramApplication extends Application {
+public class TramApplication extends MultiDexApplication {
 
     private static final String TAG = "TramApplication";
 
