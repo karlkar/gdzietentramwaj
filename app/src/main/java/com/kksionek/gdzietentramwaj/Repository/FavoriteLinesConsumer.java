@@ -1,8 +1,8 @@
 package com.kksionek.gdzietentramwaj.Repository;
 
-import com.kksionek.gdzietentramwaj.dataSource.Room.FavoriteTram;
-import com.kksionek.gdzietentramwaj.dataSource.Room.TramDao;
 import com.kksionek.gdzietentramwaj.dataSource.TramData;
+import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.dataSource.room.TramDao;
 
 import java.util.HashSet;
 import java.util.Map;

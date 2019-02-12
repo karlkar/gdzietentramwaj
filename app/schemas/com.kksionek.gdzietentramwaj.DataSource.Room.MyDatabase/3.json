@@ -2,28 +2,28 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "8032c25036b8aae2ca746a9b9e104383",
+    "identityHash": "282c6475b83997b1e1a79f4d79bee42f",
     "entities": [
       {
         "tableName": "FavoriteTram",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mLineId` TEXT NOT NULL, `mFavorite` INTEGER NOT NULL, PRIMARY KEY(`mLineId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lineId` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, PRIMARY KEY(`lineId`))",
         "fields": [
           {
-            "fieldPath": "mLineId",
-            "columnName": "mLineId",
+            "fieldPath": "lineId",
+            "columnName": "lineId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "mFavorite",
-            "columnName": "mFavorite",
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "mLineId"
+            "lineId"
           ],
           "autoGenerate": false
         },
@@ -33,7 +33,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8032c25036b8aae2ca746a9b9e104383\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"282c6475b83997b1e1a79f4d79bee42f\")"
     ]
   }
 }
