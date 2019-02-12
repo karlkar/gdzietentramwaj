@@ -122,8 +122,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Observer<TramDataWrapper> mTramDataObserver = tramDataWrapper -> {
         if (tramDataWrapper == null
-                || tramDataWrapper.throwable instanceof UnknownHostException
-                || tramDataWrapper.throwable instanceof SocketTimeoutException) {
+                || (tramDataWrapper instanceof TramDataWrapper.Error
+                && ((TramDataWrapper.Error)tramDataWrapper).getThrowable() instanceof UnknownHostException)
+                || (tramDataWrapper instanceof TramDataWrapper.Error
+                && ((TramDataWrapper.Error)tramDataWrapper).getThrowable() instanceof SocketTimeoutException)) {
             Toast.makeText(
                     this,
                     R.string.error_internet,
@@ -132,42 +134,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         if (mMenuItemRefresh != null) {
-            if (tramDataWrapper.loading) {
+            if (tramDataWrapper instanceof TramDataWrapper.InProgress) {
                 mMenuItemRefresh.startAnimation();
             } else {
                 mMenuItemRefresh.endAnimation();
             }
         }
 
-        if (tramDataWrapper.throwable != null) {
+        if (tramDataWrapper instanceof TramDataWrapper.Error) {
+            Throwable throwable = ((TramDataWrapper.Error)tramDataWrapper).getThrowable();
             if (!BuildConfig.DEBUG
-                    && !(tramDataWrapper.throwable instanceof JsonSyntaxException)
-                    && !(tramDataWrapper.throwable instanceof IllegalStateException)
-                    && !(tramDataWrapper.throwable instanceof HttpException)) {
+                    && !(throwable instanceof JsonSyntaxException)
+                    && !(throwable instanceof IllegalStateException)
+                    && !(throwable instanceof HttpException)) {
                 Crashlytics.log("Error handled with a toast.");
-                Crashlytics.logException(tramDataWrapper.throwable);
+                Crashlytics.logException(throwable);
             }
             Toast.makeText(
                     this,
                     BuildConfig.DEBUG ?
-                            tramDataWrapper.throwable.getClass().getSimpleName() + ": " + tramDataWrapper.throwable.getMessage()
+                            throwable.getClass().getSimpleName() + ": " + throwable.getMessage()
                             : getString(R.string.error_ztm),
                     Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (tramDataWrapper.tramDataHashMap == null) {
+        if (!(tramDataWrapper instanceof TramDataWrapper.Success)) {
             return;
         }
-
-        if (tramDataWrapper.tramDataHashMap.size() == 0) {
+        Map<String, TramData> tramDataHashMap = ((TramDataWrapper.Success)tramDataWrapper).getTramDataHashMap();
+        if (tramDataHashMap.size() == 0) {
             Toast.makeText(
                     this,
                     R.string.none_position_is_up_to_date,
                     Toast.LENGTH_LONG).show();
             return;
         }
-        Map<String, TramData> tramDataHashMap = tramDataWrapper.tramDataHashMap;
         Toast.makeText(
                 getApplicationContext(),
                 (BuildConfig.DEBUG ?

@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.DataSource.Room;
+package com.kksionek.gdzietentramwaj.dataSource.Room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;

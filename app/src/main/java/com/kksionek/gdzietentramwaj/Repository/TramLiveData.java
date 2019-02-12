@@ -40,22 +40,19 @@ class TramLiveData extends LiveData<TramDataWrapper> {
                     cal.add(Calendar.MINUTE, -2);
                     final String refDate = mDateFormat.format(cal.getTime());
                     return Observable.merge(
-                            mTramInterface.getTrams()
+                            mTramInterface.trams()
                                     .flatMapObservable(tramList -> Observable.fromIterable(tramList.getList())),
-                            mTramInterface.getBuses()
+                            mTramInterface.buses()
                                     .flatMapObservable(tramList -> Observable.fromIterable(tramList.getList()))
                     )
                             .subscribeOn(Schedulers.io())
                             .filter(tramData -> refDate.compareTo(tramData.getTime()) <= 0)
                             .toMap(TramData::getId, tramData -> tramData)
                             .doOnSuccess(listConsumer)
-                            .map(tramData -> new TramDataWrapper(
-                                    tramData,
-                                    null,
-                                    false))
-                            .onErrorReturn(throwable -> new TramDataWrapper(null, throwable, false))
+                            .map(data -> (TramDataWrapper)new TramDataWrapper.Success(data))
+                            .onErrorReturn(TramDataWrapper.Error::new)
                             .toFlowable()
-                            .startWith(new TramDataWrapper(null, null, true));
+                            .startWith(TramDataWrapper.InProgress.INSTANCE);
                 });
     }
 

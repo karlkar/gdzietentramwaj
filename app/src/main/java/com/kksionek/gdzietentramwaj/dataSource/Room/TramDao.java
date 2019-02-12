@@ -1,12 +1,9 @@
-package com.kksionek.gdzietentramwaj.DataSource.Room;
+package com.kksionek.gdzietentramwaj.dataSource.Room;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.Update;
-
-import com.kksionek.gdzietentramwaj.DataSource.TramData;
 
 import java.util.List;
 
