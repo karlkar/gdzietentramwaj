@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.di
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.dataSource.TramInterface
 import com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase
 import com.kksionek.gdzietentramwaj.dataSource.room.TramDao
@@ -18,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-class AppModule(private val context: Context) {
+class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
@@ -27,9 +28,11 @@ class AppModule(private val context: Context) {
 
     @Singleton
     @Provides
-    internal fun provideContext(): Context {
-        return context
-    }
+    internal fun provideApplication(): TramApplication = application
+
+    @Singleton
+    @Provides
+    internal fun provideContext(): Context = application
 
     @Singleton
     @Provides
@@ -45,9 +48,7 @@ class AppModule(private val context: Context) {
 
     @Singleton
     @Provides
-    internal fun getTramDao(myDatabase: MyDatabase): TramDao {
-        return myDatabase.tramDao()
-    }
+    internal fun getTramDao(myDatabase: MyDatabase): TramDao = myDatabase.tramDao()
 
     @Singleton
     @Provides
@@ -76,7 +77,5 @@ class AppModule(private val context: Context) {
 
     @Singleton
     @Provides
-    internal fun provideAdProvider(): AdProviderInterface {
-        return AdProvider()
-    }
+    internal fun provideAdProvider(): AdProviderInterface = AdProvider()
 }

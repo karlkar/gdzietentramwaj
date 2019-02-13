@@ -53,6 +53,7 @@ import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.dataSource.TramData;
 import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
 import com.kksionek.gdzietentramwaj.viewModel.MainActivityViewModel;
+import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -83,6 +84,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MenuItem mMenuItemFavoriteSwitch = null;
     @Inject
     AdProviderInterface adProviderInterface;
+
+    @Inject
+    ViewModelFactory viewModelFactory;
 
     private IconGenerator mIconGenerator;
     private final ArrayList<TramMarker> mAnimationMarkers = new ArrayList<>();
@@ -203,12 +207,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        TramApplication.getAppComponent().inject(this);
+        ((TramApplication)getApplication()).getAppComponent().inject(this);
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        mViewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(MainActivityViewModel.class);
 
         mViewModel.getTramData().observe(this, mTramDataObserver);
         mViewModel.getFavoriteTramsLiveData().observe(this, mFavoriteTramsObserver);

@@ -14,16 +14,23 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.kksionek.gdzietentramwaj.R;
+import com.kksionek.gdzietentramwaj.TramApplication;
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram;
 import com.kksionek.gdzietentramwaj.viewModel.FavoriteLinesActivityViewModel;
+import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory;
 
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
 public class FavoriteLinesActivity extends AppCompatActivity {
+
+    @Inject
+    ViewModelFactory viewModelFactory;
 
     private FavoriteLinesActivityViewModel mViewModel;
 
@@ -40,7 +47,9 @@ public class FavoriteLinesActivity extends AppCompatActivity {
 
         GridView gridView = findViewById(R.id.gridView);
 
-        mViewModel = ViewModelProviders.of(this)
+        ((TramApplication)getApplication()).appComponent.inject(this);
+
+        mViewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(FavoriteLinesActivityViewModel.class);
 
         FavoritesAdapter adapter = new FavoritesAdapter();

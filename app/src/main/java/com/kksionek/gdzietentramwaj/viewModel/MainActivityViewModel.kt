@@ -11,7 +11,9 @@ import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper
 import com.kksionek.gdzietentramwaj.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.repository.TramRepository
 
-class MainActivityViewModel : ViewModel() {
+class MainActivityViewModel(
+    private val application: TramApplication
+) : ViewModel() {
 
     private val mFavoriteView = MutableLiveData<Boolean>()
     private val mTramRepository: TramRepository
@@ -19,11 +21,11 @@ class MainActivityViewModel : ViewModel() {
 
     init {
         val favoriteTramView = PreferenceManager
-            .getDefaultSharedPreferences(TramApplication.getAppComponent().appContext)
-            .getBoolean("FAVORITE_TRAM_VIEW", false)  // TODO: Inject context, sharedPrefs
+            .getDefaultSharedPreferences(application.appComponent.appContext)
+            .getBoolean("FAVORITE_TRAM_VIEW", false)  // TODO: Inject sharedPrefs
         mFavoriteView.value = favoriteTramView
-        mTramRepository = TramApplication.getAppComponent().tramRepository
-        mLocationRepository = TramApplication.getAppComponent().locationRepository
+        mTramRepository = application.appComponent.tramRepository
+        mLocationRepository = application.appComponent.locationRepository
     }
 
     val tramData: LiveData<TramDataWrapper> by lazy {
@@ -41,7 +43,7 @@ class MainActivityViewModel : ViewModel() {
     fun toggleFavorite() {
         val favoriteViewOn = !(mFavoriteView.value!!)
         PreferenceManager
-            .getDefaultSharedPreferences(TramApplication.getAppComponent().appContext)
+            .getDefaultSharedPreferences(application.appComponent.appContext)
             .edit()
             .putBoolean("FAVORITE_TRAM_VIEW", favoriteViewOn)
             .apply()

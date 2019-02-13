@@ -7,9 +7,11 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram
 import com.kksionek.gdzietentramwaj.repository.TramRepository
 
-class FavoriteLinesActivityViewModel : ViewModel() {
+class FavoriteLinesActivityViewModel(
+    application: TramApplication
+) : ViewModel() {
 
-    private val mTramRepository: TramRepository = TramApplication.getAppComponent().tramRepository
+    private val mTramRepository: TramRepository = application.appComponent.tramRepository
 
     fun getFavoriteTrams(): LiveData<List<FavoriteTram>> =
         mTramRepository.allFavTrams
