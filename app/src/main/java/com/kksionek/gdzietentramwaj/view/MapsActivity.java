@@ -50,9 +50,9 @@ import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.kksionek.gdzietentramwaj.BuildConfig;
 import com.kksionek.gdzietentramwaj.R;
 import com.kksionek.gdzietentramwaj.TramApplication;
-import com.kksionek.gdzietentramwaj.ViewModel.MainActivityViewModel;
 import com.kksionek.gdzietentramwaj.dataSource.TramData;
 import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper;
+import com.kksionek.gdzietentramwaj.viewModel.MainActivityViewModel;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -292,7 +292,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         shareActionProvider.setShareIntent(shareIntent);
 
         mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch);
-        mFavoriteView = mViewModel.isFavoriteView();
+        mFavoriteView = mViewModel.isFavoriteViewEnabled();
         mFavoriteView.observe(this, mFavoriteModeObserver);
 
         return super.onCreateOptionsMenu(menu);
