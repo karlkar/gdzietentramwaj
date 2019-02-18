@@ -19,7 +19,6 @@ class TramMarker @UiThread constructor(tramData: TramData) {
 
     var finalPosition: LatLng = tramData.latLng
         private set
-    var isFavoriteVisible = true
 
     private var _marker: Marker? = null
     var marker: Marker?
