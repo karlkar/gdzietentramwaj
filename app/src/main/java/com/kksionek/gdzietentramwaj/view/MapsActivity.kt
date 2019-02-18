@@ -14,20 +14,21 @@ import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
+import android.support.annotation.StringRes
 import android.support.annotation.UiThread
 import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.ShareActionProvider
 import android.support.v7.widget.Toolbar
+import android.text.Html
 import android.text.method.LinkMovementMethod
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -48,11 +49,9 @@ import com.kksionek.gdzietentramwaj.dataSource.TramData
 import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper
 import com.kksionek.gdzietentramwaj.viewModel.MainActivityViewModel
 import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory
-
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicBoolean
-
 import javax.inject.Inject
 
 private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
@@ -516,57 +515,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun showAboutAppDialog() {
-        val marginSize = resources.getDimensionPixelSize(R.dimen.dialog_margin)
-        val params = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply {
-            leftMargin = marginSize
-            rightMargin = marginSize
-            topMargin = marginSize
-            bottomMargin = marginSize
-        }
-
-        val builder = AlertDialog.Builder(this)
-        val text = TextView(this).apply {
-            setText(R.string.disclaimer)
-            movementMethod = LinkMovementMethod.getInstance()
-            layoutParams = params
-        }
-
-        val container = FrameLayout(this).apply { addView(text) }
-
-        builder.setTitle(R.string.about_app) // TODO Move this view creation to xml
-            .setView(container)
+        val view = createDialogView(R.string.disclaimer) ?: return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.about_app)
+            .setView(view)
             .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
     private fun removeAds() {
-        val marginSize = resources.getDimensionPixelSize(R.dimen.dialog_margin)
-        val params = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply {
-            leftMargin = marginSize
-            rightMargin = marginSize
-            topMargin = marginSize
-            bottomMargin = marginSize
-        }
-
-        val builder = AlertDialog.Builder(this)
-        val text = TextView(this).apply {
-            setText(R.string.remove_info)
-            movementMethod = LinkMovementMethod.getInstance()
-            layoutParams = params
-        }
-
-        val container = FrameLayout(this).apply { addView(text) }
-
-        builder.setTitle(R.string.remove_title) // TODO Move this view creation to xml
-            .setView(container)
+        val view = createDialogView(R.string.remove_info) ?: return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.remove_title)
+            .setView(view)
             .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
             .show()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun createDialogView(@StringRes textId: Int): View? {
+        val view = LayoutInflater.from(this)
+            .inflate(R.layout.activity_main_info_dialog, null)
+        view.findViewById<TextView>(R.id.info_dialog_text)?.apply {
+            movementMethod = LinkMovementMethod.getInstance()
+            text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(getString(textId), Html.FROM_HTML_MODE_LEGACY);
+            } else {
+                Html.fromHtml(getString(textId));
+            }
+        }
+        return view
     }
 
     private fun rateApp() {

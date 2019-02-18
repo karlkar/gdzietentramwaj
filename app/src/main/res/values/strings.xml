@@ -17,6 +17,6 @@
     <string name="position_update_successful_amount">Zaktualizowano pozycje %1$d pojazdów</string>
     <string name="remove_ads">Usuń reklamy</string>
     <string name="remove_title">Usuń reklamy</string>
-    <string name="remove_info">Jeśli masz dość reklam w aplikacji zapraszam do zainstalowania jej płatnej wersji - \"<a href="http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj.pro">Gdzie Ten Tramwaj? Pro</a>\".\n\nUWAGA: Jedyna różnica między aplikacjami to to, że w wersji darmowej są reklamy, w wersji płatnej ich nie ma.</string>
+    <string name="remove_info">Jeśli masz dość reklam w aplikacji zapraszam do zainstalowania jej płatnej wersji - \"&lt;a href="http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj.pro"&gt;Gdzie Ten Tramwaj? Pro&lt;/a&gt;\".&lt;br&gt;&lt;br&gt;UWAGA: Jedyna różnica między aplikacjami to to, że w wersji darmowej są reklamy, w wersji płatnej ich nie ma.</string>
     <string name="menu_item_main_share">Udostępnij</string>
 </resources>
