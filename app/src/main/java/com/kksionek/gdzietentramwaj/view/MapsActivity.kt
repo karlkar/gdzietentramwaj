@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.view
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -40,7 +39,6 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.gson.JsonSyntaxException
-import com.google.maps.android.SphericalUtil
 import com.google.maps.android.ui.IconGenerator
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
@@ -89,43 +87,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private lateinit var iconGenerator: IconGenerator
-    private val animationMarkers = mutableListOf<TramMarker>()
-    private val valueAnimator = ValueAnimator
-        .ofFloat(0F, 1F)
-        .setDuration(3000)
+
+    private val polylineGenerator = PolylineGenerator()
+    private val tramPathAnimator = TramPathAnimator(polylineGenerator)
 
     private lateinit var viewModel: MainActivityViewModel
     private var favoriteView: LiveData<Boolean>? = null
     private var favoriteTrams = listOf<String>()
     private val cameraMoveInProgress = AtomicBoolean(false)
 
-    private val polylineGenerator = PolylineGenerator()
-
-    private val mAnimatorUpdateListener =
-        ValueAnimator.AnimatorUpdateListener { animation ->
-            var intermediatePos: LatLng
-            val fraction = animation!!.animatedFraction
-            for (tramMarker in animationMarkers) {
-                if (tramMarker.marker == null) {
-                    continue
-                }
-                intermediatePos = SphericalUtil.interpolate(
-                    tramMarker.prevPosition!!,
-                    tramMarker.finalPosition,
-                    fraction.toDouble()
-                )
-                tramMarker.marker!!.position = intermediatePos
-
-                val curPointsList = tramMarker.polyline!!.points
-                val prevPos = if (curPointsList.size != 0) {
-                    curPointsList[0]
-                } else {
-                    tramMarker.prevPosition!!
-                }
-                val pointsList = polylineGenerator.generatePolylinePoints(intermediatePos, prevPos)
-                tramMarker.polyline!!.points = pointsList
-            }
-        }
 
     private fun showSuccessToast(text: Int) {
         Toast.makeText(
@@ -253,8 +223,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         iconGenerator = IconGenerator(this)
-        ValueAnimator.setFrameDelay(180)
-        valueAnimator.addUpdateListener(mAnimatorUpdateListener)
 
         handleWelcomeDialog()
     }
@@ -351,7 +319,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun updateExistingMarkers(tramDataHashMap: Map<String, TramData>) {
         val visibleRegion: LatLngBounds = map.projection.visibleRegion.latLngBounds
         val iter = tramMarkerHashMap.entries.iterator()
-        animationMarkers.clear()
+        tramPathAnimator.removeAllAnimatedMarkers()
         while (iter.hasNext()) {
             val element = iter.next()
             val tramMarker = element.value
@@ -387,7 +355,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                     .width(TramMarker.POLYLINE_WIDTH)
                             )
                         }
-                        animationMarkers.add(tramMarker)
+                        tramPathAnimator.addMarker(tramMarker)
                     } else {
                         tramMarker.remove()
                     }
@@ -397,9 +365,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 iter.remove()
             }
         }
-        if (!animationMarkers.isEmpty()) {
-            valueAnimator.start()
-        }
+        tramPathAnimator.startAnimation()
     }
 
     @UiThread
