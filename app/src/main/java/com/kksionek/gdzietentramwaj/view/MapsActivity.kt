@@ -66,11 +66,11 @@ private const val PREF_LAST_VERSION = "LAST_VERSION"
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var mMap: GoogleMap
-    private val mTramMarkerHashMap = mutableMapOf<String, TramMarker>()
+    private lateinit var map: GoogleMap
+    private val tramMarkerHashMap = mutableMapOf<String, TramMarker>()
 
-    private var mMenuItemRefresh: MenuItemRefreshCtrl? = null
-    private lateinit var mMenuItemFavoriteSwitch: MenuItem
+    private var menuItemRefresh: MenuItemRefreshCtrl? = null
+    private lateinit var menuItemFavoriteSwitch: MenuItem
 
     @Inject
     internal lateinit var adProviderInterface: AdProviderInterface
@@ -88,16 +88,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareIntent
     }
 
-    private lateinit var mIconGenerator: IconGenerator
-    private val mAnimationMarkers = mutableListOf<TramMarker>()
-    private val mValueAnimator = ValueAnimator
+    private lateinit var iconGenerator: IconGenerator
+    private val animationMarkers = mutableListOf<TramMarker>()
+    private val valueAnimator = ValueAnimator
         .ofFloat(0F, 1F)
         .setDuration(3000)
 
-    private lateinit var mViewModel: MainActivityViewModel
-    private var mFavoriteView: LiveData<Boolean>? = null
-    private var mFavoriteTrams = listOf<String>()
-    private val mCameraMoveInProgress = AtomicBoolean(false)
+    private lateinit var viewModel: MainActivityViewModel
+    private var favoriteView: LiveData<Boolean>? = null
+    private var favoriteTrams = listOf<String>()
+    private val cameraMoveInProgress = AtomicBoolean(false)
 
     private val polylineGenerator = PolylineGenerator()
 
@@ -105,7 +105,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ValueAnimator.AnimatorUpdateListener { animation ->
             var intermediatePos: LatLng
             val fraction = animation!!.animatedFraction
-            for (tramMarker in mAnimationMarkers) {
+            for (tramMarker in animationMarkers) {
                 if (tramMarker.marker == null) {
                     continue
                 }
@@ -159,12 +159,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ).show()
     }
 
-    private val mTramDataObserver = Observer<TramDataWrapper?> { tramDataWrapper ->
+    private val tramDataObserver = Observer<TramDataWrapper?> { tramDataWrapper ->
         tramDataWrapper!!
         if (tramDataWrapper is TramDataWrapper.InProgress) {
-            mMenuItemRefresh?.startAnimation()
+            menuItemRefresh?.startAnimation()
         } else {
-            mMenuItemRefresh?.endAnimation()
+            menuItemRefresh?.endAnimation()
         }
 
         when (tramDataWrapper) {
@@ -211,17 +211,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val mFavoriteModeObserver = Observer<Boolean?> {
+    private val favoriteModeObserver = Observer<Boolean?> {
         if (it != null) {
-            mMenuItemFavoriteSwitch.setIcon(
+            menuItemFavoriteSwitch.setIcon(
                 if (it) R.drawable.fav_on else R.drawable.fav_off
             )
             updateMarkersVisibility()
         }
     }
 
-    private val mFavoriteTramsObserver = Observer<List<String>> { strings ->
-        mFavoriteTrams = strings ?: emptyList()
+    private val favoriteTramsObserver = Observer<List<String>> { strings ->
+        favoriteTrams = strings ?: emptyList()
         updateMarkersVisibility()
     }
 
@@ -234,11 +234,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val myToolbar = findViewById<Toolbar>(R.id.my_toolbar)
         setSupportActionBar(myToolbar)
 
-        mViewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = ViewModelProviders.of(this, viewModelFactory)
             .get(MainActivityViewModel::class.java)
 
-        mViewModel.tramData.observe(this, mTramDataObserver)
-        mViewModel.getFavoriteTramsLiveData().observe(this, mFavoriteTramsObserver)
+        viewModel.tramData.observe(this, tramDataObserver)
+        viewModel.getFavoriteTramsLiveData().observe(this, favoriteTramsObserver)
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
@@ -252,9 +252,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             reloadAds(null)
         }
 
-        mIconGenerator = IconGenerator(this)
+        iconGenerator = IconGenerator(this)
         ValueAnimator.setFrameDelay(180)
-        mValueAnimator.addUpdateListener(mAnimatorUpdateListener)
+        valueAnimator.addUpdateListener(mAnimatorUpdateListener)
 
         handleWelcomeDialog()
     }
@@ -269,7 +269,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun applyLastKnownLocation(adView: Boolean, map: Boolean) {
-        mViewModel.getLastKnownLocation()
+        viewModel.getLastKnownLocation()
             .addOnSuccessListener(this) { location ->
                 location?.let {
                     if (adView) {
@@ -277,7 +277,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     if (map) {
                         val latLng = LatLng(it.latitude, it.longitude)
-                        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                        this.map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
                     }
                 }
             }
@@ -296,9 +296,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         menu.findItem(R.id.menu_item_refresh)?.also {
-            mMenuItemRefresh = MenuItemRefreshCtrl(this, it)
-            if (mFavoriteView?.value == true) {
-                mMenuItemRefresh?.startAnimation()
+            menuItemRefresh = MenuItemRefreshCtrl(this, it)
+            if (favoriteView?.value == true) {
+                menuItemRefresh?.startAnimation()
             }
         }
 
@@ -314,9 +314,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         shareActionProvider.setShareIntent(shareIntent)
 
-        mMenuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-        mFavoriteView = mViewModel.isFavoriteViewEnabled().also {
-            it.observe(this, mFavoriteModeObserver)
+        menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
+        favoriteView = viewModel.isFavoriteViewEnabled().also {
+            it.observe(this, favoriteModeObserver)
         }
 
         return super.onCreateOptionsMenu(menu)
@@ -325,14 +325,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when {
             item.itemId == R.id.menu_item_info -> showAboutAppDialog()
-            item.itemId == R.id.menu_item_refresh -> mViewModel.forceReload()
+            item.itemId == R.id.menu_item_refresh -> viewModel.forceReload()
             item.itemId == R.id.menu_item_remove_ads -> removeAds()
             item.itemId == R.id.menu_item_rate -> rateApp()
             item.itemId == R.id.menu_item_favorite -> {
                 val intent = Intent(applicationContext, FavoriteLinesActivity::class.java)
                 startActivity(intent)
             }
-            item.itemId == R.id.menu_item_favorite_switch -> mViewModel.toggleFavorite()
+            item.itemId == R.id.menu_item_favorite_switch -> viewModel.toggleFavorite()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -340,18 +340,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @UiThread
     private fun updateMarkersVisibility() {
-        val onlyFavorites = mFavoriteView?.value ?: false
-        mTramMarkerHashMap.values.forEach {
-            it.isFavoriteVisible = !onlyFavorites || it.tramLine in mFavoriteTrams
+        val onlyFavorites = favoriteView?.value ?: false
+        tramMarkerHashMap.values.forEach {
+            it.isFavoriteVisible = !onlyFavorites || it.tramLine in favoriteTrams
         }
         showOrZoom()
     }
 
     @UiThread
     private fun updateExistingMarkers(tramDataHashMap: Map<String, TramData>) {
-        val visibleRegion: LatLngBounds = mMap.projection.visibleRegion.latLngBounds
-        val iter = mTramMarkerHashMap.entries.iterator()
-        mAnimationMarkers.clear()
+        val visibleRegion: LatLngBounds = map.projection.visibleRegion.latLngBounds
+        val iter = tramMarkerHashMap.entries.iterator()
+        animationMarkers.clear()
         while (iter.hasNext()) {
             val element = iter.next()
             val tramMarker = element.value
@@ -365,29 +365,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 tramMarker.updatePosition(newPosition)
 
-                if (!mCameraMoveInProgress.get() && tramMarker.isFavoriteVisible) {
+                if (!cameraMoveInProgress.get() && tramMarker.isFavoriteVisible) {
                     if (tramMarker.isOnMap(visibleRegion)) {
                         if (tramMarker.marker == null) {
-                            tramMarker.marker = mMap.addMarker(
+                            tramMarker.marker = map.addMarker(
                                 MarkerOptions()
                                     .position(tramMarker.prevPosition!!)
                                     .icon(
                                         TramMarker.getBitmap(
                                             tramMarker.tramLine,
-                                            mIconGenerator
+                                            iconGenerator
                                         )
                                     )
                             )
                         }
                         if (tramMarker.polyline == null) {
-                            tramMarker.polyline = mMap.addPolyline(
+                            tramMarker.polyline = map.addPolyline(
                                 PolylineOptions()
                                     .add(tramMarker.prevPosition)
                                     .color(Color.argb(255, 236, 57, 57))
                                     .width(TramMarker.POLYLINE_WIDTH)
                             )
                         }
-                        mAnimationMarkers.add(tramMarker)
+                        animationMarkers.add(tramMarker)
                     } else {
                         tramMarker.remove()
                     }
@@ -397,21 +397,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 iter.remove()
             }
         }
-        if (!mAnimationMarkers.isEmpty()) {
-            mValueAnimator.start()
+        if (!animationMarkers.isEmpty()) {
+            valueAnimator.start()
         }
     }
 
     @UiThread
     private fun addNewMarkers(tramDataHashMap: Map<String, TramData>) {
-        val visibleRegion: LatLngBounds = mMap.projection.visibleRegion.latLngBounds
-        val onlyFavorites = mFavoriteView?.value ?: false
+        val visibleRegion: LatLngBounds = map.projection.visibleRegion.latLngBounds
+        val onlyFavorites = favoriteView?.value ?: false
         for ((key, value) in tramDataHashMap) {
-            if (key !in mTramMarkerHashMap) {
+            if (key !in tramMarkerHashMap) {
                 val marker = TramMarker(value)
-                mTramMarkerHashMap[key] = marker
-                marker.isFavoriteVisible = !onlyFavorites || marker.tramLine in mFavoriteTrams
-                if (!mCameraMoveInProgress.get()
+                tramMarkerHashMap[key] = marker
+                marker.isFavoriteVisible = !onlyFavorites || marker.tramLine in favoriteTrams
+                if (!cameraMoveInProgress.get()
                     && marker.isFavoriteVisible
                     && marker.isOnMap(visibleRegion)
                 ) {
@@ -423,10 +423,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun createNewFullMarker(tramMarker: TramMarker) {
         if (tramMarker.marker == null) {
-            tramMarker.marker = mMap.addMarker(
+            tramMarker.marker = map.addMarker(
                 MarkerOptions()
                     .position(tramMarker.finalPosition)
-                    .icon(TramMarker.getBitmap(tramMarker.tramLine, mIconGenerator))
+                    .icon(TramMarker.getBitmap(tramMarker.tramLine, iconGenerator))
             )
         }
         if (tramMarker.polyline == null) {
@@ -434,7 +434,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val prevPosition = tramMarker.prevPosition
             val pointsList = polylineGenerator.generatePolylinePoints(finalPosition, prevPosition)
 
-            tramMarker.polyline = mMap.addPolyline(
+            tramMarker.polyline = map.addPolyline(
                 PolylineOptions()
                     .color(Color.argb(255, 236, 57, 57))
                     .width(TramMarker.POLYLINE_WIDTH)
@@ -461,8 +461,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        mMap.apply {
+        map = googleMap
+        map.apply {
             moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(52.231841, 21.005940), 15f
@@ -483,20 +483,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isTrafficEnabled = false
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mMap.isMyLocationEnabled =
+            map.isMyLocationEnabled =
                 checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         } else {
-            mMap.isMyLocationEnabled = true
+            map.isMyLocationEnabled = true
         }
 
         if (checkLocationPermission(false)) {
             applyLastKnownLocation(false, true)
         }
-        mMap.apply {
+        map.apply {
             setOnMarkerClickListener { true }
-            setOnCameraMoveStartedListener { mCameraMoveInProgress.set(true) }
+            setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
-                mCameraMoveInProgress.set(false)
+                cameraMoveInProgress.set(false)
                 showOrZoom()
             }
         }
@@ -504,12 +504,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun showOrZoom() {
         val markersToBeCreated = mutableListOf<TramMarker>()
-        val visibleRegion = mMap.projection.visibleRegion.latLngBounds
-        for (marker in mTramMarkerHashMap.values) {
+        val visibleRegion = map.projection.visibleRegion.latLngBounds
+        for (marker in tramMarkerHashMap.values) {
             if (marker.isFavoriteVisible && marker.isOnMap(visibleRegion)) {
                 markersToBeCreated.add(marker)
                 if (markersToBeCreated.size > MAX_VISIBLE_MARKERS) {
-                    mMap.animateCamera(CameraUpdateFactory.zoomIn())
+                    map.animateCamera(CameraUpdateFactory.zoomIn())
                     return
                 }
             } else {
@@ -540,10 +540,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    mMap.run { isMyLocationEnabled = true }
+                    map.run { isMyLocationEnabled = true }
                     applyLastKnownLocation(true, true)
                 } else {
-                    mMap.run { isMyLocationEnabled = false }
+                    map.run { isMyLocationEnabled = false }
                 }
             }
         }
