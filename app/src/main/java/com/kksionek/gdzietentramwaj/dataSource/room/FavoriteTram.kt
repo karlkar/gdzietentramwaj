@@ -9,7 +9,3 @@ data class FavoriteTram(
     var lineId: String,
     var isFavorite: Boolean
 )
-// TODO remove this code
-//{
-//    override fun toString(): String = lineId
-//}
