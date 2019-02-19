@@ -17,8 +17,6 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram
 import com.kksionek.gdzietentramwaj.viewModel.FavoriteLinesActivityViewModel
 import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 import javax.inject.Inject
 
@@ -88,11 +86,7 @@ class FavoriteLinesActivity : AppCompatActivity() {
             }
 
             view.setOnClickListener {
-                Observable.fromCallable { // TODO this should not happen in Activity
-                    mViewModel.setTramFavorite(tramData.lineId, !tramData.isFavorite)
-                    1
-                }.subscribeOn(Schedulers.io())
-                    .subscribe()
+                mViewModel.setTramFavorite(tramData.lineId, !tramData.isFavorite)
             }
             return view
         }

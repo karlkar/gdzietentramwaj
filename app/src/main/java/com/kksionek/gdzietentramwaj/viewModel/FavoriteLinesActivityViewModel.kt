@@ -17,6 +17,19 @@ class FavoriteLinesActivityViewModel(
         mTramRepository.allFavTrams
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
-        mTramRepository.setTramFavorite(lineId, favorite)
+        compositeDisposable.add(
+            Completable.fromCallable { tramRepository.setTramFavorite(lineId, favorite) }
+                .subscribeOn(Schedulers.io())
+                .subscribe({}, { Log.e(TAG, "Failed to save the tram as favorite", it) })
+        )
+    }
+
+    override fun onCleared() {
+        compositeDisposable.clear()
+        super.onCleared()
+    }
+
+    companion object {
+        const val TAG = "FavoriteLinesActivityVi"
     }
 }
