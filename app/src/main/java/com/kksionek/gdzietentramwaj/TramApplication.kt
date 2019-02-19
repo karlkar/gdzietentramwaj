@@ -11,10 +11,14 @@ import io.fabric.sdk.android.Fabric
 import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
 import java.io.IOException
+import javax.inject.Inject
 
 class TramApplication : MultiDexApplication() {
 
     lateinit var appComponent: AppComponent
+
+    @Inject
+    lateinit var crashReportingService: CrashReportingService
 
     override fun onCreate() {
         super.onCreate()
@@ -30,6 +34,13 @@ class TramApplication : MultiDexApplication() {
                 .build()
         )
 
+        appComponent = DaggerAppComponent
+            .builder()
+            .appModule(AppModule(this))
+            .build()
+
+        appComponent.inject(this)
+
         RxJavaPlugins.setErrorHandler { e ->
             val cause = if (e is UndeliverableException) e.cause else e
             if (cause is IOException) {
@@ -43,8 +54,10 @@ class TramApplication : MultiDexApplication() {
             if (cause is NullPointerException || cause is IllegalArgumentException) {
                 // that's likely a bug in the application
                 Log.e(TAG, "UndeliverableException happened (probably bug): $cause.message}")
-                Crashlytics.log("UndeliverableException happened (probably bug)")
-                Crashlytics.logException(cause)
+                crashReportingService.reportCrash(
+                    cause,
+                    "UndeliverableException happened (probably bug)"
+                )
                 return@setErrorHandler
             }
             if (cause is IllegalStateException) {
@@ -53,15 +66,12 @@ class TramApplication : MultiDexApplication() {
                     TAG,
                     "UndeliverableException happened (bug in RxJava or in a custom operator): ${cause.message}"
                 )
-                Crashlytics.log("UndeliverableException happened (bug in RxJava or in a custom operator)")
-                Crashlytics.logException(cause)
+                crashReportingService.reportCrash(
+                    cause,
+                    "UndeliverableException happened (bug in RxJava or in a custom operator)"
+                )
             }
         }
-
-        appComponent = DaggerAppComponent
-            .builder()
-            .appModule(AppModule(this))
-            .build()
     }
 
     companion object {

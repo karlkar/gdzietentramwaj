@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.di
 
 import android.content.Context
+import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.repository.TramRepository
 import com.kksionek.gdzietentramwaj.view.FavoriteLinesActivity
@@ -17,4 +18,5 @@ interface AppComponent {
 
     fun inject(activity: MapsActivity)
     fun inject(activity: FavoriteLinesActivity)
+    fun inject(application: TramApplication)
 }

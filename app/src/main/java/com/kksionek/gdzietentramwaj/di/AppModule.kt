@@ -3,6 +3,8 @@ package com.kksionek.gdzietentramwaj.di
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import com.kksionek.gdzietentramwaj.CrashReportingService
+import com.kksionek.gdzietentramwaj.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.dataSource.TramInterface
 import com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase
@@ -33,6 +35,11 @@ class AppModule(private val application: TramApplication) {
     @Singleton
     @Provides
     internal fun provideContext(): Context = application
+
+    @Singleton
+    @Provides
+    internal fun provideCrashReportingService(): CrashReportingService =
+        CrashlyticsCrashReportingService()
 
     @Singleton
     @Provides
