@@ -48,7 +48,7 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.dataSource.TramData
 import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.viewModel.MainActivityViewModel
+import com.kksionek.gdzietentramwaj.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -94,7 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
 
-    private lateinit var viewModel: MainActivityViewModel
+    private lateinit var viewModel: MapsViewModel
     private var favoriteView: LiveData<Boolean>? = null
     private var favoriteTrams = listOf<String>()
     private val cameraMoveInProgress = AtomicBoolean(false)
@@ -216,7 +216,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setSupportActionBar(myToolbar)
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-            .get(MainActivityViewModel::class.java)
+            .get(MapsViewModel::class.java)
 
         viewModel.tramData.observe(this, tramDataObserver)
         viewModel.getFavoriteTramsLiveData().observe(this, favoriteTramsObserver)

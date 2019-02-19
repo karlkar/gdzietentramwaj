@@ -9,8 +9,9 @@ import com.kksionek.gdzietentramwaj.repository.TramRepository
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class FavoriteLinesActivityViewModel(
+class FavoriteLinesActivityViewModel @Inject constructor(
     private val tramRepository: TramRepository,
     private val crashReportingService: CrashReportingService
 ) : ViewModel() {
