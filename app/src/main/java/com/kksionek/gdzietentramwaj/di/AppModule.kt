@@ -6,12 +6,16 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.kksionek.gdzietentramwaj.CrashReportingService
 import com.kksionek.gdzietentramwaj.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.dataSource.TramInterface
 import com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase
 import com.kksionek.gdzietentramwaj.dataSource.room.TramDao
 import dagger.Module
 import dagger.Provides
 import io.reactivex.schedulers.Schedulers
+import okhttp3.OkHttpClient
 import retrofit2.CallAdapter
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -50,4 +54,29 @@ class AppModule(private val application: TramApplication) {
     @Singleton
     @Provides
     internal fun getTramDao(myDatabase: MyDatabase): TramDao = myDatabase.tramDao()
+
+    @Singleton
+    @Provides
+    internal fun provideTramInterface(
+        okHttpClient: OkHttpClient,
+        rxAdapter: CallAdapter.Factory
+    ): TramInterface {
+        return Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .addCallAdapterFactory(rxAdapter)
+            .baseUrl("https://api.um.warszawa.pl/")
+            .build().create(TramInterface::class.java)
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideOkHttpClient(): OkHttpClient {
+        // DEBUG
+        //        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        //        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        return OkHttpClient.Builder()
+            //                .addInterceptor(interceptor)
+            .build()
+    }
 }
