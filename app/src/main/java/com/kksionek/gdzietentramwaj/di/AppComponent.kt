@@ -6,6 +6,7 @@ import com.kksionek.gdzietentramwaj.view.MapsActivity
 import dagger.Component
 import javax.inject.Singleton
 
+@ActivityScope
 @Singleton
 @Component(
     modules = [

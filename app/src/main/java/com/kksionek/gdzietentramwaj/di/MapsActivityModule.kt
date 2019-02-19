@@ -11,7 +11,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
-import javax.inject.Singleton
 
 @Module(includes = [MapsActivityModule.MapsViewModelModule::class])
 class MapsActivityModule {
@@ -24,11 +23,11 @@ class MapsActivityModule {
         fun bindMapsViewModel(mapsActivityViewModel: MapsViewModel): ViewModel
     }
 
-    @Singleton
+    @ActivityScope
     @Provides
     internal fun provideAdProvider(): AdProviderInterface = AdProvider()
 
-    @Singleton
+    @ActivityScope
     @Provides
     internal fun provideMapsViewSettingsRepository(context: Context): MapsViewSettingsRepository =
         MapsViewSettingsRepositoryImpl(context)
