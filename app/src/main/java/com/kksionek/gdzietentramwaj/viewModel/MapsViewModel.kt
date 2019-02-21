@@ -9,6 +9,8 @@ import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper
 import com.kksionek.gdzietentramwaj.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.repository.TramRepository
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class MapsViewModel @Inject constructor(
@@ -17,17 +19,26 @@ class MapsViewModel @Inject constructor(
     private val mapsViewSettingsRepository: MapsViewSettingsRepository
 ) : ViewModel() {
 
-    private val mFavoriteView = MutableLiveData<Boolean>()
-
-    init {
-        mFavoriteView.value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
+    private val favoriteView = MutableLiveData<Boolean>().apply {
+        value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
     }
 
-    val tramData: LiveData<TramDataWrapper> by lazy {
-        tramRepository.dataStream
+    private val _tramData = MutableLiveData<TramDataWrapper>()
+    val tramData: LiveData<TramDataWrapper> = _tramData
+
+    private val compositeDisposable = CompositeDisposable()
+
+    private fun startFetchingTrams() {
+        compositeDisposable.add(tramRepository.dataStream
+            .subscribeOn(Schedulers.io())
+            .subscribe { _tramData.postValue(it) })
     }
 
-    fun isFavoriteViewEnabled(): LiveData<Boolean> = mFavoriteView
+    private fun stopFetchingTrams() {
+        compositeDisposable.clear()
+    }
+
+    fun isFavoriteViewEnabled(): LiveData<Boolean> = favoriteView
 
     fun getFavoriteTramsLiveData(): LiveData<List<String>> =
         tramRepository.favoriteTrams
@@ -36,12 +47,25 @@ class MapsViewModel @Inject constructor(
         locationRepository.lastKnownLocation
 
     fun toggleFavorite() {
-        val favoriteViewOn = !(mFavoriteView.value!!)
+        val favoriteViewOn = !(favoriteView.value!!)
         mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
-        mFavoriteView.value = favoriteViewOn
+        favoriteView.value = favoriteViewOn
     }
 
     fun forceReload() {
         tramRepository.forceReload()
+    }
+
+    fun onResume() {
+        startFetchingTrams()
+    }
+
+    fun onPause() {
+        stopFetchingTrams()
+    }
+
+    override fun onCleared() {
+        stopFetchingTrams()
+        super.onCleared()
     }
 }

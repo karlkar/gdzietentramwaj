@@ -99,7 +99,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var favoriteTrams = listOf<String>()
     private val cameraMoveInProgress = AtomicBoolean(false)
 
-
     private fun showSuccessToast(text: Int) {
         Toast.makeText(
             this,
@@ -132,7 +131,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ).show()
     }
 
-    private val tramDataObserver = Observer<TramDataWrapper?> { tramDataWrapper ->
+    private val tramDataObserver = Observer<TramDataWrapper> { tramDataWrapper: TramDataWrapper? ->
         when (tramDataWrapper) {
             is TramDataWrapper.InProgress -> {
                 menuItemRefresh?.startAnimation()
@@ -145,8 +144,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 menuItemRefresh?.endAnimation()
                 handleTramGettingSuccess(tramDataWrapper)
             }
-            null -> {
-            }
+            null -> {}
         }.makeExhaustive
     }
 
@@ -266,11 +264,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
+        viewModel.onResume()
         adProviderInterface.resume()
     }
 
     override fun onPause() {
         adProviderInterface.pause()
+        viewModel.onPause()
         super.onPause()
     }
 
