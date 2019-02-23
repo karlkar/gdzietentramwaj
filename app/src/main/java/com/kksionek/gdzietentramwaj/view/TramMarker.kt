@@ -20,6 +20,8 @@ class TramMarker @UiThread constructor(tramData: TramData) {
     var finalPosition: LatLng = tramData.latLng
         private set
 
+    val id = tramData.id
+
     private var _marker: Marker? = null
     var marker: Marker?
         get() = _marker

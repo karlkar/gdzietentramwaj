@@ -19,7 +19,8 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
             var prevPosition: LatLng
             var intermediatePos: LatLng
 
-            for (tramMarker in animationMarkers) {
+            val immutableList: List<TramMarker> = animationMarkers.toList()
+            for (tramMarker in immutableList) {
                 marker = tramMarker.marker ?: continue
                 polyline = tramMarker.polyline ?: continue
                 prevPosition = tramMarker.prevPosition ?: continue
@@ -59,6 +60,10 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
     @UiThread
     fun addMarker(tramMarker: TramMarker) {
         animationMarkers.add(tramMarker)
+    }
+
+    fun removeMarker(tramMarker: TramMarker) {
+        animationMarkers.remove(tramMarker)
     }
 
     companion object {

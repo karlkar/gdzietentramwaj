@@ -35,7 +35,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
@@ -45,8 +44,6 @@ import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.dataSource.TramData
-import com.kksionek.gdzietentramwaj.dataSource.TramDataWrapper
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory
@@ -57,8 +54,6 @@ import javax.inject.Inject
 
 private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
 
-private const val MAX_VISIBLE_MARKERS = 50
-
 private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
 private const val PREF_LAST_VERSION = "LAST_VERSION"
 
@@ -68,10 +63,11 @@ private const val WARSAW_LNG = 21.005940
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private val tramMarkerHashMap = mutableMapOf<String, TramMarker>()
 
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
     private lateinit var menuItemFavoriteSwitch: MenuItem
+
+    private val currentlyDisplayedTrams = mutableMapOf<String, TramMarker>()
 
     @Inject
     internal lateinit var adProviderInterface: AdProviderInterface
@@ -96,7 +92,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var viewModel: MapsViewModel
     private var favoriteView: LiveData<Boolean>? = null
-    private var favoriteTrams = listOf<String>()
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private fun showSuccessToast(text: Int) {
@@ -131,25 +126,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ).show()
     }
 
-    private val tramDataObserver = Observer<TramDataWrapper> { tramDataWrapper: TramDataWrapper? ->
-        when (tramDataWrapper) {
-            is TramDataWrapper.InProgress -> {
+    private val tramDataObserver = Observer<UiState> { uiState: UiState? ->
+        when (uiState) {
+            is UiState.InProgress -> {
                 menuItemRefresh?.startAnimation()
             }
-            is TramDataWrapper.Error -> {
+            is UiState.Error -> {
                 menuItemRefresh?.endAnimation()
-                handleTramGettingError(tramDataWrapper)
+                handleTramGettingError(uiState)
             }
-            is TramDataWrapper.Success -> {
+            is UiState.Success -> {
                 menuItemRefresh?.endAnimation()
-                handleTramGettingSuccess(tramDataWrapper)
+                handleTramGettingSuccess(uiState)
             }
-            null -> {}
+            null -> {
+            }
         }.makeExhaustive
     }
 
-    private fun handleTramGettingError(tramDataWrapper: TramDataWrapper.Error) {
-        val throwable = tramDataWrapper.throwable
+    private fun handleTramGettingError(uiState: UiState.Error) {
+        if (!uiState.show) {
+            return
+        }
+        val throwable = uiState.throwable
         when (throwable) {
             is UnknownHostException, is SocketTimeoutException -> showErrorToast(R.string.error_internet)
             else -> {
@@ -158,6 +157,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     && throwable !is IllegalStateException
                     && throwable !is HttpException
                 ) {
+                    // TODO Move this to viewModel
                     Crashlytics.log("Error handled with a toast.")
                     Crashlytics.logException(throwable)
                 }
@@ -171,9 +171,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun handleTramGettingSuccess(tramDataWrapper: TramDataWrapper.Success) {
-        val tramDataHashMap = tramDataWrapper.tramDataHashMap
-        if (tramDataHashMap.isEmpty()) {
+    private fun handleTramGettingSuccess(uiState: UiState.Success) {
+        val tramMarkerList = uiState.data
+        if (tramMarkerList.isEmpty()) {
             showErrorToast(R.string.none_position_is_up_to_date)
             return
         }
@@ -181,13 +181,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (BuildConfig.DEBUG)
                 getString(
                     R.string.position_update_successful_amount,
-                    tramDataHashMap.size
+                    tramMarkerList.size
                 )
             else
                 getString(R.string.position_update_sucessful)
         )
-        updateExistingMarkers(tramDataHashMap)
-        addNewMarkers(tramDataHashMap)
+        updateExistingMarkers(tramMarkerList, uiState.animate)
     }
 
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
@@ -195,13 +194,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             menuItemFavoriteSwitch.setIcon(
                 if (it) R.drawable.fav_on else R.drawable.fav_off
             )
-            showOrZoom()
         }
-    }
-
-    private val favoriteTramsObserver = Observer<List<String>> { strings ->
-        favoriteTrams = strings ?: emptyList()
-        showOrZoom()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -217,7 +210,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .get(MapsViewModel::class.java)
 
         viewModel.tramData.observe(this, tramDataObserver)
-        viewModel.getFavoriteTramsLiveData().observe(this, favoriteTramsObserver)
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
@@ -296,7 +288,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareActionProvider.setShareIntent(shareIntent)
 
         menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-        favoriteView = viewModel.isFavoriteViewEnabled().also {
+        favoriteView = viewModel.favoriteView.also {
             it.observe(this, favoriteModeObserver)
         }
 
@@ -320,96 +312,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     @UiThread
-    private fun updateExistingMarkers(tramDataHashMap: Map<String, TramData>) {
-        val visibleRegion: LatLngBounds = map.projection.visibleRegion.latLngBounds
-        val iter = tramMarkerHashMap.entries.iterator()
-        tramPathAnimator.removeAllAnimatedMarkers()
-        while (iter.hasNext()) {
-            val element = iter.next()
-            val tramMarker = element.value
-            val updatedData = tramDataHashMap[element.key]
-            if (updatedData != null) {
-                val prevPosition = tramMarker.finalPosition
-                val newPosition = updatedData.latLng
-                if (prevPosition == newPosition) {
-                    continue
-                }
-
-                tramMarker.updatePosition(newPosition)
-
-                if (!cameraMoveInProgress.get() && isMarkerLineVisible(tramMarker.tramLine)) {
-                    if (tramMarker.isOnMap(visibleRegion)) {
-                        if (tramMarker.marker == null) {
-                            tramMarker.marker = map.addMarker(
-                                MarkerOptions()
-                                    .position(tramMarker.prevPosition!!)
-                                    .icon(
-                                        TramMarker.getBitmap(
-                                            tramMarker.tramLine,
-                                            iconGenerator
-                                        )
-                                    )
-                            )
-                        }
-                        if (tramMarker.polyline == null) {
-                            tramMarker.polyline = map.addPolyline(
-                                PolylineOptions()
-                                    .add(tramMarker.prevPosition)
-                                    .color(Color.argb(255, 236, 57, 57))
-                                    .width(TramMarker.POLYLINE_WIDTH)
-                            )
-                        }
-                        tramPathAnimator.addMarker(tramMarker)
-                    } else {
-                        tramMarker.remove()
-                    }
-                }
-            } else {
-                tramMarker.remove()
-                iter.remove()
+    private fun updateExistingMarkers(
+        tramMarkerList: List<TramMarker>,
+        animate: Boolean
+    ) {
+        if (animate) {
+            tramPathAnimator.removeAllAnimatedMarkers()
+        }
+        if (cameraMoveInProgress.get()) {
+            return
+        }
+        tramMarkerList.forEach {
+            currentlyDisplayedTrams.remove(it.id)
+            if (it.marker == null) {
+                it.marker = map.addMarker(
+                    MarkerOptions()
+                        .position(it.prevPosition!!)
+                        .icon(TramMarker.getBitmap(it.tramLine, iconGenerator))
+                )
             }
-        }
-        tramPathAnimator.startAnimation()
-    }
-
-    @UiThread
-    private fun addNewMarkers(tramDataHashMap: Map<String, TramData>) {
-        val visibleRegion: LatLngBounds = map.projection.visibleRegion.latLngBounds
-        for ((key, value) in tramDataHashMap) {
-            if (key !in tramMarkerHashMap) {
-                val marker = TramMarker(value)
-                tramMarkerHashMap[key] = marker
-                if (!cameraMoveInProgress.get()
-                    && isMarkerLineVisible(marker.tramLine)
-                    && marker.isOnMap(visibleRegion)
-                ) {
-                    createNewFullMarker(marker)
-                }
+            if (it.polyline == null) {
+                val newPoints =
+                    polylineGenerator.generatePolylinePoints(it.finalPosition, it.prevPosition)
+                it.polyline = map.addPolyline(
+                    PolylineOptions()
+                        .add(it.prevPosition)
+                        .color(Color.argb(255, 236, 57, 57))
+                        .width(TramMarker.POLYLINE_WIDTH)
+                ).apply { points = newPoints }
             }
+            tramPathAnimator.addMarker(it)
         }
-    }
-
-    private fun isMarkerLineVisible(line: String) =
-        !(favoriteView?.value ?: false) || line in favoriteTrams
-
-    private fun createNewFullMarker(tramMarker: TramMarker) {
-        if (tramMarker.marker == null) {
-            tramMarker.marker = map.addMarker(
-                MarkerOptions()
-                    .position(tramMarker.finalPosition)
-                    .icon(TramMarker.getBitmap(tramMarker.tramLine, iconGenerator))
-            )
+        currentlyDisplayedTrams.forEach {
+            tramPathAnimator.removeMarker(it.value)
+            it.value.remove()
         }
-        if (tramMarker.polyline == null) {
-            val finalPosition = tramMarker.finalPosition
-            val prevPosition = tramMarker.prevPosition
-            val pointsList = polylineGenerator.generatePolylinePoints(finalPosition, prevPosition)
-
-            tramMarker.polyline = map.addPolyline(
-                PolylineOptions()
-                    .color(Color.argb(255, 236, 57, 57))
-                    .width(TramMarker.POLYLINE_WIDTH)
-            ).apply { points = pointsList }
+        currentlyDisplayedTrams.clear()
+        tramMarkerList.forEach {
+            currentlyDisplayedTrams[it.id] = it
+        }
+        if (animate) {
+            tramPathAnimator.startAnimation()
         }
     }
 
@@ -467,27 +410,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             setOnMarkerClickListener { true }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
+                viewModel.visibleRegion = projection.visibleRegion.latLngBounds
                 cameraMoveInProgress.set(false)
-                showOrZoom()
             }
-        }
-    }
-
-    private fun showOrZoom() {
-        val markersToBeCreated = mutableListOf<TramMarker>()
-        val visibleRegion = map.projection.visibleRegion.latLngBounds
-        for (marker in tramMarkerHashMap.values) {
-            if (isMarkerLineVisible(marker.tramLine) && marker.isOnMap(visibleRegion)) {
-                markersToBeCreated.add(marker)
-                if (markersToBeCreated.size > MAX_VISIBLE_MARKERS) {
-                    map.animateCamera(CameraUpdateFactory.zoomIn())
-                    return
+            viewModel.mapControls.observe(this@MapsActivity, Observer {
+                when (it) {
+                    is MapControls.ZoomIn -> animateCamera(CameraUpdateFactory.zoomIn())
+                    is MapControls.MoveTo -> animateCamera(CameraUpdateFactory.newLatLng(it.location))
                 }
-            } else {
-                marker.remove()
-            }
+            })
         }
-        markersToBeCreated.forEach { createNewFullMarker(it) }
     }
 
     private fun reloadAds(location: Location?) {
