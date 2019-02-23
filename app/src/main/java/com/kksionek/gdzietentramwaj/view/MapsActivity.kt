@@ -29,7 +29,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import com.crashlytics.android.Crashlytics
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -38,17 +37,13 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.gson.JsonSyntaxException
 import com.google.maps.android.ui.IconGenerator
-import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.viewModel.ViewModelFactory
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -85,8 +80,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareIntent
     }
 
-    private lateinit var iconGenerator: IconGenerator
-
+    private val iconGenerator = IconGenerator(this)
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
 
@@ -94,27 +88,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var favoriteView: LiveData<Boolean>? = null
     private val cameraMoveInProgress = AtomicBoolean(false)
 
-    private fun showSuccessToast(text: Int) {
-        Toast.makeText(
-            this,
-            text,
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
     private fun showSuccessToast(text: String) {
         Toast.makeText(
             this,
             text,
             Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun showErrorToast(text: Int) {
-        Toast.makeText(
-            this,
-            text,
-            Toast.LENGTH_LONG
         ).show()
     }
 
@@ -133,60 +111,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             is UiState.Error -> {
                 menuItemRefresh?.endAnimation()
-                handleTramGettingError(uiState)
+                showErrorToast(getString(uiState.message, uiState.args))
             }
             is UiState.Success -> {
                 menuItemRefresh?.endAnimation()
-                handleTramGettingSuccess(uiState)
+                val tramMarkerList = uiState.data
+                showSuccessToast(getString(R.string.position_update_sucessful))
+                updateExistingMarkers(tramMarkerList, uiState.animate)
             }
             null -> {
             }
         }.makeExhaustive
-    }
-
-    private fun handleTramGettingError(uiState: UiState.Error) {
-        if (!uiState.show) {
-            return
-        }
-        val throwable = uiState.throwable
-        when (throwable) {
-            is UnknownHostException, is SocketTimeoutException -> showErrorToast(R.string.error_internet)
-            else -> {
-                if (!BuildConfig.DEBUG
-                    && throwable !is JsonSyntaxException
-                    && throwable !is IllegalStateException
-                    && throwable !is HttpException
-                ) {
-                    // TODO Move this to viewModel
-                    Crashlytics.log("Error handled with a toast.")
-                    Crashlytics.logException(throwable)
-                }
-                showErrorToast(
-                    if (BuildConfig.DEBUG)
-                        throwable.javaClass.simpleName + ": " + throwable.message
-                    else
-                        getString(R.string.error_ztm)
-                )
-            }
-        }
-    }
-
-    private fun handleTramGettingSuccess(uiState: UiState.Success) {
-        val tramMarkerList = uiState.data
-        if (tramMarkerList.isEmpty()) {
-            showErrorToast(R.string.none_position_is_up_to_date)
-            return
-        }
-        showSuccessToast(
-            if (BuildConfig.DEBUG)
-                getString(
-                    R.string.position_update_successful_amount,
-                    tramMarkerList.size
-                )
-            else
-                getString(R.string.position_update_sucessful)
-        )
-        updateExistingMarkers(tramMarkerList, uiState.animate)
     }
 
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
@@ -222,8 +157,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             reloadAds(null)
         }
-
-        iconGenerator = IconGenerator(this)
 
         handleWelcomeDialog()
     }

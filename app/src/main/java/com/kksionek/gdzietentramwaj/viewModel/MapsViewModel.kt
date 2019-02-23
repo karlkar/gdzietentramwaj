@@ -4,8 +4,13 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.location.Location
+import com.crashlytics.android.Crashlytics
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.Task
+import com.google.gson.JsonSyntaxException
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
+import com.kksionek.gdzietentramwaj.BuildConfig
+import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.dataSource.TramData
 import com.kksionek.gdzietentramwaj.repository.LocationRepository
@@ -16,6 +21,8 @@ import com.kksionek.gdzietentramwaj.view.TramMarker
 import com.kksionek.gdzietentramwaj.view.UiState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -27,11 +34,13 @@ class MapsViewModel @Inject constructor(
     private val mapsViewSettingsRepository: MapsViewSettingsRepository
 ) : ViewModel() {
 
-    enum class TramAction {
-        ADD,
-        REMOVE,
-        UPDATE
-    }
+    object NoTramsLoadedException : Throwable()
+
+//    enum class TramAction {
+//        ADD,
+//        REMOVE,
+//        UPDATE
+//    }
 
     val favoriteView = MutableLiveData<Boolean>().apply {
         value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
@@ -55,6 +64,13 @@ class MapsViewModel @Inject constructor(
     private fun startFetchingTrams() {
         compositeDisposable.add(tramRepository.dataStream
             .subscribeOn(Schedulers.io())
+            .map {
+                if (it is NetworkOperationResult.Success<List<TramData>> && it.tramDataHashMap.isEmpty()) {
+                    NetworkOperationResult.Error(NoTramsLoadedException)
+                } else {
+                    it
+                }
+            }
             .subscribe { operationResult ->
                 if (operationResult is NetworkOperationResult.Success<List<TramData>>) {
 //                    lastTramUpdate.clear()
@@ -71,7 +87,7 @@ class MapsViewModel @Inject constructor(
                     allKnownTrams.entries
                         .filter { (key) -> key !in newTramIds }
                         .onEach {
-//                            toRemoveMap[it.key] = it.value
+                            //                            toRemoveMap[it.key] = it.value
                             allKnownTrams.remove(it.key)
                         }
 
@@ -88,12 +104,33 @@ class MapsViewModel @Inject constructor(
                     }
                     showOrZoom(true)
                 } else if (operationResult is NetworkOperationResult.Error) {
-                    _tramData.postValue(
-                        UiState.Error(
-                            operationResult.throwable,
-                            true
-                        )
-                    ) //TODO logic for showing
+                    val uiState: UiState.Error = when (operationResult.throwable) {
+                        NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
+                        is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
+                        else -> {
+                            if (!BuildConfig.DEBUG
+                                && operationResult.throwable !is JsonSyntaxException
+                                && operationResult.throwable !is IllegalStateException
+                                && operationResult.throwable !is HttpException
+                            ) {
+                                // TODO Move this to wrapper class
+                                Crashlytics.log("Error handled with a toast.")
+                                Crashlytics.logException(operationResult.throwable)
+                            }
+                            if (BuildConfig.DEBUG) {
+                                UiState.Error(
+                                    R.string.debug_error_message,
+                                    listOf(
+                                        operationResult.throwable.javaClass.simpleName,
+                                        operationResult.throwable.message
+                                    )
+                                )
+                            } else {
+                                UiState.Error(R.string.error_ztm)
+                            }
+                        }
+                    }
+                    _tramData.postValue(uiState)
                 }
             })
     }
@@ -129,6 +166,7 @@ class MapsViewModel @Inject constructor(
         val favoriteViewOn = !(favoriteView.value!!)
         mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
         favoriteView.value = favoriteViewOn
+        showOrZoom(false)
     }
 
     fun forceReload() {
