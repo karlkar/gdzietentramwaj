@@ -269,7 +269,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     polylineGenerator.generatePolylinePoints(it.finalPosition, it.prevPosition)
                 it.polyline = map.addPolyline(
                     PolylineOptions()
-                        .add(it.prevPosition)
                         .color(Color.argb(255, 236, 57, 57))
                         .width(TramMarker.POLYLINE_WIDTH)
                 ).apply { points = newPoints }

@@ -36,11 +36,11 @@ class MapsViewModel @Inject constructor(
 
     object NoTramsLoadedException : Throwable()
 
-//    enum class TramAction {
-//        ADD,
-//        REMOVE,
-//        UPDATE
-//    }
+    enum class TramAction {
+        ADD,
+        REMOVE,
+        UPDATE
+    }
 
     val favoriteView = MutableLiveData<Boolean>().apply {
         value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
@@ -50,7 +50,7 @@ class MapsViewModel @Inject constructor(
     val mapControls: LiveData<MapControls> = _mapControls
 
     private val allKnownTrams = mutableMapOf<String, TramMarker>()
-//    private val lastTramUpdate = mutableMapOf<TramAction, MutableMap<String, TramMarker>>()
+    private val lastTramUpdate = mutableMapOf<TramAction, MutableMap<String, TramMarker>>()
 
     private val _tramData = MutableLiveData<UiState>()
     val tramData: LiveData<UiState> = _tramData
@@ -73,32 +73,32 @@ class MapsViewModel @Inject constructor(
             }
             .subscribe { operationResult ->
                 if (operationResult is NetworkOperationResult.Success<List<TramData>>) {
-//                    lastTramUpdate.clear()
-//                    val toRemoveMap = lastTramUpdate.getOrPut(TramAction.REMOVE) {
-//                        mutableMapOf()
-//                    }
-//                    val toUpdateMap = lastTramUpdate.getOrPut(TramAction.UPDATE) {
-//                        mutableMapOf()
-//                    }
-//                    val toAddMap = lastTramUpdate.getOrPut(TramAction.ADD) {
-//                        mutableMapOf()
-//                    }
+                    lastTramUpdate.clear()
+                    val toRemoveMap = lastTramUpdate.getOrPut(TramAction.REMOVE) {
+                        mutableMapOf()
+                    }
+                    val toUpdateMap = lastTramUpdate.getOrPut(TramAction.UPDATE) {
+                        mutableMapOf()
+                    }
+                    val toAddMap = lastTramUpdate.getOrPut(TramAction.ADD) {
+                        mutableMapOf()
+                    }
                     val newTramIds = operationResult.tramDataHashMap.map { it.id }
                     allKnownTrams.entries
                         .filter { (key) -> key !in newTramIds }
                         .onEach {
-                            //                            toRemoveMap[it.key] = it.value
+                            toRemoveMap[it.key] = it.value
                             allKnownTrams.remove(it.key)
                         }
 
                     operationResult.tramDataHashMap.forEach { tramData ->
                         val existingTramMarker = allKnownTrams[tramData.id]
                         if (existingTramMarker != null) {
-//                            toUpdateMap[tramData.id] = existingTramMarker
+                            toUpdateMap[tramData.id] = existingTramMarker
                             existingTramMarker.updatePosition(tramData.latLng)
                         } else {
                             val newTramMarker = TramMarker(tramData)
-//                            toAddMap[tramData.id] = newTramMarker
+                            toAddMap[tramData.id] = newTramMarker
                             allKnownTrams[tramData.id] = newTramMarker
                         }
                     }
@@ -136,20 +136,37 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun showOrZoom(animate: Boolean) {
-        val onlyVisibleTrams = allKnownTrams.values
+        val toAdd = lastTramUpdate[TramAction.ADD]!!.values
             .filter { isMarkerLineVisible(it.tramLine) }
             .filter { tramMarker ->
                 visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
             }
-        if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
-            postVisibleMarkers(onlyVisibleTrams, animate)
+        val toUpdate = lastTramUpdate[TramAction.UPDATE]!!.values
+            .filter { isMarkerLineVisible(it.tramLine) }
+            .filter { tramMarker ->
+                visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
+            }
+        val toDelete = lastTramUpdate[TramAction.REMOVE]!!.values
+            .filter { isMarkerLineVisible(it.tramLine) }
+            .filter { tramMarker ->
+                visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
+            }
+        if ((toAdd.size + toUpdate.size) <= MAX_VISIBLE_MARKERS) {
+            postUpdatesOfMarkers(
+                mapOf(
+                    TramAction.ADD to toAdd,
+                ),
+                animate)
         } else {
             _mapControls.postValue(MapControls.ZoomIn)
         }
     }
 
-    private fun postVisibleMarkers(tramsToBeShown: List<TramMarker>, animate: Boolean) {
-        _tramData.postValue(UiState.Success(tramsToBeShown, animate))
+    private fun postUpdatesOfMarkers(
+        updates: Map<TramAction, List<TramMarker>>,
+        animate: Boolean
+    ) {
+        _tramData.postValue(UiState.Success(updates, animate))
     }
 
     private fun isMarkerLineVisible(line: String) =
