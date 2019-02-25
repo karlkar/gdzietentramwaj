@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.location.Location
+import android.support.v7.util.DiffUtil
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.Task
@@ -36,12 +37,6 @@ class MapsViewModel @Inject constructor(
 
     object NoTramsLoadedException : Throwable()
 
-    enum class TramAction {
-        ADD,
-        REMOVE,
-        UPDATE
-    }
-
     val favoriteView = MutableLiveData<Boolean>().apply {
         value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
     }
@@ -49,8 +44,8 @@ class MapsViewModel @Inject constructor(
     private val _mapControls = MutableLiveData<MapControls>()
     val mapControls: LiveData<MapControls> = _mapControls
 
-    private val allKnownTrams = mutableMapOf<String, TramMarker>()
-    private val lastTramUpdate = mutableMapOf<TramAction, MutableMap<String, TramMarker>>()
+    private var allKnownTrams = mapOf<String, TramMarker>()
+    private var allTrams: List<TramMarker> = emptyList()
 
     private val _tramData = MutableLiveData<UiState>()
     val tramData: LiveData<UiState> = _tramData
@@ -73,35 +68,14 @@ class MapsViewModel @Inject constructor(
             }
             .subscribe { operationResult ->
                 if (operationResult is NetworkOperationResult.Success<List<TramData>>) {
-                    lastTramUpdate.clear()
-                    val toRemoveMap = lastTramUpdate.getOrPut(TramAction.REMOVE) {
-                        mutableMapOf()
-                    }
-                    val toUpdateMap = lastTramUpdate.getOrPut(TramAction.UPDATE) {
-                        mutableMapOf()
-                    }
-                    val toAddMap = lastTramUpdate.getOrPut(TramAction.ADD) {
-                        mutableMapOf()
-                    }
-                    val newTramIds = operationResult.tramDataHashMap.map { it.id }
-                    allKnownTrams.entries
-                        .filter { (key) -> key !in newTramIds }
-                        .onEach {
-                            toRemoveMap[it.key] = it.value
-                            allKnownTrams.remove(it.key)
+                    allTrams = operationResult.tramDataHashMap
+                        .map {
+                            allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(
+                                it
+                            )
                         }
+                    allKnownTrams = allTrams.map { it.id to it }.toMap()
 
-                    operationResult.tramDataHashMap.forEach { tramData ->
-                        val existingTramMarker = allKnownTrams[tramData.id]
-                        if (existingTramMarker != null) {
-                            toUpdateMap[tramData.id] = existingTramMarker
-                            existingTramMarker.updatePosition(tramData.latLng)
-                        } else {
-                            val newTramMarker = TramMarker(tramData)
-                            toAddMap[tramData.id] = newTramMarker
-                            allKnownTrams[tramData.id] = newTramMarker
-                        }
-                    }
                     showOrZoom(true)
                 } else if (operationResult is NetworkOperationResult.Error) {
                     val uiState: UiState.Error = when (operationResult.throwable) {
@@ -122,7 +96,28 @@ class MapsViewModel @Inject constructor(
                                     R.string.debug_error_message,
                                     listOf(
                                         operationResult.throwable.javaClass.simpleName,
-                                        operationResult.throwable.message
+                                        operationResult.throwable.message ?: "null" //TODO Check why an exception is thrown here
+//                                        Process: com.kksionek.gdzietentramwaj, PID: 11036
+//                                java.util.MissingFormatArgumentException: Format specifier '%2$s'
+//                                at java.util.Formatter.format(Formatter.java:2528)
+//                                at java.util.Formatter.format(Formatter.java:2458)
+//                                at java.lang.String.format(String.java:2814)
+//                                at android.content.res.Resources.getString(Resources.java:472)
+//                                at android.content.Context.getString(Context.java:572)
+//                                at com.kksionek.gdzietentramwaj.view.MapsActivity$tramDataObserver$1.onChanged(MapsActivity.kt:117)
+//                                at com.kksionek.gdzietentramwaj.view.MapsActivity$tramDataObserver$1.onChanged(MapsActivity.kt:61)
+//                                at android.arch.lifecycle.LiveData.considerNotify(LiveData.java:109)
+//                                at android.arch.lifecycle.LiveData.dispatchingValue(LiveData.java:126)
+//                                at android.arch.lifecycle.LiveData.setValue(LiveData.java:282)
+//                                at android.arch.lifecycle.MutableLiveData.setValue(MutableLiveData.java:33)
+//                                at android.arch.lifecycle.LiveData$1.run(LiveData.java:87)
+//                                at android.os.Handler.handleCallback(Handler.java:789)
+//                                at android.os.Handler.dispatchMessage(Handler.java:98)
+//                                at android.os.Looper.loop(Looper.java:164)
+//                                at android.app.ActivityThread.main(ActivityThread.java:6944)
+//                                at java.lang.reflect.Method.invoke(Native Method)
+//                                at com.android.internal.os.Zygote$MethodAndArgsCaller.run(Zygote.java:327)
+//                                at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1374)
                                     )
                                 )
                             } else {
@@ -135,42 +130,39 @@ class MapsViewModel @Inject constructor(
             })
     }
 
+    class DiffCallback(
+        private val oldList: List<TramMarker>,
+        private val newList: List<TramMarker>
+    ) : DiffUtil.Callback() {
+        override fun areItemsTheSame(p0: Int, p1: Int): Boolean = oldList[p0].id == newList[p1].id
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areContentsTheSame(p0: Int, p1: Int): Boolean =
+            oldList[p0].finalPosition == newList[p1].finalPosition
+                    && oldList[p0].prevPosition == newList[p1].prevPosition
+    }
+
     private fun showOrZoom(animate: Boolean) {
-        val toAdd = lastTramUpdate[TramAction.ADD]!!.values
-            .filter { isMarkerLineVisible(it.tramLine) }
-            .filter { tramMarker ->
-                visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
-            }
-        val toUpdate = lastTramUpdate[TramAction.UPDATE]!!.values
-            .filter { isMarkerLineVisible(it.tramLine) }
-            .filter { tramMarker ->
-                visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
-            }
-        val toDelete = lastTramUpdate[TramAction.REMOVE]!!.values
-            .filter { isMarkerLineVisible(it.tramLine) }
-            .filter { tramMarker ->
-                visibleRegion?.let { tramMarker.isOnMap(it) } ?: false
-            }
-        if ((toAdd.size + toUpdate.size) <= MAX_VISIBLE_MARKERS) {
-            postUpdatesOfMarkers(
-                mapOf(
-                    TramAction.ADD to toAdd,
-                ),
-                animate)
+        val onlyVisibleTrams = allTrams
+            .filter { isMarkerLineVisible(it.tramLine)  }
+            .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
+
+        if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
+            postMarkers(onlyVisibleTrams, animate)
         } else {
             _mapControls.postValue(MapControls.ZoomIn)
         }
     }
 
-    private fun postUpdatesOfMarkers(
-        updates: Map<TramAction, List<TramMarker>>,
-        animate: Boolean
-    ) {
-        _tramData.postValue(UiState.Success(updates, animate))
+    private fun postMarkers(visibleTrams: List<TramMarker>, animate: Boolean) {
+        _tramData.postValue(UiState.Success(visibleTrams, animate))
     }
 
     private fun isMarkerLineVisible(line: String) =
-        !(favoriteView.value ?: false) || line in tramRepository.favoriteTrams.value ?: emptyList()
+        !(favoriteView.value ?: false) || line in tramRepository.favoriteTrams.value ?: emptyList() // TODO: Getting the value from the database is not efficient
 
     private fun stopFetchingTrams() {
         compositeDisposable.clear()

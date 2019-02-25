@@ -52,7 +52,7 @@ class TramMarker @UiThread constructor(tramData: TramData) {
     }
 
     fun isOnMap(bounds: LatLngBounds): Boolean = bounds.contains(finalPosition)
-            || (_prevPosition?.run { bounds.contains(this) } ?: false)
+            || (_prevPosition?.let { bounds.contains(it) } ?: false)
 
     fun updatePosition(finalPosition: LatLng) {
         if (finalPosition === this.finalPosition)
