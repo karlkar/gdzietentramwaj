@@ -1,13 +1,10 @@
 package com.kksionek.gdzietentramwaj
 
 import android.support.multidex.MultiDexApplication
-import android.util.Log
+import com.kksionek.gdzietentramwaj.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.di.AppComponent
 import com.kksionek.gdzietentramwaj.di.AppModule
 import com.kksionek.gdzietentramwaj.di.DaggerAppComponent
-import io.reactivex.exceptions.UndeliverableException
-import io.reactivex.plugins.RxJavaPlugins
-import java.io.IOException
 import javax.inject.Inject
 
 class TramApplication : MultiDexApplication() {

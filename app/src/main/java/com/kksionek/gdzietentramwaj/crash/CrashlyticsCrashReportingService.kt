@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj
+package com.kksionek.gdzietentramwaj.crash
 
 import com.crashlytics.android.Crashlytics
 

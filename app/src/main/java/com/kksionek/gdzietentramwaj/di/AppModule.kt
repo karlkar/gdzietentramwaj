@@ -3,9 +3,9 @@ package com.kksionek.gdzietentramwaj.di
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import com.kksionek.gdzietentramwaj.CrashReportingService
-import com.kksionek.gdzietentramwaj.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.crash.CrashReportingService
+import com.kksionek.gdzietentramwaj.crash.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.dataSource.TramInterface
 import com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase
 import com.kksionek.gdzietentramwaj.dataSource.room.TramDao

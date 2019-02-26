@@ -4,7 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
-import com.kksionek.gdzietentramwaj.CrashReportingService
+import com.kksionek.gdzietentramwaj.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram
 import com.kksionek.gdzietentramwaj.repository.TramRepository
 import io.reactivex.Completable

@@ -5,13 +5,13 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.location.Location
 import android.support.v7.util.DiffUtil
-import com.crashlytics.android.Crashlytics
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.Task
 import com.google.gson.JsonSyntaxException
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.dataSource.TramData
 import com.kksionek.gdzietentramwaj.repository.LocationRepository
@@ -36,7 +36,8 @@ private const val MAX_VISIBLE_MARKERS = 50
 class MapsViewModel @Inject constructor(
     private val tramRepository: TramRepository,
     private val locationRepository: LocationRepository,
-    private val mapsViewSettingsRepository: MapsViewSettingsRepository
+    private val mapsViewSettingsRepository: MapsViewSettingsRepository,
+    private val crashReportingService: CrashReportingService
 ) : ViewModel() {
 
     object NoTramsLoadedException : Throwable()
@@ -106,9 +107,10 @@ class MapsViewModel @Inject constructor(
                                 && operationResult.throwable !is IllegalStateException
                                 && operationResult.throwable !is HttpException
                             ) {
-                                // TODO Move this to wrapper class
-                                Crashlytics.log("Error handled with a toast.")
-                                Crashlytics.logException(operationResult.throwable)
+                                crashReportingService.reportCrash(
+                                    operationResult.throwable,
+                                    "Error handled with a toast."
+                                )
                             }
                             if (BuildConfig.DEBUG) {
                                 UiState.Error(
