@@ -23,38 +23,6 @@ class TramApplication : MultiDexApplication() {
             .build()
 
         appComponent.inject(this)
-
-        RxJavaPlugins.setErrorHandler { e ->
-            val cause = if (e is UndeliverableException) e.cause else e
-            when (cause) {
-                is IOException ->
-                    // fine, irrelevant network problem or API that throws on cancellation
-                    return@setErrorHandler
-                is InterruptedException ->
-                    // fine, some blocking code was interrupted by a dispose call
-                    return@setErrorHandler
-                is NullPointerException, is IllegalArgumentException -> {
-                    // that's likely a bug in the application
-                    Log.e(TAG, "UndeliverableException happened (probably bug): $cause.message}")
-                    crashReportingService.reportCrash(
-                        cause,
-                        "UndeliverableException happened (probably bug)"
-                    )
-                    return@setErrorHandler
-                }
-                is IllegalStateException -> {
-                    // that's a bug in RxJava or in a custom operator
-                    Log.e(
-                        TAG,
-                        "UndeliverableException happened (bug in RxJava or in a custom operator): ${cause.message}"
-                    )
-                    crashReportingService.reportCrash(
-                        cause,
-                        "UndeliverableException happened (bug in RxJava or in a custom operator)"
-                    )
-                }
-            }
-        }
     }
 
     companion object {

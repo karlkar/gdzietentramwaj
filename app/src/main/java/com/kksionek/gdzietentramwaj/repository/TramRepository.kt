@@ -37,7 +37,7 @@ class TramRepository @Inject constructor(
                         val cal = Calendar.getInstance()
                         cal.add(Calendar.MINUTE, -2)
                         val refDate = dateFormat.format(cal.time)
-                        Observable.merge(
+                        Observable.mergeDelayError(
                             tramInterface.trams()
                                 .flatMapObservable { (list) -> Observable.fromIterable(list) },
                             tramInterface.buses()

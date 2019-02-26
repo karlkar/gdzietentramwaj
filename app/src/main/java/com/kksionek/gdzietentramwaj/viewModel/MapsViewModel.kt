@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.location.Location
 import android.support.v7.util.DiffUtil
+import android.util.Log
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.Task
 import com.google.gson.JsonSyntaxException
@@ -20,6 +21,7 @@ import com.kksionek.gdzietentramwaj.repository.TramRepository
 import com.kksionek.gdzietentramwaj.view.MapControls
 import com.kksionek.gdzietentramwaj.view.TramMarker
 import com.kksionek.gdzietentramwaj.view.UiState
+import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -68,11 +70,20 @@ class MapsViewModel @Inject constructor(
     init {
         compositeDisposable.add(tramRepository.favoriteTrams
             .subscribeOn(Schedulers.io())
+            .onErrorResumeNext { throwable: Throwable ->
+                Log.e(TAG, "Failed getting all the favorites from the database", throwable)
+                crashReportingService.reportCrash(
+                    throwable,
+                    "Failed getting the favorite data from database"
+                )
+                Flowable.empty<List<String>>()
+            }
             .subscribe {
                 favoriteLock.write {
                     favoriteTrams = it ?: emptyList()
                 }
-            })
+            }
+        )
     }
 
     private fun startFetchingTrams() {
@@ -202,5 +213,9 @@ class MapsViewModel @Inject constructor(
         stopFetchingTrams()
         compositeDisposable.clear()
         super.onCleared()
+    }
+
+    companion object {
+        const val TAG = "MapsViewModel"
     }
 }

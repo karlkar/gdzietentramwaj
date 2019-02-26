@@ -8,6 +8,7 @@ import com.kksionek.gdzietentramwaj.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram
 import com.kksionek.gdzietentramwaj.repository.TramRepository
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -26,6 +27,14 @@ class FavoriteLinesActivityViewModel @Inject constructor(
     init {
         compositeDisposable.add(tramRepository.allFavTrams
             .subscribeOn(Schedulers.io())
+            .onErrorResumeNext { throwable: Throwable ->
+                Log.e(TAG, "Failed getting all the favorites from the database", throwable)
+                crashReportingService.reportCrash(
+                    throwable,
+                    "Failed getting all the favorites from the database"
+                )
+                Flowable.empty()
+            }
             .subscribe { list -> _favoriteTrams.postValue(list) }
         )
     }
@@ -34,7 +43,9 @@ class FavoriteLinesActivityViewModel @Inject constructor(
         compositeDisposable.add(
             Completable.fromCallable { tramRepository.setTramFavorite(lineId, favorite) }
                 .subscribeOn(Schedulers.io())
-                .subscribe({}, {
+                .subscribe({
+                    Log.v(TAG, "Tram saved as favorite")
+                }, {
                     Log.e(TAG, "Failed to save the tram as favorite", it)
                     crashReportingService.reportCrash(
                         it,
