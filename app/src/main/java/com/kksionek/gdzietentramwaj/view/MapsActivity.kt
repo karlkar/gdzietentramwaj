@@ -113,7 +113,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             is UiState.Error -> {
                 menuItemRefresh?.endAnimation()
-                showErrorToast(getString(uiState.message, uiState.args))
+                showErrorToast(getString(uiState.message, *uiState.args.toTypedArray()))
             }
             is UiState.Success -> {
                 menuItemRefresh?.endAnimation()

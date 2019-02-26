@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.repository
 
-import android.arch.lifecycle.LiveData
 import com.kksionek.gdzietentramwaj.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.dataSource.TramData
 import com.kksionek.gdzietentramwaj.dataSource.TramInterface
@@ -13,8 +12,7 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -58,10 +56,10 @@ class TramRepository @Inject constructor(
         map { data -> NetworkOperationResult.Success(data) as NetworkOperationResult<T> }
             .onErrorReturn { NetworkOperationResult.Error(it) }
 
-    val allFavTrams: LiveData<List<FavoriteTram>>
+    val allFavTrams: Flowable<List<FavoriteTram>>
         get() = mTramDao.getAllFavTrams()
 
-    val favoriteTrams: LiveData<List<String>>
+    val favoriteTrams: Flowable<List<String>>
         get() = mTramDao.getFavoriteTrams()
 
     fun forceReload() {

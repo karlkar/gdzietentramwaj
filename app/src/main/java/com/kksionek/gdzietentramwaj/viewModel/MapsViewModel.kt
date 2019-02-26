@@ -21,10 +21,14 @@ import com.kksionek.gdzietentramwaj.view.MapControls
 import com.kksionek.gdzietentramwaj.view.TramMarker
 import com.kksionek.gdzietentramwaj.view.UiState
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 import kotlin.properties.Delegates
 
 private const val MAX_VISIBLE_MARKERS = 50
@@ -55,9 +59,24 @@ class MapsViewModel @Inject constructor(
     }
 
     private val compositeDisposable = CompositeDisposable()
+    private var tramFetchingDisposable: Disposable? = null
+
+    private val favoriteLock = ReentrantReadWriteLock()
+    private var favoriteTrams = emptyList<String>()
+
+    init {
+        compositeDisposable.add(tramRepository.favoriteTrams
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                favoriteLock.write {
+                    favoriteTrams = it ?: emptyList()
+                }
+            })
+    }
 
     private fun startFetchingTrams() {
-        compositeDisposable.add(tramRepository.dataStream
+        tramFetchingDisposable?.dispose()
+        tramFetchingDisposable = tramRepository.dataStream
             .subscribeOn(Schedulers.io())
             .map {
                 if (it is NetworkOperationResult.Success<List<TramData>> && it.tramDataHashMap.isEmpty()) {
@@ -97,28 +116,7 @@ class MapsViewModel @Inject constructor(
                                     listOf(
                                         operationResult.throwable.javaClass.simpleName,
                                         operationResult.throwable.message
-                                            ?: "null" //TODO Check why an exception is thrown here
-//                                        Process: com.kksionek.gdzietentramwaj, PID: 11036
-//                                java.util.MissingFormatArgumentException: Format specifier '%2$s'
-//                                at java.util.Formatter.format(Formatter.java:2528)
-//                                at java.util.Formatter.format(Formatter.java:2458)
-//                                at java.lang.String.format(String.java:2814)
-//                                at android.content.res.Resources.getString(Resources.java:472)
-//                                at android.content.Context.getString(Context.java:572)
-//                                at com.kksionek.gdzietentramwaj.view.MapsActivity$tramDataObserver$1.onChanged(MapsActivity.kt:117)
-//                                at com.kksionek.gdzietentramwaj.view.MapsActivity$tramDataObserver$1.onChanged(MapsActivity.kt:61)
-//                                at android.arch.lifecycle.LiveData.considerNotify(LiveData.java:109)
-//                                at android.arch.lifecycle.LiveData.dispatchingValue(LiveData.java:126)
-//                                at android.arch.lifecycle.LiveData.setValue(LiveData.java:282)
-//                                at android.arch.lifecycle.MutableLiveData.setValue(MutableLiveData.java:33)
-//                                at android.arch.lifecycle.LiveData$1.run(LiveData.java:87)
-//                                at android.os.Handler.handleCallback(Handler.java:789)
-//                                at android.os.Handler.dispatchMessage(Handler.java:98)
-//                                at android.os.Looper.loop(Looper.java:164)
-//                                at android.app.ActivityThread.main(ActivityThread.java:6944)
-//                                at java.lang.reflect.Method.invoke(Native Method)
-//                                at com.android.internal.os.Zygote$MethodAndArgsCaller.run(Zygote.java:327)
-//                                at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1374)
+                                            ?: "null"
                                     )
                                 )
                             } else {
@@ -128,7 +126,7 @@ class MapsViewModel @Inject constructor(
                     }
                     _tramData.postValue(uiState)
                 }
-            })
+            }
     }
 
     class DiffCallback(
@@ -166,12 +164,14 @@ class MapsViewModel @Inject constructor(
         _tramData.postValue(UiState.Success(visibleTrams, animate, newData))
     }
 
-    private fun isMarkerLineVisible(line: String) =
-        !(favoriteView.value
-            ?: false) || line in tramRepository.favoriteTrams.value ?: emptyList() // TODO: Getting the value from the database is not efficient
+    private fun isMarkerLineVisible(line: String): Boolean {
+        return favoriteLock.read {
+            !(favoriteView.value ?: false) || line in favoriteTrams
+        }
+    }
 
     private fun stopFetchingTrams() {
-        compositeDisposable.clear()
+        tramFetchingDisposable?.dispose()
     }
 
     fun getLastKnownLocation(): Task<Location> =
@@ -198,6 +198,7 @@ class MapsViewModel @Inject constructor(
 
     override fun onCleared() {
         stopFetchingTrams()
+        compositeDisposable.clear()
         super.onCleared()
     }
 }

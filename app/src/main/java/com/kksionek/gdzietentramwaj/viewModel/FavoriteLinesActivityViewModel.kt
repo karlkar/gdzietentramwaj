@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.viewModel
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
 import com.kksionek.gdzietentramwaj.CrashReportingService
@@ -18,8 +19,16 @@ class FavoriteLinesActivityViewModel @Inject constructor(
 
     private val compositeDisposable = CompositeDisposable()
 
-    fun getFavoriteTrams(): LiveData<List<FavoriteTram>> =
-        tramRepository.allFavTrams
+    private var _favoriteTrams =
+        MutableLiveData<List<FavoriteTram>>().apply { postValue(emptyList()) }
+    val favoriteTrams: LiveData<List<FavoriteTram>> = _favoriteTrams
+
+    init {
+        compositeDisposable.add(tramRepository.allFavTrams
+            .subscribeOn(Schedulers.io())
+            .subscribe { list -> _favoriteTrams.postValue(list) }
+        )
+    }
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
         compositeDisposable.add(

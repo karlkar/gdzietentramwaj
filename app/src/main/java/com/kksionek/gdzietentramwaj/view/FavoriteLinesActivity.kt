@@ -48,7 +48,7 @@ class FavoriteLinesActivity : AppCompatActivity() {
 
         val adapter = FavoritesAdapter()
         gridView.adapter = adapter
-        mViewModel.getFavoriteTrams()
+        mViewModel.favoriteTrams
             .observe(this, Observer<List<FavoriteTram>> { adapter.setData(it!!) })
     }
 
