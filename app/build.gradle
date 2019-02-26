@@ -39,12 +39,12 @@ android {
     }
     buildTypes {
         debug {
+            manifestPlaceholders = [enableCrashReporting:"false"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            // Only use this flag on builds you don't proguard or upload to beta-by-crashlytics
-            ext.alwaysUpdateBuildId = false
         }
         release {
+            manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 //            signingConfig signingConfigs.release

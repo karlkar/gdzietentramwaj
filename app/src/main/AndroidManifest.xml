@@ -37,6 +37,10 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/adMobAppId"/>
 
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${enableCrashReporting}" />
+
         <activity
             android:name=".view.MapsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
