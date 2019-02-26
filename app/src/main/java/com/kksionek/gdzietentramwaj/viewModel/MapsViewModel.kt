@@ -76,7 +76,7 @@ class MapsViewModel @Inject constructor(
                         }
                     allKnownTrams = allTrams.map { it.id to it }.toMap()
 
-                    showOrZoom(true)
+                    showOrZoom(true, true)
                 } else if (operationResult is NetworkOperationResult.Error) {
                     val uiState: UiState.Error = when (operationResult.throwable) {
                         NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
@@ -96,7 +96,8 @@ class MapsViewModel @Inject constructor(
                                     R.string.debug_error_message,
                                     listOf(
                                         operationResult.throwable.javaClass.simpleName,
-                                        operationResult.throwable.message ?: "null" //TODO Check why an exception is thrown here
+                                        operationResult.throwable.message
+                                            ?: "null" //TODO Check why an exception is thrown here
 //                                        Process: com.kksionek.gdzietentramwaj, PID: 11036
 //                                java.util.MissingFormatArgumentException: Format specifier '%2$s'
 //                                at java.util.Formatter.format(Formatter.java:2528)
@@ -145,24 +146,29 @@ class MapsViewModel @Inject constructor(
                     && oldList[p0].prevPosition == newList[p1].prevPosition
     }
 
-    private fun showOrZoom(animate: Boolean) {
+    private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
         val onlyVisibleTrams = allTrams
-            .filter { isMarkerLineVisible(it.tramLine)  }
+            .filter { isMarkerLineVisible(it.tramLine) }
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
 
         if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
-            postMarkers(onlyVisibleTrams, animate)
+            postMarkers(onlyVisibleTrams, animate, newData)
         } else {
             _mapControls.postValue(MapControls.ZoomIn)
         }
     }
 
-    private fun postMarkers(visibleTrams: List<TramMarker>, animate: Boolean) {
-        _tramData.postValue(UiState.Success(visibleTrams, animate))
+    private fun postMarkers(
+        visibleTrams: List<TramMarker>,
+        animate: Boolean,
+        newData: Boolean = false
+    ) {
+        _tramData.postValue(UiState.Success(visibleTrams, animate, newData))
     }
 
     private fun isMarkerLineVisible(line: String) =
-        !(favoriteView.value ?: false) || line in tramRepository.favoriteTrams.value ?: emptyList() // TODO: Getting the value from the database is not efficient
+        !(favoriteView.value
+            ?: false) || line in tramRepository.favoriteTrams.value ?: emptyList() // TODO: Getting the value from the database is not efficient
 
     private fun stopFetchingTrams() {
         compositeDisposable.clear()

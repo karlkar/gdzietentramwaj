@@ -21,7 +21,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.util.DiffUtil
 import android.support.v7.util.DiffUtil.DiffResult.NO_POSITION
-import android.support.v7.util.ListUpdateCallback
 import android.support.v7.widget.ShareActionProvider
 import android.support.v7.widget.Toolbar
 import android.text.Html
@@ -119,7 +118,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             is UiState.Success -> {
                 menuItemRefresh?.endAnimation()
                 val tramMarkerList = uiState.data
-                showSuccessToast(getString(R.string.position_update_sucessful))
+                if (uiState.newData) {
+                    showSuccessToast(getString(R.string.position_update_sucessful))
+                }
                 updateExistingMarkers(tramMarkerList, uiState.animate)
             }
             null -> {
@@ -245,53 +246,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             else -> return super.onOptionsItemSelected(item)
         }
         return true
-    }
-
-    inner class UpdateCallback(
-        private val oldList: List<TramMarker>,
-        private val newList: List<TramMarker>,
-        private val diffResult: DiffUtil.DiffResult) : ListUpdateCallback {
-        override fun onChanged(p0: Int, p1: Int, p2: Any?) {
-        }
-
-        override fun onMoved(p0: Int, p1: Int) {
-        }
-
-        override fun onInserted(position: Int, count: Int) {
-            for (i in position..(position + count - 1)) {
-                val tramMarker = newList[diffResult.convertOldPositionToNew(i)]
-                if (tramMarker.marker == null) {
-                    tramMarker.marker = map.addMarker(
-                        MarkerOptions()
-                            .position(tramMarker.prevPosition!!)
-                            .icon(TramMarker.getBitmap(tramMarker.tramLine, iconGenerator))
-                    )
-                }
-                if (tramMarker.polyline == null) {
-                    val newPoints =
-                        polylineGenerator.generatePolylinePoints(
-                            tramMarker.finalPosition,
-                            tramMarker.prevPosition
-                        )
-                    tramMarker.polyline = map.addPolyline(
-                        PolylineOptions()
-                            .color(Color.argb(255, 236, 57, 57))
-                            .width(TramMarker.POLYLINE_WIDTH)
-                    ).apply { points = newPoints }
-                }
-                tramPathAnimator.addMarker(tramMarker)
-            }
-        }
-
-        override fun onRemoved(position: Int, count: Int) {
-            for (i in position..(position + count - 1)) {
-
-                oldList[diffResult.convertNewPositionToOld(i)].apply {
-                    tramPathAnimator.removeMarker(this)
-                    remove()
-                }
-            }
-        }
     }
 
     @UiThread
