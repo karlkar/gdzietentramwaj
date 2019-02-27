@@ -7,7 +7,6 @@ import android.location.Location
 import android.support.v7.util.DiffUtil
 import android.util.Log
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.tasks.Task
 import com.google.gson.JsonSyntaxException
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
@@ -57,6 +56,9 @@ class MapsViewModel @Inject constructor(
     private val _tramData = MutableLiveData<UiState>()
     val tramData: LiveData<UiState> = _tramData
 
+    private val _lastLocation = MutableLiveData<Location>()
+    val lastLocation: LiveData<Location> = _lastLocation
+
     var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, _ ->
         showOrZoom(false)
     }
@@ -68,6 +70,10 @@ class MapsViewModel @Inject constructor(
     private var favoriteTrams = emptyList<String>()
 
     init {
+        observeFavoriteTrams()
+    }
+
+    private fun observeFavoriteTrams() {
         compositeDisposable.add(tramRepository.favoriteTrams
             .subscribeOn(Schedulers.io())
             .onErrorResumeNext { throwable: Throwable ->
@@ -84,6 +90,13 @@ class MapsViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    fun forceReloadLastLocation() {
+        compositeDisposable.add(locationRepository.lastKnownLocation
+            .subscribe { location ->
+                _lastLocation.postValue(location)
+            })
     }
 
     private fun startFetchingTrams() {
@@ -186,9 +199,6 @@ class MapsViewModel @Inject constructor(
     private fun stopFetchingTrams() {
         tramFetchingDisposable?.dispose()
     }
-
-    fun getLastKnownLocation(): Task<Location> =
-        locationRepository.lastKnownLocation
 
     fun toggleFavorite() {
         val favoriteViewOn = !(favoriteView.value!!)

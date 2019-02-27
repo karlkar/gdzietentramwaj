@@ -150,17 +150,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         viewModel.tramData.observe(this, tramDataObserver)
 
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment?
+        viewModel.lastLocation.observe(this, Observer { location ->
+            location?.let {
+                reloadAds(it)
+                if (this::map.isInitialized) {
+                    val latLng = LatLng(it.latitude, it.longitude)
+                    map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                    map.isMyLocationEnabled = checkLocationPermission(false)
+                    viewModel.lastLocation.removeObservers(this)
+                }
+            }
+        })
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
         adProviderInterface.initialize(this, getString(R.string.adMobAppId))
         adProviderInterface.showAd(findViewById(R.id.adView))
-        if (checkLocationPermission(true)) {
-            applyLastKnownLocation(true, false)
-        } else {
-            reloadAds(null)
-        }
+        checkLocationPermission(true)
 
         handleWelcomeDialog()
     }
@@ -174,21 +180,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         sharedPreferences.edit()
             .putInt(PREF_LAST_VERSION, BuildConfig.VERSION_CODE)
             .apply()
-    }
-
-    private fun applyLastKnownLocation(adView: Boolean, map: Boolean) {
-        viewModel.getLastKnownLocation()
-            .addOnSuccessListener(this) { location ->
-                location?.let {
-                    if (adView) {
-                        reloadAds(it)
-                    }
-                    if (map) {
-                        val latLng = LatLng(it.latitude, it.longitude)
-                        this.map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-                    }
-                }
-            }
     }
 
     override fun onResume() {
@@ -283,9 +274,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
                 if (tramMarker.polyline == null) {
                     val newPoints = polylineGenerator.generatePolylinePoints(
-                            tramMarker.finalPosition,
-                            tramMarker.prevPosition
-                        )
+                        tramMarker.finalPosition,
+                        tramMarker.prevPosition
+                    )
                     tramMarker.polyline = map.addPolyline(
                         PolylineOptions()
                             .color(Color.argb(255, 236, 57, 57))
@@ -342,16 +333,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isIndoorEnabled = false
             isTrafficEnabled = false
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            map.isMyLocationEnabled =
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        } else {
-            map.isMyLocationEnabled = true
-        }
 
-        if (checkLocationPermission(false)) {
-            applyLastKnownLocation(false, true)
-        }
+        viewModel.forceReloadLastLocation()
         map.apply {
             setOnMarkerClickListener { true }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
@@ -368,16 +351,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun reloadAds(location: Location?) {
-        fun createDefaultLocation(): Location {
-            val loc = Location("")
-            loc.latitude = WARSAW_LAT
-            loc.longitude = WARSAW_LNG
-            return loc
-        }
-
-        val adLocation = location ?: createDefaultLocation()
-        adProviderInterface.loadAd(applicationContext, adLocation)
+    private fun reloadAds(location: Location) {
+        adProviderInterface.loadAd(applicationContext, location)
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -386,16 +361,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    map.run { isMyLocationEnabled = true }
-                    applyLastKnownLocation(true, true)
-                } else {
-                    map.run { isMyLocationEnabled = false }
-                }
-            }
-        }
+        viewModel.forceReloadLastLocation()
     }
 
     private fun showAboutAppDialog() {
