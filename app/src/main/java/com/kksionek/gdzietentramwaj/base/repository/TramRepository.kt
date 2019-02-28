@@ -11,9 +11,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -23,10 +20,6 @@ class TramRepository @Inject constructor(
     private val favoriteRepositoryAdder: FavoriteLinesConsumer
 ) {
     //TODO divide it into map and favorite parts
-    private val dateFormat = SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss",
-        Locale.getDefault()
-    )
     private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
     val dataStream: Flowable<NetworkOperationResult<List<TramData>>> =
@@ -36,9 +29,6 @@ class TramRepository @Inject constructor(
                 Flowable.interval(0, 10, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
                     .flatMap {
-                        val cal = Calendar.getInstance()
-                        cal.add(Calendar.MINUTE, -2)
-                        val refDate = dateFormat.format(cal.time)
                         Observable.mergeDelayError(
                             tramInterface.trams()
                                 .flatMapObservable { (list) -> Observable.fromIterable(list) },
@@ -46,8 +36,7 @@ class TramRepository @Inject constructor(
                                 .flatMapObservable { (list) -> Observable.fromIterable(list) }
                         )
                             .subscribeOn(Schedulers.io())
-                            .filter { (time) -> refDate <= time }
-                            .toList() //TODO repository shouldn't have this logic probably...
+                            .toList()
                             .doOnSuccess(favoriteRepositoryAdder)
                             .toNetworkOperationResult()
                             .toFlowable()

@@ -27,6 +27,9 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
 import kotlin.concurrent.read
@@ -105,57 +108,77 @@ class MapsViewModel @Inject constructor(
         tramFetchingDisposable?.dispose()
         tramFetchingDisposable = tramRepository.dataStream
             .subscribeOn(Schedulers.io())
-            .map {
-                if (it is NetworkOperationResult.Success<List<TramData>> && it.tramDataHashMap.isEmpty()) {
-                    NetworkOperationResult.Error(NoTramsLoadedException)
-                } else {
-                    it
-                }
-            }
+            .filterOutOutdated()
+            .transformEmptyListToError()
             .subscribe { operationResult ->
                 if (operationResult is NetworkOperationResult.Success<List<TramData>>) {
-                    allTrams = operationResult.tramDataHashMap
-                        .map {
-                            allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(
-                                it
-                            )
-                        }
-                    allKnownTrams = allTrams.map { it.id to it }.toMap()
-
-                    showOrZoom(true, true)
+                    handleSuccess(operationResult)
                 } else if (operationResult is NetworkOperationResult.Error) {
-                    val uiState: UiState.Error = when (operationResult.throwable) {
-                        NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
-                        is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
-                        else -> {
-                            if (!BuildConfig.DEBUG
-                                && operationResult.throwable !is JsonSyntaxException
-                                && operationResult.throwable !is IllegalStateException
-                                && operationResult.throwable !is HttpException
-                            ) {
-                                crashReportingService.reportCrash(
-                                    operationResult.throwable,
-                                    "Error handled with a toast."
-                                )
-                            }
-                            if (BuildConfig.DEBUG) {
-                                UiState.Error(
-                                    R.string.debug_error_message,
-                                    listOf(
-                                        operationResult.throwable.javaClass.simpleName,
-                                        operationResult.throwable.message
-                                            ?: "null"
-                                    )
-                                )
-                            } else {
-                                UiState.Error(R.string.error_ztm)
-                            }
-                        }
-                    }
-                    _tramData.postValue(uiState)
+                    handleError(operationResult)
                 }
             }
     }
+
+    private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<TramData>>) {
+        allTrams = operationResult.tramDataHashMap
+            .map { allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(it) }
+        allKnownTrams = allTrams.associateBy { it.id }
+
+        showOrZoom(true, true)
+    }
+
+    private fun handleError(operationResult: NetworkOperationResult.Error<List<TramData>>) {
+        val uiState: UiState.Error = when (operationResult.throwable) {
+            NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
+            is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
+            else -> {
+                if (!BuildConfig.DEBUG
+                    && operationResult.throwable !is JsonSyntaxException
+                    && operationResult.throwable !is IllegalStateException
+                    && operationResult.throwable !is HttpException
+                ) {
+                    crashReportingService.reportCrash(
+                        operationResult.throwable,
+                        "Error handled with a toast."
+                    )
+                }
+                if (BuildConfig.DEBUG) {
+                    UiState.Error(
+                        R.string.debug_error_message,
+                        listOf(
+                            operationResult.throwable.javaClass.simpleName,
+                            operationResult.throwable.message
+                                ?: "null"
+                        )
+                    )
+                } else {
+                    UiState.Error(R.string.error_ztm)
+                }
+            }
+        }
+        _tramData.postValue(uiState)
+    }
+
+    private fun Flowable<NetworkOperationResult<List<TramData>>>.filterOutOutdated() =
+        map { result ->
+            if (result is NetworkOperationResult.Success<List<TramData>>) {
+                val refDate = Calendar.getInstance()
+                    .apply { add(Calendar.MINUTE, -2) }
+                    .let { dateFormat.format(it.time) }
+                NetworkOperationResult.Success(result.tramDataHashMap.filter { refDate <= it.time })
+            } else {
+                result
+            }
+        }
+
+    private fun Flowable<NetworkOperationResult<List<TramData>>>.transformEmptyListToError() =
+        map {
+            if (it is NetworkOperationResult.Success<List<TramData>> && it.tramDataHashMap.isEmpty()) {
+                NetworkOperationResult.Error(NoTramsLoadedException)
+            } else {
+                it
+            }
+        }
 
     class DiffCallback(
         private val oldList: List<TramMarker>,
@@ -229,5 +252,10 @@ class MapsViewModel @Inject constructor(
 
     companion object {
         const val TAG = "MapsViewModel"
+
+        private val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss",
+            Locale.US
+        )
     }
 }
