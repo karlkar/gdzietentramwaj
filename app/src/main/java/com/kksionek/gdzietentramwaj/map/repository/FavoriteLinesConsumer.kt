@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.base.repository
+package com.kksionek.gdzietentramwaj.map.repository
 
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao

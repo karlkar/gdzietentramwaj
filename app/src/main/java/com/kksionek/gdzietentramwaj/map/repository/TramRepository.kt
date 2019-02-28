@@ -1,6 +1,5 @@
-package com.kksionek.gdzietentramwaj.base.repository
+package com.kksionek.gdzietentramwaj.map.repository
 
-import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
@@ -15,11 +14,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TramRepository @Inject constructor(
-    private val mTramDao: TramDao,
+    private val tramDao: TramDao,
     private val tramInterface: TramInterface,
     private val favoriteRepositoryAdder: FavoriteLinesConsumer
 ) {
-    //TODO divide it into map and favorite parts
     private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
     val dataStream: Flowable<NetworkOperationResult<List<TramData>>> =
@@ -47,17 +45,10 @@ class TramRepository @Inject constructor(
         map { data -> NetworkOperationResult.Success(data) as NetworkOperationResult<T> }
             .onErrorReturn { NetworkOperationResult.Error(it) }
 
-    val allFavTrams: Flowable<List<FavoriteTram>>
-        get() = mTramDao.getAllFavTrams()
-
     val favoriteTrams: Flowable<List<String>>
-        get() = mTramDao.getFavoriteTrams()
+        get() = tramDao.getFavoriteTrams()
 
     fun forceReload() {
         dataTrigger.onNext(Unit)
-    }
-
-    fun setTramFavorite(lineId: String, favorite: Boolean) {
-        mTramDao.setFavorite(lineId, favorite)
     }
 }

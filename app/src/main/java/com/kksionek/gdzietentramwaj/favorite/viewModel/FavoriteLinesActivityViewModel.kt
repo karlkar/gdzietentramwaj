@@ -6,7 +6,7 @@ import android.arch.lifecycle.ViewModel
 import android.util.Log
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
-import com.kksionek.gdzietentramwaj.base.repository.TramRepository
+import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteTramRepository
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
@@ -14,7 +14,7 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class FavoriteLinesActivityViewModel @Inject constructor(
-    private val tramRepository: TramRepository,
+    private val favoriteTramRepository: FavoriteTramRepository,
     private val crashReportingService: CrashReportingService
 ) : ViewModel() {
 
@@ -25,7 +25,7 @@ class FavoriteLinesActivityViewModel @Inject constructor(
     val favoriteTrams: LiveData<List<FavoriteTram>> = _favoriteTrams
 
     init {
-        compositeDisposable.add(tramRepository.allFavTrams
+        compositeDisposable.add(favoriteTramRepository.allFavTrams
             .subscribeOn(Schedulers.io())
             .onErrorResumeNext { throwable: Throwable ->
                 Log.e(TAG, "Failed getting all the favorites from the database", throwable)
@@ -41,7 +41,7 @@ class FavoriteLinesActivityViewModel @Inject constructor(
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
         compositeDisposable.add(
-            Completable.fromCallable { tramRepository.setTramFavorite(lineId, favorite) }
+            Completable.fromCallable { favoriteTramRepository.setTramFavorite(lineId, favorite) }
                 .subscribeOn(Schedulers.io())
                 .subscribe({
                     Log.v(TAG, "Tram saved as favorite")
