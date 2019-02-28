@@ -43,6 +43,8 @@ import com.google.maps.android.ui.IconGenerator
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.WARSAW_LAT
+import com.kksionek.gdzietentramwaj.WARSAW_LNG
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
@@ -54,9 +56,6 @@ private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
 
 private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
 private const val PREF_LAST_VERSION = "LAST_VERSION"
-
-private const val WARSAW_LAT = 52.231841 // TODO move to GlobalConstants.kt
-private const val WARSAW_LNG = 21.005940
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -322,12 +321,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
         map.apply {
             moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(
-                        WARSAW_LAT,
-                        WARSAW_LNG
-                    ), 15f
-                )
+                CameraUpdateFactory.newLatLngZoom(LatLng(WARSAW_LAT, WARSAW_LNG), 15f)
             )
             setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(

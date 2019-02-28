@@ -8,12 +8,11 @@ import android.location.Location
 import android.os.Build
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Tasks
+import com.kksionek.gdzietentramwaj.WARSAW_LAT
+import com.kksionek.gdzietentramwaj.WARSAW_LNG
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
-
-private const val WARSAW_LAT = 52.231841
-private const val WARSAW_LNG = 21.005940
 
 class LocationRepository @Inject constructor(private val context: Context) {
 
