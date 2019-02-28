@@ -11,6 +11,7 @@ import com.google.gson.JsonSyntaxException
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.WARSAW_LOCATION
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.base.dataSource.TramData
@@ -94,6 +95,7 @@ class MapsViewModel @Inject constructor(
 
     fun forceReloadLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
+            .onErrorReturnItem(WARSAW_LOCATION)
             .subscribe { location ->
                 _lastLocation.postValue(location)
             })

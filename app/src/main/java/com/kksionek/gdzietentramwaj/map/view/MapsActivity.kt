@@ -43,8 +43,7 @@ import com.google.maps.android.ui.IconGenerator
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.WARSAW_LAT
-import com.kksionek.gdzietentramwaj.WARSAW_LNG
+import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
@@ -321,7 +320,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
         map.apply {
             moveCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(WARSAW_LAT, WARSAW_LNG), 15f)
+                CameraUpdateFactory.newLatLngZoom(WARSAW_LATLNG, 15f)
             )
             setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
