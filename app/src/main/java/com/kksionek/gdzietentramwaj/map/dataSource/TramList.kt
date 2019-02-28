@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.base.dataSource
+package com.kksionek.gdzietentramwaj.map.dataSource
 
 import com.google.gson.annotations.SerializedName
 import java.util.ArrayList

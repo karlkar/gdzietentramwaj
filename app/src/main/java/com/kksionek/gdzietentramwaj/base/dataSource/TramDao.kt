@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.base.dataSource.room
+package com.kksionek.gdzietentramwaj.base.dataSource
 
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert

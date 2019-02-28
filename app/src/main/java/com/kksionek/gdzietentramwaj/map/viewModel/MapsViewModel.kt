@@ -13,9 +13,9 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.WARSAW_LOCATION
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
-import com.kksionek.gdzietentramwaj.base.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.base.dataSource.TramData
 import com.kksionek.gdzietentramwaj.base.repository.TramRepository
+import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.view.MapControls

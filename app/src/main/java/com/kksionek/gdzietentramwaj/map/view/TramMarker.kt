@@ -11,7 +11,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.maps.android.ui.IconGenerator
-import com.kksionek.gdzietentramwaj.base.dataSource.TramData
+import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 
 class TramMarker @UiThread constructor(tramData: TramData) {
 

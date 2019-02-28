@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.base.dataSource
+package com.kksionek.gdzietentramwaj.map.dataSource
 
 import io.reactivex.Single
 import retrofit2.http.GET

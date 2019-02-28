@@ -1,10 +1,10 @@
 package com.kksionek.gdzietentramwaj.base.repository
 
-import com.kksionek.gdzietentramwaj.base.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.base.dataSource.TramData
-import com.kksionek.gdzietentramwaj.base.dataSource.TramInterface
-import com.kksionek.gdzietentramwaj.base.dataSource.room.FavoriteTram
-import com.kksionek.gdzietentramwaj.base.dataSource.room.TramDao
+import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
+import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.dataSource.TramData
+import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable

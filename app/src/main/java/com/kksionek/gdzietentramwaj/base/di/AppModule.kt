@@ -6,9 +6,9 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.crash.CrashlyticsCrashReportingService
-import com.kksionek.gdzietentramwaj.base.dataSource.TramInterface
-import com.kksionek.gdzietentramwaj.base.dataSource.room.MyDatabase
-import com.kksionek.gdzietentramwaj.base.dataSource.room.TramDao
+import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
+import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
 import dagger.Module
 import dagger.Provides
 import io.reactivex.schedulers.Schedulers

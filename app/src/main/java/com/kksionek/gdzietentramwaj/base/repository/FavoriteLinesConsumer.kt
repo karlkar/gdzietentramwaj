@@ -1,9 +1,8 @@
 package com.kksionek.gdzietentramwaj.base.repository
 
-import com.kksionek.gdzietentramwaj.base.dataSource.TramData
-import com.kksionek.gdzietentramwaj.base.dataSource.room.FavoriteTram
-import com.kksionek.gdzietentramwaj.base.dataSource.room.TramDao
-
+import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
+import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import io.reactivex.functions.Consumer
 import javax.inject.Inject
 
