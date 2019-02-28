@@ -8,6 +8,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 
 class AdProvider : AdProviderInterface {
 

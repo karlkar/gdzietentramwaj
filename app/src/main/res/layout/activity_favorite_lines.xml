@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.kksionek.gdzietentramwaj.view.FavoriteLinesActivity">
+    tools:context="com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity">
 
     <include
         android:id="@+id/my_toolbar"

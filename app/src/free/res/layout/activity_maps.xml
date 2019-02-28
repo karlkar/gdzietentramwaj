@@ -35,5 +35,5 @@
               android:layout_height="match_parent"
               android:layout_above="@id/adBackground"
               android:layout_below="@id/my_toolbar"
-              tools:context="com.kksionek.gdzietentramwaj.view.MapsActivity"/>
+              tools:context="com.kksionek.gdzietentramwaj.map.view.MapsActivity"/>
 </RelativeLayout>

@@ -14,8 +14,8 @@ import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.kksionek.gdzietentramwaj.dataSource.room.FavoriteTram;
-import com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase;
+import com.kksionek.gdzietentramwaj.base.dataSource.room.FavoriteTram;
+import com.kksionek.gdzietentramwaj.base.dataSource.room.MyDatabase;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase.MIGRATION_1_2;
-import static com.kksionek.gdzietentramwaj.dataSource.room.MyDatabase.MIGRATION_2_3;
+import static com.kksionek.gdzietentramwaj.base.dataSource.room.MyDatabase.MIGRATION_1_2;
+import static com.kksionek.gdzietentramwaj.base.dataSource.room.MyDatabase.MIGRATION_2_3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
