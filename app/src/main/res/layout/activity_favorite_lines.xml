@@ -21,15 +21,15 @@
         android:layout_alignParentRight="true"
         android:text="@string/fav_instruction"/>
 
-    <GridView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:layout_below="@id/clickToRemoveText"
-        android:numColumns="7">
+        tools:listItem="@layout/grid_favorite_element">
 
-    </GridView>
+    </android.support.v7.widget.RecyclerView>
 
 </RelativeLayout>
