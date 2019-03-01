@@ -18,6 +18,8 @@ private const val COLUMN_COUNT = 7
 
 class FavoriteLinesActivity : AppCompatActivity() {
 
+    // https://medium.com/androiddevelopers/testing-room-migrations-be93cdb0d975
+
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
 
