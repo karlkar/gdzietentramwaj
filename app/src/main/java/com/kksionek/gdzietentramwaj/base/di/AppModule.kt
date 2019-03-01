@@ -8,14 +8,11 @@ import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.crash.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
-import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
 import dagger.Module
 import dagger.Provides
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import retrofit2.CallAdapter
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -54,20 +51,6 @@ class AppModule(private val application: TramApplication) {
     @Singleton
     @Provides
     internal fun getTramDao(myDatabase: MyDatabase): TramDao = myDatabase.tramDao()
-
-    @Singleton
-    @Provides
-    internal fun provideTramInterface(
-        okHttpClient: OkHttpClient,
-        rxAdapter: CallAdapter.Factory
-    ): TramInterface {
-        return Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .addCallAdapterFactory(rxAdapter)
-            .baseUrl("https://api.um.warszawa.pl/")
-            .build().create(TramInterface::class.java)
-    }
 
     @Singleton
     @Provides

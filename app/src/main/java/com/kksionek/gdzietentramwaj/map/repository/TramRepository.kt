@@ -4,10 +4,10 @@ import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
+import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
@@ -40,10 +40,6 @@ class TramRepository @Inject constructor(
                             .toFlowable()
                     }
             }
-
-    private fun <T> Single<T>.toNetworkOperationResult() =
-        map { data -> NetworkOperationResult.Success(data) as NetworkOperationResult<T> }
-            .onErrorReturn { NetworkOperationResult.Error(it) }
 
     val favoriteTrams: Flowable<List<String>>
         get() = tramDao.getFavoriteTrams()

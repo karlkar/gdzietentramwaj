@@ -13,8 +13,10 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.WARSAW_LOCATION
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
+import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.TramRepository
@@ -42,6 +44,7 @@ class MapsViewModel @Inject constructor(
     private val tramRepository: TramRepository,
     private val locationRepository: LocationRepository,
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,
+    private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService
 ) : ViewModel() {
 
@@ -62,6 +65,9 @@ class MapsViewModel @Inject constructor(
 
     private val _lastLocation = MutableLiveData<Location>()
     val lastLocation: LiveData<Location> = _lastLocation
+
+    private val _difficulties = MutableLiveData<List<DifficultiesEntity>>()
+    val difficulties: LiveData<List<DifficultiesEntity>> = _difficulties
 
     var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, _ ->
         showOrZoom(false)
@@ -120,7 +126,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<TramData>>) {
-        allTrams = operationResult.tramDataHashMap
+        allTrams = operationResult.data
             .map { allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(it) }
         allKnownTrams = allTrams.associateBy { it.id }
 
@@ -165,7 +171,7 @@ class MapsViewModel @Inject constructor(
                 val refDate = Calendar.getInstance()
                     .apply { add(Calendar.MINUTE, -2) }
                     .let { dateFormat.format(it.time) }
-                NetworkOperationResult.Success(result.tramDataHashMap.filter { refDate <= it.time })
+                NetworkOperationResult.Success(result.data.filter { refDate <= it.time })
             } else {
                 result
             }
@@ -173,7 +179,7 @@ class MapsViewModel @Inject constructor(
 
     private fun Flowable<NetworkOperationResult<List<TramData>>>.transformEmptyListToError() =
         map {
-            if (it is NetworkOperationResult.Success<List<TramData>> && it.tramDataHashMap.isEmpty()) {
+            if (it is NetworkOperationResult.Success<List<TramData>> && it.data.isEmpty()) {
                 NetworkOperationResult.Error(NoTramsLoadedException)
             } else {
                 it
@@ -232,8 +238,20 @@ class MapsViewModel @Inject constructor(
         showOrZoom(false)
     }
 
-    fun forceReload() {
+    fun forceReloadTrams() {
         tramRepository.forceReload()
+    }
+
+    fun forceReloadDifficulties() {
+        compositeDisposable.add(
+            difficultiesRepository.getDifficulties()
+                .subscribe { result ->
+                    when (result) {
+                        is NetworkOperationResult.Success -> _difficulties.postValue(result.data)
+                        is NetworkOperationResult.Error ->
+                            Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                    }
+                })
     }
 
     fun onResume() {

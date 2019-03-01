@@ -25,6 +25,7 @@ import android.support.v7.widget.ShareActionProvider
 import android.support.v7.widget.Toolbar
 import android.text.Html
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -83,8 +84,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val iconGenerator by lazy { IconGenerator(this) }
     private val polylineGenerator = PolylineGenerator()
-    private val tramPathAnimator =
-        TramPathAnimator(polylineGenerator)
+    private val tramPathAnimator = TramPathAnimator(polylineGenerator)
 
     private lateinit var viewModel: MapsViewModel
     private var favoriteView: LiveData<Boolean>? = null
@@ -161,6 +161,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         })
+
+        viewModel.difficulties.observe(this, Observer { difficulties ->
+            Log.d(TAG, difficulties.toString())
+            Toast.makeText(this, difficulties.toString(), Toast.LENGTH_LONG).show()
+        })
+
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
@@ -226,7 +232,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_item_info -> showAboutAppDialog()
-            R.id.menu_item_refresh -> viewModel.forceReload()
+            R.id.menu_item_refresh -> {
+                viewModel.forceReloadTrams()
+                viewModel.forceReloadDifficulties()
+            }
             R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_favorite -> {
@@ -414,5 +423,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             )
         }
+    }
+
+    companion object {
+        private const val TAG = "MapsActivity"
     }
 }
