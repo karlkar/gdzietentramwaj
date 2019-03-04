@@ -9,7 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 private val pattern =
-    "<tr.*?(<img src=\".*?\".*?)okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
+    "<tr.*?id=\"komunikat_(.*?)_.*?(<img src=\".*?\".*?)okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
 private val singleIconPattern = "<img src=\"(.*?)\"".toRegex()
 
 class DifficultiesRepository @Inject constructor(
@@ -22,16 +22,18 @@ class DifficultiesRepository @Inject constructor(
             .map { result ->
                 pattern.findAll(result)
                     .map { matchResult ->
+                        val id = matchResult.groupValues[1]
                         val iconList: List<String>
-                        matchResult.groupValues[1].let { allIconsStr ->
+                        matchResult.groupValues[2].let { allIconsStr ->
                             iconList = singleIconPattern.findAll(allIconsStr)
                                 .map { it.groupValues[1] }
                                 .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
                                 .toList()
                         }
-                        val period = matchResult.groupValues[2]
-                        val msg = matchResult.groupValues[3]
-                        val link = matchResult.groupValues[4]
+                        val period = matchResult.groupValues[3]
+                        val msg = matchResult.groupValues[4]
+                        val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
+                            .replace("&amp;", "&") + "&i=$id"
                         DifficultiesEntity(iconList, period, msg, link)
                     }
                     .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }

@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -162,12 +163,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
 
-        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter()
+        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter {
+            startActivity(Intent(ACTION_VIEW, Uri.parse(it.link)))
+        }
 
-        viewModel.difficulties.observe(this, Observer { difficulties ->
-            (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                difficulties
-            )
+        viewModel.difficulties.observe(this, Observer { difficulties -> // TODO Wrap it with sealed class to show progress
+            if (difficulties?.size == 0) {
+                //TODO implement empty view
+            } else {
+                (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                    difficulties
+                )
+            }
         })
 
         val mapFragment =
@@ -349,10 +356,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isBuildingsEnabled = false
             isIndoorEnabled = false
             isTrafficEnabled = false
-        }
 
-        viewModel.forceReloadLastLocation() // TODO move it down not to break the apply block
-        map.apply {
             setOnMarkerClickListener { true }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
@@ -366,6 +370,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             })
         }
+
+        viewModel.forceReloadLastLocation()
     }
 
     private fun reloadAds(location: Location) {

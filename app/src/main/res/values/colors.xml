@@ -6,4 +6,5 @@
     <color name="polylineColor">#ec3939</color>
     <color name="favoriteLineColor">#ffe78e</color>
     <color name="tramColor">#f9f5ce</color>
+    <color name="difficulties_bg">#F3FF45</color>
 </resources>

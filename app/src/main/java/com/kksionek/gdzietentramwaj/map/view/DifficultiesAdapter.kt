@@ -5,10 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
+import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import kotlinx.android.synthetic.main.item_difficulty.*
 
-class DifficultiesAdapter : BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>() {
+class DifficultiesAdapter(onItemClickListener: OnItemClickListener<DifficultiesEntity>) :
+    BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>(onItemClickListener) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -31,7 +33,6 @@ class DifficultiesAdapter : BaseAdapter<DifficultiesEntity, DifficultiesAdapter.
         override fun bind(data: DifficultiesEntity) {
             (recyclerview_difficulty_icons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
             textview_difficulty_description.text = data.msg
-            button_difficulty_link.setOnClickListener { }
         }
     }
 }
