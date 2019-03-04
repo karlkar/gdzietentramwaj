@@ -29,7 +29,6 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -45,16 +44,11 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
-import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
-import kotlinx.android.synthetic.main.item_difficulty.*
-import kotlinx.android.synthetic.main.item_difficulty_icon.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -185,58 +179,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         checkLocationPermission(true)
 
         handleWelcomeDialog()
-    }
-
-    // TODO Move those adapters from this file
-    class DifficultiesAdapter : BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>() {
-
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
-        ): BaseAdapter.ViewHolder<DifficultiesEntity> {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_difficulty, parent, false)
-            return ViewHolder(this, view)
-        }
-
-        class ViewHolder(
-            parent: BaseAdapter<DifficultiesEntity, *>,
-            view: View
-        ) : BaseAdapter.ViewHolder<DifficultiesEntity>(parent, view) {
-
-            init {
-                recyclerview_difficulty_icons.adapter = DifficultyIconsAdapter()
-            }
-
-            override fun bind(data: DifficultiesEntity) {
-                (recyclerview_difficulty_icons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
-                textview_difficulty_description.text = data.msg
-                button_difficulty_link.setOnClickListener { }
-            }
-        }
-    }
-
-    class DifficultyIconsAdapter : BaseAdapter<String, DifficultyIconsAdapter.ViewHolder>() {
-
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
-        ): BaseAdapter.ViewHolder<String> {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_difficulty_icon, parent, false)
-            return ViewHolder(this, view)
-        }
-
-        class ViewHolder(
-            parent: BaseAdapter<String, *>,
-            view: View
-        ) : BaseAdapter.ViewHolder<String>(parent, view) {
-
-            override fun bind(data: String) {
-                Picasso.get().load(data)
-                    .into(imageview_difficulty_icon) // TODO inject picasso with dagger
-            }
-        }
     }
 
     private fun handleWelcomeDialog() {
