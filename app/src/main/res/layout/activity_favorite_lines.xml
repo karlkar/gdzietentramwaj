@@ -6,7 +6,7 @@
     tools:context="com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity">
 
     <include
-        android:id="@+id/my_toolbar"
+        android:id="@+id/toolbar_maps_toolbar"
         layout="@layout/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
@@ -15,7 +15,7 @@
         android:id="@+id/clickToRemoveText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/my_toolbar"
+        android:layout_below="@id/toolbar_maps_toolbar"
         android:padding="16dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"

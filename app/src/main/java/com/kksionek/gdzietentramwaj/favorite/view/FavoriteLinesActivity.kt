@@ -29,7 +29,7 @@ class FavoriteLinesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite_lines)
 
-        val myToolbar = findViewById<Toolbar>(R.id.my_toolbar)
+        val myToolbar = findViewById<Toolbar>(R.id.toolbar_maps_toolbar)
         setSupportActionBar(myToolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -49,6 +49,6 @@ class FavoriteLinesActivity : AppCompatActivity() {
         gridView.addItemDecoration(SpacesItemDecoration(this, R.dimen.grid_offset))
         gridView.adapter = adapter
         mViewModel.favoriteTrams
-            .observe(this, Observer<List<FavoriteTram>> { adapter.setData(it!!) })
+            .observe(this, Observer<List<FavoriteTram>> { adapter.submitList(it) })
     }
 }

@@ -25,11 +25,11 @@ import android.support.v7.widget.ShareActionProvider
 import android.support.v7.widget.Toolbar
 import android.text.Html
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -45,10 +45,16 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
+import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
+import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
+import kotlinx.android.synthetic.main.item_difficulty.*
+import kotlinx.android.synthetic.main.item_difficulty_icon.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -58,7 +64,7 @@ private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
 private const val PREF_LAST_VERSION = "LAST_VERSION"
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-
+    //TODO change fav icon to vector drawable
     private lateinit var map: GoogleMap
 
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
@@ -142,7 +148,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         (application as TramApplication).appComponent.inject(this)
 
-        val myToolbar = findViewById<Toolbar>(R.id.my_toolbar)
+        val myToolbar = findViewById<Toolbar>(R.id.toolbar_maps_toolbar)
         setSupportActionBar(myToolbar)
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
@@ -162,22 +168,79 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
 
+        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter()
+
         viewModel.difficulties.observe(this, Observer { difficulties ->
-            Log.d(TAG, difficulties.toString())
-            Toast.makeText(this, difficulties.toString(), Toast.LENGTH_LONG).show()
+            (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                difficulties
+            )
         })
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        val mapFragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_maps_content) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
         adProviderInterface.initialize(this, getString(R.string.adMobAppId))
-        adProviderInterface.showAd(findViewById(R.id.adView))
+        adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
 
         handleWelcomeDialog()
     }
 
+    // TODO Move those adapters from this file
+    class DifficultiesAdapter : BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>() {
+
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): BaseAdapter.ViewHolder<DifficultiesEntity> {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_difficulty, parent, false)
+            return ViewHolder(this, view)
+        }
+
+        class ViewHolder(
+            parent: BaseAdapter<DifficultiesEntity, *>,
+            view: View
+        ) : BaseAdapter.ViewHolder<DifficultiesEntity>(parent, view) {
+
+            init {
+                recyclerview_difficulty_icons.adapter = DifficultyIconsAdapter()
+            }
+
+            override fun bind(data: DifficultiesEntity) {
+                (recyclerview_difficulty_icons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
+                textview_difficulty_description.text = data.msg
+                button_difficulty_link.setOnClickListener { }
+            }
+        }
+    }
+
+    class DifficultyIconsAdapter : BaseAdapter<String, DifficultyIconsAdapter.ViewHolder>() {
+
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): BaseAdapter.ViewHolder<String> {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_difficulty_icon, parent, false)
+            return ViewHolder(this, view)
+        }
+
+        class ViewHolder(
+            parent: BaseAdapter<String, *>,
+            view: View
+        ) : BaseAdapter.ViewHolder<String>(parent, view) {
+
+            override fun bind(data: String) {
+                Picasso.get().load(data)
+                    .into(imageview_difficulty_icon) // TODO inject picasso with dagger
+            }
+        }
+    }
+
     private fun handleWelcomeDialog() {
+        // TODO move this logic to ViewModel
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val lastVersion = sharedPreferences.getInt(PREF_LAST_VERSION, 0)
         if (lastVersion < BUILD_VERSION_WELCOME_WINDOW_ADDED) {
@@ -346,7 +409,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isTrafficEnabled = false
         }
 
-        viewModel.forceReloadLastLocation()
+        viewModel.forceReloadLastLocation() // TODO move it down not to break the apply block
         map.apply {
             setOnMarkerClickListener { true }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
@@ -397,7 +460,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     @Suppress("DEPRECATION")
     private fun createDialogView(@StringRes textId: Int): View? {
         val view = LayoutInflater.from(this)
-            .inflate(R.layout.activity_main_info_dialog, null)
+            .inflate(R.layout.dialog_info, null)
         view.findViewById<TextView>(R.id.info_dialog_text)?.apply {
             movementMethod = LinkMovementMethod.getInstance()
             text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

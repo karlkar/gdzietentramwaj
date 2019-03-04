@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 private val pattern =
     "<tr.*?(<img src=\".*?\".*?)okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
-private val iconPattern = "<img src=\"(.*?)\"".toRegex()
+private val singleIconPattern = "<img src=\"(.*?)\"".toRegex()
 
 class DifficultiesRepository @Inject constructor(
     private val difficultiesInterface: DifficultiesInterface
@@ -21,16 +21,17 @@ class DifficultiesRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
             .map { result ->
                 pattern.findAll(result)
-                    .map {
+                    .map { matchResult ->
                         val iconList: List<String>
-                        it.groupValues[1].let {
-                            iconList = iconPattern.findAll(it)
+                        matchResult.groupValues[1].let { allIconsStr ->
+                            iconList = singleIconPattern.findAll(allIconsStr)
                                 .map { it.groupValues[1] }
+                                .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
                                 .toList()
                         }
-                        val period = it.groupValues[2]
-                        val msg = it.groupValues[3]
-                        val link = it.groupValues[4]
+                        val period = matchResult.groupValues[2]
+                        val msg = matchResult.groupValues[3]
+                        val link = matchResult.groupValues[4]
                         DifficultiesEntity(iconList, period, msg, link)
                     }
                     .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }

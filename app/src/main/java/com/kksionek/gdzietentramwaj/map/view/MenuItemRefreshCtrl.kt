@@ -17,7 +17,7 @@ class MenuItemRefreshCtrl(
         AnimationUtils.loadAnimation(context, R.anim.anim_rotate)
     }
     private val mRefreshImage: ImageView by lazy {
-        LayoutInflater.from(context).inflate(R.layout.refresh_action_view, null) as ImageView
+        LayoutInflater.from(context).inflate(R.layout.view_refresh_action, null) as ImageView
     }
 
     fun startAnimation() {

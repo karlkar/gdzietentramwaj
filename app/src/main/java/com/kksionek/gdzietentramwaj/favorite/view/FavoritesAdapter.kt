@@ -1,81 +1,53 @@
 package com.kksionek.gdzietentramwaj.favorite.view
 
 import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.grid_favorite_element.*
+import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
+import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
+import kotlinx.android.synthetic.main.item_favorite_line.*
 import java.util.Collections
 
-class FavoritesAdapter(
-    private val onItemClickListener: OnItemClickListener
-) : RecyclerView.Adapter<FavoritesAdapter.ViewHolder>() {
+class FavoritesAdapter(onItemClickListener: OnItemClickListener<FavoriteTram>) :
+    BaseAdapter<FavoriteTram, FavoritesAdapter.ViewHolder>(
+        onItemClickListener,
+        FavoriteDiffCallback()
+    ) {
 
     class ViewHolder(
         parent: FavoritesAdapter,
         view: View
-    ) : RecyclerView.ViewHolder(view), LayoutContainer {
+    ) : BaseAdapter.ViewHolder<FavoriteTram>(parent, view) {
 
-        private lateinit var innerData: FavoriteTram
-
-        override val containerView: View?
-            get() = itemView
-
-        init {
-            itemView.setOnClickListener { parent.onItemClickListener.invoke(innerData) }
-        }
-
-        fun bind(data: FavoriteTram) {
-            innerData = data
+        override fun bind(data: FavoriteTram) {
             tramNum.text = data.lineId
             tramNum.isSelected = data.isFavorite
         }
     }
 
-    private val trams = mutableListOf<FavoriteTram>()
+    class FavoriteDiffCallback : DiffUtil.ItemCallback<FavoriteTram>() {
+        override fun areItemsTheSame(oldItem: FavoriteTram, newItem: FavoriteTram): Boolean =
+            oldItem.lineId == newItem.lineId
 
-    class FavoriteDiffCallback(
-        private val oldItems: List<FavoriteTram>,
-        private val newItems: List<FavoriteTram>
-    ) : DiffUtil.Callback() {
-        override fun areItemsTheSame(oldItem: Int, newItem: Int): Boolean =
-            oldItems[oldItem].lineId == newItems[newItem].lineId
-
-        override fun getOldListSize(): Int = oldItems.size
-
-        override fun getNewListSize(): Int = newItems.size
-
-        override fun areContentsTheSame(oldItem: Int, newItem: Int): Boolean =
-            oldItems[oldItem].lineId == newItems[newItem].lineId
-                    && oldItems[oldItem].isFavorite == newItems[newItem].isFavorite
+        override fun areContentsTheSame(oldItem: FavoriteTram, newItem: FavoriteTram): Boolean =
+            oldItem.lineId == newItem.lineId
+                    && oldItem.isFavorite == newItem.isFavorite
     }
 
-    fun setData(data: List<FavoriteTram>) {
+    override fun submitList(list: List<FavoriteTram>?) {
         Collections.sort(
-            data,
+            list,
             NaturalOrderComparator()
         )
-        val diffResult = DiffUtil.calculateDiff(FavoriteDiffCallback(trams, data))
-        trams.clear()
-        trams.addAll(data)
-        diffResult.dispatchUpdatesTo(this)
+        super.submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.grid_favorite_element, parent, false)
+            .inflate(R.layout.item_favorite_line, parent, false)
         return ViewHolder(this, view)
     }
-
-    override fun getItemCount(): Int = trams.size
-
-    override fun onBindViewHolder(holder: ViewHolder, viewType: Int) {
-        holder.bind(trams[holder.adapterPosition])
-    }
 }
-
-typealias OnItemClickListener = (FavoriteTram) -> Unit
