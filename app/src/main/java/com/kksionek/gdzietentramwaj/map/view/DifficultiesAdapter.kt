@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.view
 
+import android.support.v7.util.DiffUtil
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,18 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import kotlinx.android.synthetic.main.item_difficulty.*
 
 class DifficultiesAdapter(onItemClickListener: OnItemClickListener<DifficultiesEntity>) :
-    BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>(onItemClickListener) {
+    BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>(
+        onItemClickListener,
+        DiffCallback()
+    ) {
+
+    class DiffCallback : DiffUtil.ItemCallback<DifficultiesEntity>() {
+        override fun areItemsTheSame(p0: DifficultiesEntity, p1: DifficultiesEntity): Boolean =
+            p0.link == p1.link
+
+        override fun areContentsTheSame(p0: DifficultiesEntity, p1: DifficultiesEntity): Boolean =
+            p0 == p1
+    }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
