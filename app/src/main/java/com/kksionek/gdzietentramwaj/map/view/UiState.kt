@@ -2,15 +2,14 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import android.support.annotation.StringRes
 
-sealed class UiState {
+sealed class UiState<T> {
 
-    object InProgress : UiState()
+    class InProgress<T> : UiState<T>()
 
-    data class Success(
-        val data: List<TramMarker>,
-        val animate: Boolean,
-        val newData: Boolean = false
-    ) : UiState()
+    data class Success<T>(
+        val data: T
+    ) : UiState<T>()
 
-    data class Error(@StringRes val message: Int, val args: List<String?> = emptyList()) : UiState()
+    data class Error<T>(@StringRes val message: Int, val args: List<String?> = emptyList()) :
+        UiState<T>()
 }

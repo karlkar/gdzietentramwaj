@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -30,6 +31,8 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -107,27 +110,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ).show()
     }
 
-    private val tramDataObserver = Observer<UiState> { uiState: UiState? ->
-        when (uiState) {
-            is UiState.InProgress -> {
-                menuItemRefresh?.startAnimation()
-            }
-            is UiState.Error -> {
-                menuItemRefresh?.endAnimation()
-                showErrorToast(getString(uiState.message, *uiState.args.toTypedArray()))
-            }
-            is UiState.Success -> {
-                menuItemRefresh?.endAnimation()
-                val tramMarkerList = uiState.data
-                if (uiState.newData) {
-                    showSuccessToast(getString(R.string.position_update_sucessful))
+    private val tramDataObserver =
+        Observer<UiState<BusTramLoading>> { uiState: UiState<BusTramLoading>? ->
+            when (uiState) {
+                is UiState.InProgress -> {
+                    menuItemRefresh?.startAnimation()
                 }
-                updateExistingMarkers(tramMarkerList, uiState.animate)
-            }
-            null -> {
-            }
-        }.makeExhaustive
-    }
+                is UiState.Error -> {
+                    menuItemRefresh?.endAnimation()
+                    showErrorToast(getString(uiState.message, *uiState.args.toTypedArray()))
+                }
+                is UiState.Success -> {
+                    menuItemRefresh?.endAnimation()
+                    val tramMarkerList = uiState.data.data
+                    if (uiState.data.newData) {
+                        showSuccessToast(getString(R.string.position_update_sucessful))
+                    }
+                    updateExistingMarkers(tramMarkerList, uiState.data.animate)
+                }
+                null -> {
+                }
+            }.makeExhaustive
+        }
 
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
         favorite?.let {
@@ -167,14 +171,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             startActivity(Intent(ACTION_VIEW, Uri.parse(it.link)))
         }
 
-        viewModel.difficulties.observe(this, Observer { difficulties -> // TODO Wrap it with sealed class to show progress
-            if (difficulties?.size == 0) {
-                //TODO implement empty view
-            } else {
-                (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                    difficulties
-                )
-            }
+        imagebutton_difficulties_refresh_button.setOnClickListener {
+            viewModel.forceReloadDifficulties()
+        }
+
+        viewModel.difficulties.observe(this, Observer { difficulties ->
+            when (difficulties) {
+                is UiState.Success -> {
+                    stopDifficultiesLoading()
+                    if (difficulties.data.isEmpty()) {
+                        //TODO implement empty view
+                    } else {
+                        (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                            difficulties.data
+                        )
+                    }
+                }
+                is UiState.Error -> {
+                    stopDifficultiesLoading()
+                }
+                is UiState.InProgress -> {
+                    startDifficultiesLoading()
+                }
+                null -> {
+                }
+            }.makeExhaustive
         })
 
         val mapFragment =
@@ -186,6 +207,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         checkLocationPermission(true)
 
         handleWelcomeDialog()
+    }
+
+    private val reloadAnimation: Animation by lazy {
+        AnimationUtils.loadAnimation(this, R.anim.anim_rotate)
+    }
+
+    private fun startDifficultiesLoading() {
+        imagebutton_difficulties_refresh_button.isEnabled = false
+        imagebutton_difficulties_refresh_button.startAnimation(reloadAnimation)
+    }
+
+    private fun stopDifficultiesLoading() {
+        imagebutton_difficulties_refresh_button.isEnabled = true
+        imagebutton_difficulties_refresh_button.clearAnimation()
     }
 
     private fun handleWelcomeDialog() {
@@ -244,10 +279,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_item_info -> showAboutAppDialog()
-            R.id.menu_item_refresh -> {
-                viewModel.forceReloadTrams()
-                viewModel.forceReloadDifficulties()
-            }
+            R.id.menu_item_refresh -> viewModel.forceReloadTrams()
             R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_favorite -> {
@@ -405,6 +437,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .show()
     }
 
+    @SuppressLint("InflateParams")
     @Suppress("DEPRECATION")
     private fun createDialogView(@StringRes textId: Int): View? {
         val view = LayoutInflater.from(this)

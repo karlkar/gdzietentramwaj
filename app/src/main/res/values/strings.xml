@@ -19,4 +19,5 @@
     <string name="remove_info">Jeśli masz dość reklam w aplikacji zapraszam do zainstalowania jej płatnej wersji - \"&lt;a href="http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj.pro"&gt;Gdzie Ten Tramwaj? Pro&lt;/a&gt;\".&lt;br&gt;&lt;br&gt;UWAGA: Jedyna różnica między aplikacjami to to, że w wersji darmowej są reklamy, w wersji płatnej ich nie ma.</string>
     <string name="menu_item_main_share">Udostępnij</string>
     <string name="debug_error_message">%1$s: %2$s</string>
+    <string name="error_failed_to_reload_difficulties">Failed to reload difficulties</string>
 </resources>

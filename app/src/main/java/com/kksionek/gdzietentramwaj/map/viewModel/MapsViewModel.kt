@@ -20,6 +20,7 @@ import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.TramRepository
+import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
@@ -30,8 +31,7 @@ import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
 import kotlin.concurrent.read
@@ -60,14 +60,14 @@ class MapsViewModel @Inject constructor(
     private var allKnownTrams = mapOf<String, TramMarker>()
     private var allTrams: List<TramMarker> = emptyList()
 
-    private val _tramData = MutableLiveData<UiState>()
-    val tramData: LiveData<UiState> = _tramData
+    private val _tramData = MutableLiveData<UiState<BusTramLoading>>()
+    val tramData: LiveData<UiState<BusTramLoading>> = _tramData
 
     private val _lastLocation = MutableLiveData<Location>()
     val lastLocation: LiveData<Location> = _lastLocation
 
-    private val _difficulties = MutableLiveData<List<DifficultiesEntity>>()
-    val difficulties: LiveData<List<DifficultiesEntity>> = _difficulties
+    private val _difficulties = MutableLiveData<UiState<List<DifficultiesEntity>>>()
+    val difficulties: LiveData<UiState<List<DifficultiesEntity>>> = _difficulties
 
     var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, _ ->
         showOrZoom(false)
@@ -81,6 +81,7 @@ class MapsViewModel @Inject constructor(
 
     init {
         observeFavoriteTrams()
+        forceReloadDifficulties()
     }
 
     private fun observeFavoriteTrams() {
@@ -134,7 +135,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun handleError(operationResult: NetworkOperationResult.Error<List<TramData>>) {
-        val uiState: UiState.Error = when (operationResult.throwable) {
+        val uiState: UiState.Error<BusTramLoading> = when (operationResult.throwable) {
             NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
             is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
             else -> {
@@ -218,7 +219,7 @@ class MapsViewModel @Inject constructor(
         animate: Boolean,
         newData: Boolean = false
     ) {
-        _tramData.postValue(UiState.Success(visibleTrams, animate, newData))
+        _tramData.postValue(UiState.Success(BusTramLoading(visibleTrams, animate, newData)))
     }
 
     private fun isMarkerLineVisible(line: String): Boolean {
@@ -245,13 +246,18 @@ class MapsViewModel @Inject constructor(
     fun forceReloadDifficulties() {
         compositeDisposable.add(
             difficultiesRepository.getDifficulties()
-                .subscribe { result ->
+                .toObservable()
+                .map { result ->
                     when (result) {
-                        is NetworkOperationResult.Success -> _difficulties.postValue(result.data)
-                        is NetworkOperationResult.Error ->
+                        is NetworkOperationResult.Success -> UiState.Success(result.data)
+                        is NetworkOperationResult.Error -> {
                             Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                            UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
+                        }
                     }
-                })
+                }
+                .startWith(UiState.InProgress())
+                .subscribe { _difficulties.postValue(it) })
     }
 
     fun onResume() {

@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -9,6 +10,7 @@ import android.widget.ImageView
 
 import com.kksionek.gdzietentramwaj.R
 
+@SuppressLint("InflateParams")
 class MenuItemRefreshCtrl(
     private val context: Context,
     private val menuItem: MenuItem
