@@ -31,6 +31,8 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.TextView
@@ -180,8 +182,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 is UiState.Success -> {
                     stopDifficultiesLoading()
                     if (difficulties.data.isEmpty()) {
-                        //TODO implement empty view
+                        textview_difficulties_no_items.visibility = VISIBLE
                     } else {
+                        textview_difficulties_no_items.visibility = GONE
                         (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
                             difficulties.data
                         )
@@ -303,7 +306,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if (animate) {
             tramPathAnimator.removeAllAnimatedMarkers()
         }
-        val diffCallback = MapsViewModel.DiffCallback(currentlyDisplayedTrams, tramMarkerList)
+        val diffCallback = TramDiffCallback(currentlyDisplayedTrams, tramMarkerList)
         val diffResult = DiffUtil.calculateDiff(diffCallback, false)
 
         for (i in (currentlyDisplayedTrams.size - 1) downTo 0) {

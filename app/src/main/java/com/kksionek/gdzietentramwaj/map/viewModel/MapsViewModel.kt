@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.location.Location
-import android.support.v7.util.DiffUtil
 import android.util.Log
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
@@ -186,21 +185,6 @@ class MapsViewModel @Inject constructor(
                 it
             }
         }
-
-    class DiffCallback(
-        private val oldList: List<TramMarker>,
-        private val newList: List<TramMarker>
-    ) : DiffUtil.Callback() {
-        override fun areItemsTheSame(p0: Int, p1: Int): Boolean = oldList[p0].id == newList[p1].id
-
-        override fun getOldListSize(): Int = oldList.size
-
-        override fun getNewListSize(): Int = newList.size
-
-        override fun areContentsTheSame(p0: Int, p1: Int): Boolean =
-            oldList[p0].finalPosition == newList[p1].finalPosition
-                    && oldList[p0].prevPosition == newList[p1].prevPosition
-    }
 
     private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
         val onlyVisibleTrams = allTrams

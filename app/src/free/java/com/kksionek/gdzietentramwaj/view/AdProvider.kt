@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.view
 
 import android.content.Context
 import android.location.Location
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 
 import com.google.android.gms.ads.AdRequest
@@ -32,6 +33,7 @@ class AdProvider : AdProviderInterface {
 
     override fun loadAd(context: Context, location: Location) {
         adView?.let {
+            it.visibility = VISIBLE
             val adRequest = AdRequest.Builder()
                 .addTestDevice(context.getString(R.string.adMobTestDeviceS7Edge))
                 .setLocation(location)
