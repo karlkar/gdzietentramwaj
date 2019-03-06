@@ -64,7 +64,7 @@ private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
 private const val PREF_LAST_VERSION = "LAST_VERSION"
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-    //TODO change fav icon to vector drawable
+    // TODO Remove html from difficulties message
     private lateinit var map: GoogleMap
 
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
