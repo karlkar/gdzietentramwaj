@@ -2,7 +2,6 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ActivityNotFoundException
@@ -53,6 +52,7 @@ import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -92,7 +92,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
 
     private lateinit var viewModel: MapsViewModel
-    private var favoriteView: LiveData<Boolean>? = null
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private fun showSuccessToast(text: String) {
@@ -134,12 +133,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }.makeExhaustive
         }
 
+    @Suppress("MissingPermission")
+    private val lastLocationObserver = Observer { location: Location? ->
+        location?.let {
+            reloadAds(it)
+            if (this::map.isInitialized) {
+                val latLng = LatLng(it.latitude, it.longitude)
+                map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                map.isMyLocationEnabled = checkLocationPermission(false)
+                viewModel.lastLocation.removeObservers(this)
+            }
+        }
+    }
+
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
         favorite?.let {
-            menuItemFavoriteSwitch.setIcon(
-                if (it) R.drawable.fav_on else R.drawable.fav_off
-            )
+            if (::menuItemFavoriteSwitch.isInitialized) {
+                menuItemFavoriteSwitch.setIcon(
+                    if (it) R.drawable.fav_on else R.drawable.fav_off
+                )
+            }
         }
+    }
+
+    private val difficultiesObserver = Observer { difficulties: UiState<List<DifficultiesEntity>>? ->
+        when (difficulties) {
+            is UiState.Success -> {
+                stopDifficultiesLoading()
+                if (difficulties.data.isEmpty()) {
+                    textview_difficulties_no_items.visibility = VISIBLE
+                } else {
+                    textview_difficulties_no_items.visibility = GONE
+                    (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                        difficulties.data
+                    )
+                }
+            }
+            is UiState.Error -> {
+                stopDifficultiesLoading()
+            }
+            is UiState.InProgress -> {
+                startDifficultiesLoading()
+            }
+            null -> {
+            }
+        }.makeExhaustive
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,19 +193,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .get(MapsViewModel::class.java)
 
         viewModel.tramData.observe(this, tramDataObserver)
+        viewModel.lastLocation.observe(this, lastLocationObserver)
+        viewModel.favoriteView.observe(this, favoriteModeObserver)
 
-        viewModel.lastLocation.observe(this, Observer { location ->
-            location?.let {
-                reloadAds(it)
-                if (this::map.isInitialized) {
-                    val latLng = LatLng(it.latitude, it.longitude)
-                    map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-                    map.isMyLocationEnabled = checkLocationPermission(false)
-                    viewModel.lastLocation.removeObservers(this)
-                }
-            }
-        })
+        setupDifficultiesBottomSheet()
 
+        val mapFragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_maps_content) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
+
+        adProviderInterface.initialize(this, getString(R.string.adMobAppId))
+        adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
+        checkLocationPermission(true)
+
+        handleWelcomeDialog()
+    }
+
+    private fun setupDifficultiesBottomSheet() {
         recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter {
             startActivity(Intent(ACTION_VIEW, Uri.parse(it.link)))
         }
@@ -176,39 +218,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             viewModel.forceReloadDifficulties()
         }
 
-        viewModel.difficulties.observe(this, Observer { difficulties ->
-            when (difficulties) {
-                is UiState.Success -> {
-                    stopDifficultiesLoading()
-                    if (difficulties.data.isEmpty()) {
-                        textview_difficulties_no_items.visibility = VISIBLE
-                    } else {
-                        textview_difficulties_no_items.visibility = GONE
-                        (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                            difficulties.data
-                        )
-                    }
-                }
-                is UiState.Error -> {
-                    stopDifficultiesLoading()
-                }
-                is UiState.InProgress -> {
-                    startDifficultiesLoading()
-                }
-                null -> {
-                }
-            }.makeExhaustive
-        })
-
-        val mapFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_maps_content) as SupportMapFragment?
-        mapFragment?.getMapAsync(this)
-
-        adProviderInterface.initialize(this, getString(R.string.adMobAppId))
-        adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
-        checkLocationPermission(true)
-
-        handleWelcomeDialog()
+        viewModel.difficulties.observe(this, difficultiesObserver)
     }
 
     private val reloadAnimation: Animation by lazy {
@@ -253,7 +263,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         menuInflater.inflate(R.menu.main_menu, menu)
         menu.findItem(R.id.menu_item_refresh)?.also {
             menuItemRefresh = MenuItemRefreshCtrl(this, it)
-            if (favoriteView?.value == true) {
+            if (viewModel.tramData.value is UiState.InProgress) {
                 menuItemRefresh?.startAnimation()
             }
         }
@@ -271,9 +281,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareActionProvider.setShareIntent(shareIntent)
 
         menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-        favoriteView = viewModel.favoriteView.also {
-            it.observe(this, favoriteModeObserver)
-        }
 
         return super.onCreateOptionsMenu(menu)
     }
