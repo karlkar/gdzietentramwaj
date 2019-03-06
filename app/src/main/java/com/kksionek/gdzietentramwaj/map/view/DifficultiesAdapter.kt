@@ -1,5 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.view
 
+import android.support.v4.text.HtmlCompat
+import android.support.v4.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import android.support.v7.util.DiffUtil
 import android.view.LayoutInflater
 import android.view.View
@@ -44,7 +46,7 @@ class DifficultiesAdapter(onItemClickListener: OnItemClickListener<DifficultiesE
 
         override fun bind(data: DifficultiesEntity) {
             (recyclerview_difficulty_icons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
-            textview_difficulty_description.text = data.msg
+            textview_difficulty_description.text = HtmlCompat.fromHtml(data.msg, FROM_HTML_MODE_LEGACY)
         }
     }
 }
