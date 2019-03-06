@@ -26,11 +26,13 @@ import com.kksionek.gdzietentramwaj.map.view.UiState
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
 import kotlin.concurrent.read
@@ -138,10 +140,10 @@ class MapsViewModel @Inject constructor(
             NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
             is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
             else -> {
-                if (!BuildConfig.DEBUG
-                    && operationResult.throwable !is JsonSyntaxException
+                if (operationResult.throwable !is JsonSyntaxException
                     && operationResult.throwable !is IllegalStateException
                     && operationResult.throwable !is HttpException
+                    && (operationResult.throwable is CompositeException && (operationResult.throwable.exceptions.any { it !is HttpException }))
                 ) {
                     crashReportingService.reportCrash(
                         operationResult.throwable,
