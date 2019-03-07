@@ -6,7 +6,6 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.Intent.ACTION_VIEW
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -30,10 +29,6 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -52,7 +47,6 @@ import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -90,6 +84,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val iconGenerator by lazy { IconGenerator(this) }
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
+    private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
 
     private lateinit var viewModel: MapsViewModel
     private val cameraMoveInProgress = AtomicBoolean(false)
@@ -156,30 +151,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val difficultiesObserver = Observer { difficulties: UiState<List<DifficultiesEntity>>? ->
-        when (difficulties) {
-            is UiState.Success -> {
-                stopDifficultiesLoading()
-                if (difficulties.data.isEmpty()) {
-                    textview_difficulties_no_items.visibility = VISIBLE
-                } else {
-                    textview_difficulties_no_items.visibility = GONE
-                    (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                        difficulties.data
-                    )
-                }
-            }
-            is UiState.Error -> {
-                stopDifficultiesLoading()
-            }
-            is UiState.InProgress -> {
-                startDifficultiesLoading()
-            }
-            null -> {
-            }
-        }.makeExhaustive
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -196,7 +167,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         viewModel.lastLocation.observe(this, lastLocationObserver)
         viewModel.favoriteView.observe(this, favoriteModeObserver)
 
-        setupDifficultiesBottomSheet()
+        difficultiesBottomSheet = DifficultiesBottomSheet(
+            constraintlayout_bottomsheet_rootview,
+            this,
+            this,
+            viewModel
+        )
 
         val mapFragment =
             supportFragmentManager.findFragmentById(R.id.fragment_maps_content) as? SupportMapFragment
@@ -207,32 +183,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         checkLocationPermission(true)
 
         handleWelcomeDialog()
-    }
-
-    private fun setupDifficultiesBottomSheet() {
-        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter {
-            startActivity(Intent(ACTION_VIEW, Uri.parse(it.link)))
-        }
-
-        imagebutton_difficulties_refresh_button.setOnClickListener {
-            viewModel.forceReloadDifficulties()
-        }
-
-        viewModel.difficulties.observe(this, difficultiesObserver)
-    }
-
-    private val reloadAnimation: Animation by lazy {
-        AnimationUtils.loadAnimation(this, R.anim.anim_rotate)
-    }
-
-    private fun startDifficultiesLoading() {
-        imagebutton_difficulties_refresh_button.isEnabled = false
-        imagebutton_difficulties_refresh_button.startAnimation(reloadAnimation)
-    }
-
-    private fun stopDifficultiesLoading() {
-        imagebutton_difficulties_refresh_button.isEnabled = true
-        imagebutton_difficulties_refresh_button.clearAnimation()
     }
 
     private fun handleWelcomeDialog() {
