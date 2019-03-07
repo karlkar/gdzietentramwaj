@@ -8,6 +8,8 @@ import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.crash.CrashlyticsCrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.base.view.ImageLoader
+import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
 import dagger.Module
 import dagger.Provides
 import io.reactivex.schedulers.Schedulers
@@ -61,5 +63,11 @@ class AppModule(private val application: TramApplication) {
         return OkHttpClient.Builder()
             //                .addInterceptor(interceptor)
             .build()
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideImageLoader(): ImageLoader {
+        return PicassoImageLoader()
     }
 }

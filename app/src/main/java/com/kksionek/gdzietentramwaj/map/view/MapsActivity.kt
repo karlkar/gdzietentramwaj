@@ -44,6 +44,7 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
+import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.makeExhaustive
@@ -67,6 +68,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @Inject
     internal lateinit var adProviderInterface: AdProviderInterface
+
+    @Inject
+    internal lateinit var imageLoader: ImageLoader
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -171,7 +175,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             constraintlayout_bottomsheet_rootview,
             this,
             this,
-            viewModel
+            viewModel,
+            imageLoader
         )
 
         val mapFragment =

@@ -8,11 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
+import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import kotlinx.android.synthetic.main.item_difficulty.*
 
-class DifficultiesAdapter(onItemClickListener: OnItemClickListener<DifficultiesEntity>) :
+class DifficultiesAdapter(
+    private val imageLoader: ImageLoader,
+    onItemClickListener: OnItemClickListener<DifficultiesEntity>) :
     BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>(
         onItemClickListener,
         DiffCallback()
@@ -32,16 +35,17 @@ class DifficultiesAdapter(onItemClickListener: OnItemClickListener<DifficultiesE
     ): BaseAdapter.ViewHolder<DifficultiesEntity> {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_difficulty, parent, false)
-        return ViewHolder(this, view)
+        return ViewHolder(this, view, imageLoader)
     }
 
     class ViewHolder(
         parent: BaseAdapter<DifficultiesEntity, *>,
-        view: View
+        view: View,
+        imageLoader: ImageLoader
     ) : BaseAdapter.ViewHolder<DifficultiesEntity>(parent, view) {
 
         init {
-            recyclerview_difficulty_icons.adapter = DifficultyIconsAdapter()
+            recyclerview_difficulty_icons.adapter = DifficultyIconsAdapter(imageLoader)
         }
 
         override fun bind(data: DifficultiesEntity) {

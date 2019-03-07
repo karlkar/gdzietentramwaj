@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
@@ -19,7 +20,8 @@ class DifficultiesBottomSheet(
     override val containerView: View,
     context: Context,
     lifecycleOwner: LifecycleOwner,
-    viewModel: MapsViewModel
+    viewModel: MapsViewModel,
+    imageLoader: ImageLoader
 ) : LayoutContainer {
 
     private val difficultiesObserver =
@@ -48,7 +50,7 @@ class DifficultiesBottomSheet(
         }
 
     init {
-        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter {
+        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter(imageLoader) {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.link)))
         }
 
