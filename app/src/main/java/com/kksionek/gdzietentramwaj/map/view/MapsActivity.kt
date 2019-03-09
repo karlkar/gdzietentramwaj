@@ -30,6 +30,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -53,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
+private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
@@ -190,6 +193,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val result = googleApiAvailability.isGooglePlayServicesAvailable(this)
+        if (result != ConnectionResult.SUCCESS) {
+            googleApiAvailability.getErrorDialog(this, result, MY_GOOGLE_API_AVAILABILITY_REQUEST) {
+                finish()
+            }.show()
+        }
         viewModel.onResume()
         adProviderInterface.resume()
     }
@@ -247,6 +257,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         tramMarkerList: List<TramMarker>,
         animate: Boolean
     ) {
+        if (!::map.isInitialized) {
+            return
+        }
         if (cameraMoveInProgress.get()) {
             return
         }
