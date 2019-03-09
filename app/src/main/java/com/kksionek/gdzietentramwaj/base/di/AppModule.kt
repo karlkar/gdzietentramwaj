@@ -3,9 +3,11 @@ package com.kksionek.gdzietentramwaj.base.di
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.crash.CrashlyticsCrashReportingService
+import com.kksionek.gdzietentramwaj.base.crash.NoOpCrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
@@ -36,7 +38,7 @@ class AppModule(private val application: TramApplication) {
     @Singleton
     @Provides
     internal fun provideCrashReportingService(): CrashReportingService =
-        CrashlyticsCrashReportingService()
+        if (BuildConfig.DEBUG) NoOpCrashReportingService() else CrashlyticsCrashReportingService()
 
     @Singleton
     @Provides

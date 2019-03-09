@@ -6,34 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/difficulties_bg"
-    app:behavior_hideable="false"
-    app:behavior_peekHeight="32dp"
     android:clickable="true"
     android:focusable="true"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="32dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_difficulties_difficulties"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:orientation="vertical"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:itemCount="3"
-        tools:listItem="@layout/difficulties_recycler_item"
         tools:listitem="@layout/item_difficulty" />
 
     <TextView
-        android:id="@+id/textview_difficulties_no_items"
-        android:layout_width="match_parent"
+        android:id="@+id/textview_difficulties_message"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
@@ -41,24 +34,25 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Brak utrudnień... A przynajmniej tak twierdzi ZTM ;)"
+        android:text="@string/difficulties_bottom_sheet_no_items"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/imagebutton_difficulties_refresh_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imagebutton_difficulties_refresh_button"
+        app:layout_constraintTop_toBottomOf="@id/view_difficulties_divider"
         tools:visibility="visible" />
 
     <TextView
         android:id="@+id/textview_difficulties_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="4dp"
-        android:maxHeight="20dp"
-        android:text="Utrudnienia"
+        android:gravity="center"
+        android:minHeight="32dp"
+        android:text="@string/difficulties_bottom_sheet_title"
         android:textAppearance="@style/Toolbar.TitleText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,25 +61,25 @@
     <ImageButton
         android:id="@+id/imagebutton_difficulties_refresh_button"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
+        android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="4dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginBottom="4dp"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_menu_refresh"
+        app:layout_constraintBottom_toBottomOf="@id/textview_difficulties_title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/textview_difficulties_title" />
 
     <View
+        android:id="@+id/view_difficulties_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
-        app:layout_constraintBottom_toTopOf="@id/recyclerview_difficulties_difficulties"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barrier" />
 
     <android.support.constraint.Barrier
         android:id="@+id/barrier"

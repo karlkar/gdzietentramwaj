@@ -30,15 +30,23 @@ class DifficultiesBottomSheet(
                 is UiState.Success -> {
                     stopDifficultiesLoading()
                     if (difficulties.data.isEmpty()) {
-                        textview_difficulties_no_items.visibility = View.VISIBLE
+                        textview_difficulties_message.text =
+                            context.getText(R.string.difficulties_bottom_sheet_no_items)
+                        recyclerview_difficulties_difficulties.visibility = View.GONE
+                        textview_difficulties_message.visibility = View.VISIBLE
                     } else {
-                        textview_difficulties_no_items.visibility = View.GONE
+                        textview_difficulties_message.visibility = View.GONE
+                        recyclerview_difficulties_difficulties.visibility = View.VISIBLE
                         (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
                             difficulties.data
                         )
                     }
                 }
                 is UiState.Error -> {
+                    textview_difficulties_message.text =
+                        context.getText(R.string.error_failed_to_reload_difficulties)
+                    recyclerview_difficulties_difficulties.visibility = View.GONE
+                    textview_difficulties_message.visibility = View.VISIBLE
                     stopDifficultiesLoading()
                 }
                 is UiState.InProgress -> {
