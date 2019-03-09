@@ -4,7 +4,6 @@
     android:id="@+id/toolbar_maps_toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
     android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
     app:elevation="4dp"
     android:elevation="4dp"

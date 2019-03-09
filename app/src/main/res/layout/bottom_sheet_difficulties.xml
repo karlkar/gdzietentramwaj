@@ -67,6 +67,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/refresh"
         android:src="@drawable/ic_menu_refresh"
         app:layout_constraintBottom_toBottomOf="@id/textview_difficulties_title"
         app:layout_constraintEnd_toEndOf="parent"
