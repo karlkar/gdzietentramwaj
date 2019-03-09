@@ -27,14 +27,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/toolbar_maps_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/colorPrimary"
-                    android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-                    app:elevation="4dp"
-                    app:titleTextAppearance="@style/Toolbar.TitleText" />
+                <include layout="@layout/toolbar"/>
             </android.support.design.widget.AppBarLayout>
 
             <fragment
