@@ -20,24 +20,28 @@ class DifficultiesRepository @Inject constructor(
         difficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
-                pattern.findAll(result)
-                    .map { matchResult ->
-                        val id = matchResult.groupValues[1]
-                        val iconList: List<String>
-                        matchResult.groupValues[2].let { allIconsStr ->
-                            iconList = singleIconPattern.findAll(allIconsStr)
-                                .map { it.groupValues[1] }
-                                .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
-                                .toList()
+                if (result.isEmpty()) {
+                    emptyList()
+                } else {
+                    pattern.findAll(result)
+                        .map { matchResult ->
+                            val id = matchResult.groupValues[1]
+                            val iconList: List<String>
+                            matchResult.groupValues[2].let { allIconsStr ->
+                                iconList = singleIconPattern.findAll(allIconsStr)
+                                    .map { it.groupValues[1] }
+                                    .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
+                                    .toList()
+                            }
+                            val period = matchResult.groupValues[3]
+                            val msg = matchResult.groupValues[4]
+                            val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
+                                .replace("&amp;", "&") + "&i=$id"
+                            DifficultiesEntity(iconList, period, msg, link)
                         }
-                        val period = matchResult.groupValues[3]
-                        val msg = matchResult.groupValues[4]
-                        val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
-                            .replace("&amp;", "&") + "&i=$id"
-                        DifficultiesEntity(iconList, period, msg, link)
-                    }
-                    .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
-                    .toList()
+                        .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
+                        .toList()
+                }
             }
             .toNetworkOperationResult()
 }
