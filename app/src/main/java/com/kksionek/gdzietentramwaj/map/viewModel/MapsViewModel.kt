@@ -142,27 +142,34 @@ class MapsViewModel @Inject constructor(
             NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
             is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
             else -> {
-                if (operationResult.throwable !is JsonSyntaxException
-                    && operationResult.throwable !is IllegalStateException
-                    && operationResult.throwable !is HttpException
-                    && (operationResult.throwable is CompositeException && (operationResult.throwable.exceptions.any { it !is HttpException }))
+                if (operationResult.throwable is CompositeException
+                    && operationResult.throwable.exceptions.all { it is HttpException }
                 ) {
-                    crashReportingService.reportCrash(
-                        operationResult.throwable,
-                        "Error handled with a toast."
-                    )
-                }
-                if (BuildConfig.DEBUG) {
-                    UiState.Error(
-                        R.string.debug_error_message,
-                        listOf(
-                            operationResult.throwable.javaClass.simpleName,
-                            operationResult.throwable.message
-                                ?: "null"
-                        )
-                    )
+                    UiState.Error(R.string.error_internet)
                 } else {
-                    UiState.Error(R.string.error_ztm)
+                    if (operationResult.throwable !is JsonSyntaxException
+                        && operationResult.throwable !is IllegalStateException
+                        && operationResult.throwable !is HttpException
+                        && (operationResult.throwable is CompositeException
+                                && (operationResult.throwable.exceptions.any { it !is HttpException }))
+                    ) {
+                        crashReportingService.reportCrash(
+                            operationResult.throwable,
+                            "Error handled with a toast."
+                        )
+                    }
+                    if (BuildConfig.DEBUG) {
+                        UiState.Error(
+                            R.string.debug_error_message,
+                            listOf(
+                                operationResult.throwable.javaClass.simpleName,
+                                operationResult.throwable.message
+                                    ?: "null"
+                            )
+                        )
+                    } else {
+                        UiState.Error(R.string.error_ztm)
+                    }
                 }
             }
         }
@@ -246,6 +253,12 @@ class MapsViewModel @Inject constructor(
                         is NetworkOperationResult.Success -> UiState.Success(result.data)
                         is NetworkOperationResult.Error -> {
                             Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                            if (result.throwable !is HttpException) {
+                                crashReportingService.reportCrash(
+                                    result.throwable,
+                                    "Failed to reload difficulties"
+                                )
+                            }
                             UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
                         }
                     }
