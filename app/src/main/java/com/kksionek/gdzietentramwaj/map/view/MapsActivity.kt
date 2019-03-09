@@ -12,7 +12,6 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
 import android.support.annotation.StringRes
 import android.support.annotation.UiThread
@@ -54,9 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
-
-private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
-private const val PREF_LAST_VERSION = "LAST_VERSION"
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
@@ -187,19 +183,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
 
-        handleWelcomeDialog()
-    }
-
-    private fun handleWelcomeDialog() {
-        // TODO move this logic to ViewModel
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val lastVersion = sharedPreferences.getInt(PREF_LAST_VERSION, 0)
-        if (lastVersion < BUILD_VERSION_WELCOME_WINDOW_ADDED) {
+        if (viewModel.shouldShowWelcomeDialog()) {
             showAboutAppDialog()
         }
-        sharedPreferences.edit()
-            .putInt(PREF_LAST_VERSION, BuildConfig.VERSION_CODE)
-            .apply()
     }
 
     override fun onResume() {
@@ -339,6 +325,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             moveCamera(
                 CameraUpdateFactory.newLatLngZoom(WARSAW_LATLNG, 15f)
             )
+            setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
             setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                     applicationContext,

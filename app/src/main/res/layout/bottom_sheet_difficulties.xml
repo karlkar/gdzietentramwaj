@@ -8,6 +8,8 @@
     android:background="@drawable/difficulties_bg"
     app:behavior_hideable="false"
     app:behavior_peekHeight="32dp"
+    android:clickable="true"
+    android:focusable="true"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <android.support.v7.widget.RecyclerView

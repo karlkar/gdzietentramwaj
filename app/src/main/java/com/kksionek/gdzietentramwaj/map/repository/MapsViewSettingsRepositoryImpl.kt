@@ -3,7 +3,8 @@ package com.kksionek.gdzietentramwaj.map.repository
 import android.content.Context
 import android.preference.PreferenceManager
 
-const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
+private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
+private const val PREF_LAST_VERSION = "LAST_VERSION"
 
 class MapsViewSettingsRepositoryImpl(private val context: Context) :
     MapsViewSettingsRepository {
@@ -17,6 +18,18 @@ class MapsViewSettingsRepositoryImpl(private val context: Context) :
             .getDefaultSharedPreferences(context)
             .edit()
             .putBoolean(PREF_FAVORITE_TRAM_VIEW, enabled)
+            .apply()
+    }
+
+    override fun getPreviouslyLaunchedVersion(): Int = PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getInt(PREF_LAST_VERSION, 0)
+
+    override fun saveLastLaunchedVersion(version: Int) {
+        PreferenceManager
+            .getDefaultSharedPreferences(context)
+            .edit()
+            .putInt(PREF_LAST_VERSION, version)
             .apply()
     }
 }

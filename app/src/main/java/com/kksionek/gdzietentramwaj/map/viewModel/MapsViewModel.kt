@@ -41,6 +41,8 @@ import kotlin.properties.Delegates
 
 private const val MAX_VISIBLE_MARKERS = 50
 
+private const val BUILD_VERSION_WELCOME_WINDOW_ADDED = 23
+
 class MapsViewModel @Inject constructor(
     private val tramRepository: TramRepository,
     private val locationRepository: LocationRepository,
@@ -165,6 +167,12 @@ class MapsViewModel @Inject constructor(
             }
         }
         _tramData.postValue(uiState)
+    }
+
+    fun shouldShowWelcomeDialog(): Boolean {
+        val lastVersion = mapsViewSettingsRepository.getPreviouslyLaunchedVersion()
+        mapsViewSettingsRepository.saveLastLaunchedVersion(BuildConfig.VERSION_CODE)
+        return lastVersion < BUILD_VERSION_WELCOME_WINDOW_ADDED
     }
 
     private fun Flowable<NetworkOperationResult<List<TramData>>>.filterOutOutdated() =
