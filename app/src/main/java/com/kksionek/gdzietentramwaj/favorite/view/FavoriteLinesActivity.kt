@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.Toolbar
+import android.view.MenuItem
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
@@ -13,6 +13,7 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesActivityViewModel
 import kotlinx.android.synthetic.main.activity_favorite_lines.*
 import javax.inject.Inject
+
 
 private const val COLUMN_COUNT = 7
 
@@ -29,13 +30,8 @@ class FavoriteLinesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite_lines)
 
-        val myToolbar = findViewById<Toolbar>(R.id.toolbar_maps_toolbar)
-        setSupportActionBar(myToolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-        }
-        myToolbar.setNavigationOnClickListener { onBackPressed() }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
 
         (application as TramApplication).appComponent.inject(this)
 
@@ -50,5 +46,15 @@ class FavoriteLinesActivity : AppCompatActivity() {
         gridView.adapter = adapter
         mViewModel.favoriteTrams
             .observe(this, Observer<List<FavoriteTram>> { adapter.submitList(it) })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

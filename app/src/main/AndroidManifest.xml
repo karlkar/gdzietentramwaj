@@ -60,6 +60,7 @@
 
         <activity android:name=".favorite.view.FavoriteLinesActivity"
                   android:label="@string/action_menu_favorite"
+            android:theme="@style/Theme.AppCompat.Light"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
     </application>
 
