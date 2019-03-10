@@ -15,12 +15,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".TramApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-        android:name=".TramApplication"
+        android:theme="@style/Base.Theme.AppCompat.Light"
         tools:ignore="GoogleAppIndexingWarning">
 
         <!--
@@ -37,7 +37,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/adMobAppId"/>
+            android:value="@string/adMobAppId" />
 
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
@@ -58,10 +58,11 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".favorite.view.FavoriteLinesActivity"
-                  android:label="@string/action_menu_favorite"
-            android:theme="@style/Theme.AppCompat.Light"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
+        <activity
+            android:name=".favorite.view.FavoriteLinesActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/action_menu_favorite"
+            android:parentActivityName=".map.view.MapsActivity" />
     </application>
 
 </manifest>

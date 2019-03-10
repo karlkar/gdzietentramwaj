@@ -1,44 +1,22 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinatorlayout_maps_rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.kksionek.gdzietentramwaj.map.view.MapsActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <fragment
+        android:id="@+id/fragment_maps_content"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_dodgeInsetEdges="bottom">
+        android:layout_height="match_parent" />
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbarlayout_maps_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <include layout="@layout/toolbar"/>
-        </android.support.design.widget.AppBarLayout>
-
-        <fragment
-            android:id="@+id/fragment_maps_content"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appbarlayout_maps_toolbar" />
-
-        <FrameLayout
-            android:id="@+id/adview_maps_adview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            tools:ignore="MissingConstraints" />
-    </android.support.constraint.ConstraintLayout>
+    <FrameLayout
+        android:id="@+id/adview_maps_adview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints" />
 
     <include layout="@layout/bottom_sheet_difficulties" />
 </android.support.design.widget.CoordinatorLayout>

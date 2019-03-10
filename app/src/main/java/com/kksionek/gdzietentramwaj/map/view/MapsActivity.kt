@@ -21,7 +21,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.util.DiffUtil
 import android.support.v7.util.DiffUtil.DiffResult.NO_POSITION
 import android.support.v7.widget.ShareActionProvider
-import android.support.v7.widget.Toolbar
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -159,9 +158,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_maps)
 
         (application as TramApplication).appComponent.inject(this)
-
-        val myToolbar = findViewById<Toolbar>(R.id.toolbar_maps_toolbar)
-        setSupportActionBar(myToolbar)
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
             .get(MapsViewModel::class.java)
