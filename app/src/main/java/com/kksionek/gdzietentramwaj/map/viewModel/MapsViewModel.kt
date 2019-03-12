@@ -12,6 +12,7 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.WARSAW_LOCATION
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
+import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
@@ -121,11 +122,12 @@ class MapsViewModel @Inject constructor(
             .filterOutOutdated()
             .transformEmptyListToError()
             .subscribe { operationResult ->
-                if (operationResult is NetworkOperationResult.Success<List<TramData>>) {
-                    handleSuccess(operationResult)
-                } else if (operationResult is NetworkOperationResult.Error) {
-                    handleError(operationResult)
-                }
+                when (operationResult) {
+                    is NetworkOperationResult.Success<List<TramData>> ->
+                        handleSuccess(operationResult)
+                    is NetworkOperationResult.Error -> handleError(operationResult)
+                    is NetworkOperationResult.InProgress -> _tramData.postValue(UiState.InProgress())
+                }.makeExhaustive
             }
     }
 
@@ -247,7 +249,6 @@ class MapsViewModel @Inject constructor(
     fun forceReloadDifficulties() {
         compositeDisposable.add(
             difficultiesRepository.getDifficulties()
-                .toObservable()
                 .map { result ->
                     when (result) {
                         is NetworkOperationResult.Success -> UiState.Success(result.data)
@@ -261,9 +262,9 @@ class MapsViewModel @Inject constructor(
                             }
                             UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
                         }
+                        is NetworkOperationResult.InProgress -> UiState.InProgress()
                     }
                 }
-                .startWith(UiState.InProgress())
                 .subscribe { _difficulties.postValue(it) })
     }
 

@@ -4,7 +4,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
-import io.reactivex.Single
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -16,7 +16,7 @@ class DifficultiesRepository @Inject constructor(
     private val difficultiesInterface: DifficultiesInterface
 ) {
 
-    fun getDifficulties(): Single<NetworkOperationResult<List<DifficultiesEntity>>> =
+    fun getDifficulties(): Observable<NetworkOperationResult<List<DifficultiesEntity>>> =
         difficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
@@ -44,4 +44,6 @@ class DifficultiesRepository @Inject constructor(
                 }
             }
             .toNetworkOperationResult()
+            .toObservable()
+            .startWith(NetworkOperationResult.InProgress())
 }

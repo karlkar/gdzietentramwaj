@@ -38,6 +38,7 @@ class TramRepository @Inject constructor(
                             .doOnSuccess(favoriteRepositoryAdder)
                             .toNetworkOperationResult()
                             .toFlowable()
+                            .startWith(NetworkOperationResult.InProgress())
                     }
             }
 
