@@ -59,6 +59,8 @@ private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
 
+    // TODO Move to single activity
+
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
     private lateinit var menuItemFavoriteSwitch: MenuItem
 

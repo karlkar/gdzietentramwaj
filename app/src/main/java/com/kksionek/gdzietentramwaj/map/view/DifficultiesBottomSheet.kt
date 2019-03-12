@@ -24,6 +24,12 @@ class DifficultiesBottomSheet(
     imageLoader: ImageLoader
 ) : LayoutContainer {
 
+    /*
+    TODO - Difficulties features
+    1. Auto refresh every x minutes
+    2. Seen / unseen should look different
+    3. Badge count for difficulties
+     */
     private val difficultiesObserver =
         Observer { difficulties: UiState<List<DifficultiesEntity>>? ->
             when (difficulties) {
