@@ -147,11 +147,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
         favorite?.let {
-            if (::menuItemFavoriteSwitch.isInitialized) {
-                menuItemFavoriteSwitch.setIcon(
-                    if (it) R.drawable.fav_on else R.drawable.fav_off
-                )
-            }
+            setFavoriteButtonIcon(it)
+        }
+    }
+
+    private fun setFavoriteButtonIcon(favoriteEnabled: Boolean) {
+        if (::menuItemFavoriteSwitch.isInitialized) {
+            menuItemFavoriteSwitch.setIcon(
+                if (favoriteEnabled) R.drawable.fav_on else R.drawable.fav_off
+            )
         }
     }
 
@@ -230,7 +234,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareActionProvider.setShareIntent(shareIntent)
 
         menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-
+        setFavoriteButtonIcon(viewModel.favoriteView.value ?: false)
         return super.onCreateOptionsMenu(menu)
     }
 
