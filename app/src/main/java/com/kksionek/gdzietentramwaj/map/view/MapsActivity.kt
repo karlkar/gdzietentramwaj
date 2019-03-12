@@ -361,13 +361,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 viewModel.visibleRegion = projection.visibleRegion.latLngBounds
                 cameraMoveInProgress.set(false)
             }
-            viewModel.mapControls.observe(this@MapsActivity, Observer {
-                when (it) {
-                    is MapControls.ZoomIn -> animateCamera(CameraUpdateFactory.zoomIn())
-                    is MapControls.MoveTo -> animateCamera(CameraUpdateFactory.newLatLng(it.location))
-                }
-            })
         }
+
+        viewModel.mapControls.observe(this@MapsActivity, Observer {
+            when (it) {
+                is MapControls.ZoomIn -> map.animateCamera(CameraUpdateFactory.zoomIn())
+                is MapControls.MoveTo -> map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
+            }
+        })
 
         viewModel.forceReloadLastLocation()
     }
