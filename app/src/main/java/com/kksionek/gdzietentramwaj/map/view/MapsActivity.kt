@@ -39,7 +39,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.maps.android.ui.IconGenerator
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -85,7 +84,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareIntent
     }
 
-    private val iconGenerator by lazy { IconGenerator(this) }
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
@@ -290,9 +288,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
-                                    iconGenerator
+                                    this
                                 )
                             )
+                            .anchor(0.5f, 0.8f)
                     )
                 }
                 if (tramMarker.polyline == null) {
