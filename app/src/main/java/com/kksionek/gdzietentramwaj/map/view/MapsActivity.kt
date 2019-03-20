@@ -93,7 +93,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun showSuccessToast(text: String) {
         Toast.makeText(
-            this,
+            applicationContext,
             text,
             Toast.LENGTH_SHORT
         ).show()
@@ -101,7 +101,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun showErrorToast(text: String) {
         Toast.makeText(
-            this,
+            applicationContext,
             text,
             Toast.LENGTH_LONG
         ).show()
