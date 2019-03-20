@@ -134,8 +134,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    freeImplementation 'com.google.firebase:firebase-core:16.0.7'
-    freeImplementation 'com.google.firebase:firebase-ads:17.1.3'
+    freeImplementation 'com.google.firebase:firebase-core:16.0.8'
+    freeImplementation 'com.google.firebase:firebase-ads:17.2.0'
     freeImplementation 'com.android.support:customtabs:28.0.0'
 }
 
