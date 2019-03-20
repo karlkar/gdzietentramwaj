@@ -23,7 +23,7 @@ class TramRepository @Inject constructor(
     val dataStream: Flowable<NetworkOperationResult<List<TramData>>> =
         dataTrigger.toFlowable(BackpressureStrategy.DROP)
             .startWith(Unit)
-            .switchMap {
+            .switchMapDelayError {
                 Flowable.interval(0, 10, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
                     .flatMap {
