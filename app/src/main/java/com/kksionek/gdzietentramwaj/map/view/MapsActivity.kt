@@ -138,7 +138,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val latLng = LatLng(it.latitude, it.longitude)
                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
                 map.isMyLocationEnabled = checkLocationPermission(false)
-                viewModel.lastLocation.removeObservers(this)
             }
         }
     }
@@ -353,6 +352,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isBuildingsEnabled = false
             isIndoorEnabled = false
             isTrafficEnabled = false
+            isMyLocationEnabled = checkLocationPermission(false)
 
             setOnMarkerClickListener { true }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
