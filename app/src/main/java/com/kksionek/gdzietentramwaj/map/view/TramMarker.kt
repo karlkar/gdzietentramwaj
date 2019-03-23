@@ -103,8 +103,16 @@ class TramMarker @UiThread constructor(tramData: TramData) {
             val descriptor = mBitmaps[line]
             if (descriptor == null) {
                 val isTram = checkIfIsTram(line)
+                val textColor = when {
+                    line.length < 3 -> Color.BLACK
+                    line.startsWith("4")
+                            || line.startsWith("5")
+                            || line.startsWith("E") -> Color.RED
+                    line.startsWith("L") -> Color.rgb(76, 165, 80)
+                    else -> Color.BLACK
+                }
                 val clustersPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.BLACK
+                    color = textColor
                     textSize = 35.0f
                     typeface = Typeface.create(typeface, BOLD)
                     textAlign = Paint.Align.CENTER
