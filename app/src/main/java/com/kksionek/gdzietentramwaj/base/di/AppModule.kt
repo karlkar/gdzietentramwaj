@@ -14,6 +14,7 @@ import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
 import dagger.Module
 import dagger.Provides
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import retrofit2.CallAdapter
@@ -71,5 +72,13 @@ class AppModule(private val application: TramApplication) {
     @Provides
     internal fun provideImageLoader(): ImageLoader {
         return PicassoImageLoader()
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideRxJavaErrorHandler(
+        crashReportingService: CrashReportingService
+    ): Consumer<in Throwable> = Consumer {
+        crashReportingService.reportCrash(it, "Global Error Handler")
     }
 }

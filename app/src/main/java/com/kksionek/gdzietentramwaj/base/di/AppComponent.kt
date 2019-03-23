@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.base.di
 
+import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.favorite.di.FavoriteLinesActivityViewModelModule
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.map.di.MapsActivityModule
@@ -20,4 +21,5 @@ import javax.inject.Singleton
 interface AppComponent {
     fun inject(activity: MapsActivity)
     fun inject(activity: FavoriteLinesActivity)
+    fun inject(application: TramApplication)
 }
