@@ -30,6 +30,8 @@ class TramMarker @UiThread constructor(tramData: TramData) {
 
     val id = tramData.id
 
+    val brigade = tramData.brigade
+
     private var _marker: Marker? = null
     var marker: Marker?
         get() = _marker

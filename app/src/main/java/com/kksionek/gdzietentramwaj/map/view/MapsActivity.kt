@@ -284,6 +284,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     tramMarker.marker = map.addMarker(
                         MarkerOptions()
                             .position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
+                            .title(getString(R.string.brigade))
+                            .snippet(tramMarker.brigade)
                             .icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
@@ -354,7 +356,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isTrafficEnabled = false
             isMyLocationEnabled = checkLocationPermission(false)
 
-            setOnMarkerClickListener { true }
+            setOnMarkerClickListener {
+                if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
+                return@setOnMarkerClickListener true
+            }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
                 viewModel.visibleRegion = projection.visibleRegion.latLngBounds
