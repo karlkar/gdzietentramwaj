@@ -39,7 +39,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.maps.android.ui.IconGenerator
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -85,7 +84,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareIntent
     }
 
-    private val iconGenerator by lazy { IconGenerator(this) }
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
@@ -95,7 +93,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun showSuccessToast(text: String) {
         Toast.makeText(
-            this,
+            applicationContext,
             text,
             Toast.LENGTH_SHORT
         ).show()
@@ -103,7 +101,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun showErrorToast(text: String) {
         Toast.makeText(
-            this,
+            applicationContext,
             text,
             Toast.LENGTH_LONG
         ).show()
@@ -140,7 +138,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val latLng = LatLng(it.latitude, it.longitude)
                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
                 map.isMyLocationEnabled = checkLocationPermission(false)
-                viewModel.lastLocation.removeObservers(this)
             }
         }
     }
@@ -287,12 +284,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     tramMarker.marker = map.addMarker(
                         MarkerOptions()
                             .position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
+                            .title(getString(R.string.brigade))
+                            .snippet(tramMarker.brigade)
                             .icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
-                                    iconGenerator
+                                    this
                                 )
                             )
+                            .anchor(0.5f, 0.8f)
                     )
                 }
                 if (tramMarker.polyline == null) {
@@ -354,8 +354,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isBuildingsEnabled = false
             isIndoorEnabled = false
             isTrafficEnabled = false
+            isMyLocationEnabled = checkLocationPermission(false)
 
-            setOnMarkerClickListener { true }
+            setOnMarkerClickListener {
+                if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
+                return@setOnMarkerClickListener true
+            }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
                 viewModel.visibleRegion = projection.visibleRegion.latLngBounds

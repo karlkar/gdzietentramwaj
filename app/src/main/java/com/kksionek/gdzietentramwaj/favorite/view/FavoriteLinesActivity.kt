@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.view.MenuItem
 import com.kksionek.gdzietentramwaj.R
@@ -43,6 +44,9 @@ class FavoriteLinesActivity : AppCompatActivity() {
         }
         gridView.layoutManager = GridLayoutManager(this, COLUMN_COUNT)
         gridView.addItemDecoration(SpacesItemDecoration(this, R.dimen.grid_offset))
+        gridView.itemAnimator = object : DefaultItemAnimator() {
+            override fun getChangeDuration(): Long = 100
+        }
         gridView.adapter = adapter
         mViewModel.favoriteTrams
             .observe(this, Observer<List<FavoriteTram>> { adapter.submitList(it) })

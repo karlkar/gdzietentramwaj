@@ -22,4 +22,5 @@
     <string name="error_failed_to_reload_difficulties">Nie udało się załadować utrudnień</string>
     <string name="difficulties_bottom_sheet_no_items">Brak utrudnień&#8230; A przynajmniej tak twierdzi ZTM ;)</string>
     <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
+    <string name="brigade">Brygada</string>
 </resources>

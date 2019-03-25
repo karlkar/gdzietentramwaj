@@ -13,7 +13,7 @@ data class TramData(
     @SerializedName("Lines")
     val firstLine: String,
     @SerializedName("Brigade")
-    private val brigade: String
+    val brigade: String
 ) {
     val id: String
         get() = "$firstLine/$brigade"
