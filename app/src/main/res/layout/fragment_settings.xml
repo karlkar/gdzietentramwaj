@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/settings_marker_title_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Wybierz zestaw ikonek:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/settings_marker_old_bus_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_old_bus"
+        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
+        app:layout_constraintEnd_toStartOf="@+id/settings_marker_old_tram_imageview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
+
+    <ImageView
+        android:id="@+id/settings_marker_old_tram_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_old_tram"
+        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
+        app:layout_constraintEnd_toStartOf="@+id/settings_marker_divider_view"
+        app:layout_constraintStart_toEndOf="@id/settings_marker_old_bus_imageview"
+        app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
+
+    <RadioButton
+        android:id="@+id/settings_marker_old_radiobutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stare ikony"
+        app:layout_constraintEnd_toEndOf="@id/settings_marker_old_tram_imageview"
+        app:layout_constraintStart_toStartOf="@id/settings_marker_old_bus_imageview"
+        app:layout_constraintTop_toBottomOf="@id/settings_marker_old_bus_imageview" />
+
+    <ImageView
+        android:id="@+id/settings_marker_new_bus_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_bus"
+        app:layout_constraintEnd_toStartOf="@+id/settings_marker_new_tram_imageview"
+        app:layout_constraintStart_toEndOf="@+id/settings_marker_divider_view"
+        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+
+    <ImageView
+        android:id="@+id/settings_marker_new_tram_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_tram"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/settings_marker_new_bus_imageview"
+        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+
+    <RadioButton
+        android:id="@+id/settings_marker_new_radiobutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nowe ikony"
+        app:layout_constraintEnd_toEndOf="@id/settings_marker_new_tram_imageview"
+        app:layout_constraintStart_toStartOf="@id/settings_marker_new_bus_imageview"
+        app:layout_constraintTop_toBottomOf="@id/settings_marker_new_bus_imageview" />
+
+    <View
+        android:id="@+id/settings_marker_divider_view"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_radiobutton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+</android.support.constraint.ConstraintLayout>

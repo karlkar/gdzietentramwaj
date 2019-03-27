@@ -21,6 +21,11 @@
             "android.support.v7.widget.ShareActionProvider"/>
 
     <item
+        android:id="@+id/menu_item_settings"
+        android:title="Ustawienia"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_item_favorite"
         android:title="@string/action_menu_favorite"
         app:showAsAction="never" />

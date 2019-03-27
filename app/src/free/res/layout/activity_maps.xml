@@ -16,9 +16,11 @@
 
         <fragment
             android:id="@+id/fragment_maps_content"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
 
         <include layout="@layout/bottom_sheet_difficulties" />
     </android.support.design.widget.CoordinatorLayout>

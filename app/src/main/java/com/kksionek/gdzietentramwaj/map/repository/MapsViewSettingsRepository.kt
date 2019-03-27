@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
-interface MapsViewSettingsRepository {
+interface MapsViewSettingsRepository: IconSettingsManager {
 
     fun isFavoriteTramViewEnabled(): Boolean
 

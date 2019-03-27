@@ -19,9 +19,10 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
+import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 
 
-class TramMarker @UiThread constructor(tramData: TramData) {
+class TramMarker(tramData: TramData) {
 
     val tramLine: String = tramData.firstLine
 
@@ -95,10 +96,10 @@ class TramMarker @UiThread constructor(tramData: TramData) {
             return bitmap
         }
 
-        @JvmStatic
         fun getBitmap(
             line: String,
-            context: Context
+            context: Context,
+            iconSettingsProvider: IconSettingsProvider
         ): BitmapDescriptor {
             val descriptor = mBitmaps[line]
             if (descriptor == null) {
@@ -111,17 +112,22 @@ class TramMarker @UiThread constructor(tramData: TramData) {
                     line.startsWith("L") -> Color.rgb(76, 165, 80)
                     else -> Color.BLACK
                 }
+                val oldIconSet = iconSettingsProvider.isOldIconSetEnabled()
                 val clustersPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = textColor
                     textSize = 35.0f
                     typeface = Typeface.create(typeface, BOLD)
                     textAlign = Paint.Align.CENTER
                 }
-                val icon = if (isTram) R.drawable.ic_tram else R.drawable.ic_bus
+                val icon = if (oldIconSet) {
+                    if (isTram) R.drawable.ic_old_tram else R.drawable.ic_old_bus
+                } else {
+                    if (isTram) R.drawable.ic_tram else R.drawable.ic_bus
+                }
                 val drawable = ContextCompat.getDrawable(context, icon)
                 val bitmap = drawableToBitmap(drawable!!)
 
-                val modifier = if (isTram) 2.15f else 2.8f
+                val modifier = if (oldIconSet || isTram) 2.15f else 2.8f
                 val canvas = Canvas(bitmap)
                 canvas.drawText(
                     line,

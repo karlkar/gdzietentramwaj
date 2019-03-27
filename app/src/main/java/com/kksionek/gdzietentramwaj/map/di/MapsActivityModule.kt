@@ -6,6 +6,8 @@ import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
 import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
+import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
+import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
@@ -60,7 +62,8 @@ class MapsActivityModule {
     @Provides
     internal fun provideDifficultiesInterface(
         okHttpClient: OkHttpClient,
-        rxAdapter: CallAdapter.Factory) : DifficultiesInterface {
+        rxAdapter: CallAdapter.Factory
+    ): DifficultiesInterface {
         return Retrofit.Builder()
             .addConverterFactory(ScalarsConverterFactory.create())
             .client(okHttpClient)
@@ -68,4 +71,16 @@ class MapsActivityModule {
             .baseUrl("https://www.ztm.waw.pl/")
             .build().create(DifficultiesInterface::class.java)
     }
+
+    @Singleton
+    @Provides
+    internal fun provideIconSettingsProvider(
+        mapsViewSettingsRepository: MapsViewSettingsRepository
+    ): IconSettingsProvider = mapsViewSettingsRepository
+
+    @Singleton
+    @Provides
+    internal fun provideIconSettingsManager(
+        mapsViewSettingsRepository: MapsViewSettingsRepository
+    ): IconSettingsManager = mapsViewSettingsRepository
 }

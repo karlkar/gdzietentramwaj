@@ -29,20 +29,17 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
@@ -52,10 +49,10 @@ import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
-private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
+const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
 private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity() {
     private lateinit var map: GoogleMap
 
     // TODO Move to single activity
@@ -177,10 +174,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             imageLoader
         )
 
-        val mapFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_maps_content) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
-
         adProviderInterface.initialize(this, getString(R.string.adMobAppId))
         adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
@@ -241,6 +234,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             R.id.menu_item_refresh -> viewModel.forceReloadTrams()
             R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
+            R.id.menu_item_settings -> {
+                findNavController(R.id.fragment_maps_content).navigate(R.id.action_nav_graph_to_settingsFragment)
+            }
             R.id.menu_item_favorite -> {
                 val intent = Intent(applicationContext, FavoriteLinesActivity::class.java)
                 startActivity(intent)
@@ -281,18 +277,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val tramMarker = tramMarkerList[i]
             if (diffResult.convertNewPositionToOld(i) == NO_POSITION) {
                 if (tramMarker.marker == null) {
+                    val oldIconSet = viewModel.iconSettingsProvider.isOldIconSetEnabled()
                     tramMarker.marker = map.addMarker(
-                        MarkerOptions()
-                            .position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
-                            .title(getString(R.string.brigade))
-                            .snippet(tramMarker.brigade)
-                            .icon(
+                        MarkerOptions().apply {
+                            position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
+                            title(getString(R.string.brigade))
+                            snippet(tramMarker.brigade)
+                            icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
-                                    this
+                                    this@MapsActivity,
+                                    viewModel.iconSettingsProvider
                                 )
                             )
-                            .anchor(0.5f, 0.8f)
+                            if (!oldIconSet) {
+                                anchor(0.5f, 0.8f)
+                            }
+                        }
                     )
                 }
                 if (tramMarker.polyline == null) {
@@ -332,49 +333,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             return false
         }
         return true
-    }
-
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        map.apply {
-            moveCamera(
-                CameraUpdateFactory.newLatLngZoom(WARSAW_LATLNG, 15f)
-            )
-            setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
-            setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    applicationContext,
-                    R.raw.map_style
-                )
-            )
-            uiSettings?.apply {
-                isTiltGesturesEnabled = false
-                isZoomControlsEnabled = true
-            }
-            isBuildingsEnabled = false
-            isIndoorEnabled = false
-            isTrafficEnabled = false
-            isMyLocationEnabled = checkLocationPermission(false)
-
-            setOnMarkerClickListener {
-                if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
-                return@setOnMarkerClickListener true
-            }
-            setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
-            setOnCameraIdleListener {
-                viewModel.visibleRegion = projection.visibleRegion.latLngBounds
-                cameraMoveInProgress.set(false)
-            }
-        }
-
-        viewModel.mapControls.observe(this@MapsActivity, Observer {
-            when (it) {
-                is MapControls.ZoomIn -> map.animateCamera(CameraUpdateFactory.zoomIn())
-                is MapControls.MoveTo -> map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
-            }
-        })
-
-        viewModel.forceReloadLastLocation()
     }
 
     private fun reloadAds(location: Location) {

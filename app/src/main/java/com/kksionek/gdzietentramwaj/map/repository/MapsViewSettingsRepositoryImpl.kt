@@ -5,6 +5,7 @@ import android.preference.PreferenceManager
 
 private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
 private const val PREF_LAST_VERSION = "LAST_VERSION"
+private const val PREF_OLD_ICON_SET = "OLD_ICON_SET"
 
 class MapsViewSettingsRepositoryImpl(private val context: Context) :
     MapsViewSettingsRepository {
@@ -32,4 +33,15 @@ class MapsViewSettingsRepositoryImpl(private val context: Context) :
             .putInt(PREF_LAST_VERSION, version)
             .apply()
     }
+
+    override fun setIsOldIconSetEnabled(enabled: Boolean) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putBoolean(PREF_OLD_ICON_SET, enabled)
+            .apply()
+    }
+
+    override fun isOldIconSetEnabled(): Boolean = PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getBoolean(PREF_OLD_ICON_SET, false)
 }
