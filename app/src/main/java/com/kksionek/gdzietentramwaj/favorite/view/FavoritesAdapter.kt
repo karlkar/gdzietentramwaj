@@ -1,9 +1,9 @@
 package com.kksionek.gdzietentramwaj.favorite.view
 
-import android.support.v7.util.DiffUtil
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter

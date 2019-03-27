@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj
 
-import android.support.multidex.MultiDexApplication
+import androidx.multidex.MultiDexApplication
 import com.kksionek.gdzietentramwaj.base.di.AppComponent
 import com.kksionek.gdzietentramwaj.base.di.AppModule
 import com.kksionek.gdzietentramwaj.base.di.DaggerAppComponent

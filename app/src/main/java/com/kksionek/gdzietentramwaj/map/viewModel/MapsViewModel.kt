@@ -1,10 +1,10 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
 import android.location.Location
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException

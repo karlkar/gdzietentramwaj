@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.view
 
-import android.support.annotation.StringRes
+import androidx.annotation.StringRes
 
 sealed class UiState<T> {
 

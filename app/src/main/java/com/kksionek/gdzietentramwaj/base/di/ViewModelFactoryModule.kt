@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.base.di
 
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import dagger.Binds
 import dagger.Module

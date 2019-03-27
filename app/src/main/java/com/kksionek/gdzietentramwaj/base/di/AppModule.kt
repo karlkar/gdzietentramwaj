@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.base.di
 
-import android.arch.persistence.room.Room
 import android.content.Context
+import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.TramApplication

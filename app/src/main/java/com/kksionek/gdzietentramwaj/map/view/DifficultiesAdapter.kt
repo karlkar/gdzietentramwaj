@@ -1,11 +1,11 @@
 package com.kksionek.gdzietentramwaj.map.view
 
-import android.support.v4.text.HtmlCompat
-import android.support.v4.text.HtmlCompat.FROM_HTML_MODE_LEGACY
-import android.support.v7.util.DiffUtil
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.text.HtmlCompat
+import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
+import androidx.recyclerview.widget.DiffUtil
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader

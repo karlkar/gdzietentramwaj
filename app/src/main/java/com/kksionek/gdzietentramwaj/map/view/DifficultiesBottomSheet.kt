@@ -1,13 +1,13 @@
 package com.kksionek.gdzietentramwaj.map.view
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.makeExhaustive

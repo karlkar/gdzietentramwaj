@@ -1,15 +1,8 @@
 package com.kksionek.gdzietentramwaj;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.persistence.db.framework.FrameworkSQLiteOpenHelperFactory;
-import android.arch.persistence.room.testing.MigrationTestHelper;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.Nullable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 
 import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase;
 
@@ -19,6 +12,14 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.room.testing.MigrationTestHelper;
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 public class MigrationTest {

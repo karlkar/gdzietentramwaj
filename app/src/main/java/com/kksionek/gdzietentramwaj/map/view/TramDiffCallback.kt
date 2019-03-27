@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.view
 
-import android.support.v7.util.DiffUtil
+import androidx.recyclerview.widget.DiffUtil
 
 class TramDiffCallback(
         private val oldList: List<TramMarker>,

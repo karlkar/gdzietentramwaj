@@ -8,9 +8,9 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.Typeface.BOLD
 import android.graphics.drawable.Drawable
-import android.support.annotation.UiThread
-import android.support.v4.content.ContextCompat
 import android.util.LruCache
+import androidx.annotation.UiThread
+import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng

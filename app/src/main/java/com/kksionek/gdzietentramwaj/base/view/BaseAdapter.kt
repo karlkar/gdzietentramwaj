@@ -1,9 +1,9 @@
 package com.kksionek.gdzietentramwaj.base.view
 
-import android.support.v7.recyclerview.extensions.ListAdapter
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 
 abstract class BaseAdapter<T : Any, VH : BaseAdapter.ViewHolder<T>>(

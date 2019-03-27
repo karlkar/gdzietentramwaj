@@ -18,7 +18,7 @@
         android:title="@string/menu_item_main_share"
         app:showAsAction="ifRoom"
         app:actionProviderClass=
-            "android.support.v7.widget.ShareActionProvider"/>
+            "androidx.appcompat.widget.ShareActionProvider"/>
 
     <item
         android:id="@+id/menu_item_settings"

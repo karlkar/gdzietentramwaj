@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.view
 
 import android.animation.ValueAnimator
-import android.support.annotation.UiThread
+import androidx.annotation.UiThread
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline

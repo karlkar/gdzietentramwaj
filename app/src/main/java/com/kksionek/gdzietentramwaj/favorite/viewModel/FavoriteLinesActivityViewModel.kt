@@ -1,9 +1,9 @@
 package com.kksionek.gdzietentramwaj.favorite.viewModel
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteTramRepository
