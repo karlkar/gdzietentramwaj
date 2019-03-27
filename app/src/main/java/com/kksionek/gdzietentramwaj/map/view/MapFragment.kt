@@ -62,6 +62,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var menuItemFavoriteSwitch: MenuItem
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
 
+    private var isOldIconSetEnabled = false
+
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
@@ -150,6 +152,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         (activity!!.application as TramApplication).appComponent.inject(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory)
             .get(MapsViewModel::class.java)
+
+        isOldIconSetEnabled = viewModel.iconSettingsProvider.isOldIconSetEnabled()
 
         aboutDialogProvider = activity as? AboutDialogProvider
             ?: throw IllegalArgumentException("Activity should implement AboutDialogProvider interface")
@@ -363,6 +367,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if (animate) {
             tramPathAnimator.removeAllAnimatedMarkers()
         }
+
+        val currentOldIconEnabledSetting = viewModel.iconSettingsProvider.isOldIconSetEnabled()
+        if (isOldIconSetEnabled != currentOldIconEnabledSetting) {
+            TramMarker.clearCache()
+            isOldIconSetEnabled = currentOldIconEnabledSetting
+            currentlyDisplayedTrams.forEach {
+                tramPathAnimator.removeMarker(it)
+                it.remove()
+            }
+            currentlyDisplayedTrams = emptyList()
+        }
+
         val diffCallback = TramDiffCallback(currentlyDisplayedTrams, tramMarkerList)
         val diffResult = DiffUtil.calculateDiff(diffCallback, false)
 
@@ -379,7 +395,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             val tramMarker = tramMarkerList[i]
             if (diffResult.convertNewPositionToOld(i) == DiffUtil.DiffResult.NO_POSITION) {
                 if (tramMarker.marker == null) {
-                    val oldIconSet = viewModel.iconSettingsProvider.isOldIconSetEnabled()
+                    val oldIconSet = currentOldIconEnabledSetting
                     tramMarker.marker = map.addMarker(
                         MarkerOptions().apply {
                             position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final

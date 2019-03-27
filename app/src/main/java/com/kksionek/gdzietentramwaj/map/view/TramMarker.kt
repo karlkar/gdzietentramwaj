@@ -21,7 +21,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 
-
 class TramMarker(tramData: TramData) {
 
     val tramLine: String = tramData.firstLine
@@ -78,7 +77,7 @@ class TramMarker(tramData: TramData) {
 
         const val POLYLINE_WIDTH = 8F
 
-        private val mBitmaps = LruCache<String, BitmapDescriptor>(50)
+        private val bitmapCache = LruCache<String, BitmapDescriptor>(50)
 
         private fun drawableToBitmap(drawable: Drawable): Bitmap {
             var bitmap = Bitmap.createBitmap(
@@ -101,7 +100,7 @@ class TramMarker(tramData: TramData) {
             context: Context,
             iconSettingsProvider: IconSettingsProvider
         ): BitmapDescriptor {
-            val descriptor = mBitmaps[line]
+            val descriptor = bitmapCache[line]
             if (descriptor == null) {
                 val isTram = checkIfIsTram(line)
                 val textColor = when {
@@ -137,7 +136,7 @@ class TramMarker(tramData: TramData) {
                 )
 
                 val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
-                mBitmaps.put(line, bitmapDescriptor)
+                bitmapCache.put(line, bitmapDescriptor)
                 return bitmapDescriptor
             } else {
                 return descriptor
@@ -145,5 +144,9 @@ class TramMarker(tramData: TramData) {
         }
 
         private fun checkIfIsTram(line: String) = line.length < 3
+
+        fun clearCache() {
+            bitmapCache.evictAll()
+        }
     }
 }
