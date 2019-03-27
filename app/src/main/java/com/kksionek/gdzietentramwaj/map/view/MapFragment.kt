@@ -35,7 +35,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_map, container, false)
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         viewModel = ViewModelProviders.of(activity!!)[MapsViewModel::class.java] // TODO make it fragment's viewmodel
     }
@@ -43,8 +43,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment_karol) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
+        if (!this::map.isInitialized) {
+            (childFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment)
+                ?.getMapAsync(this)
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

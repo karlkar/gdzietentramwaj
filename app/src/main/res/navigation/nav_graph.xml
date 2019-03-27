@@ -12,7 +12,6 @@
         <action
             android:id="@+id/action_nav_graph_to_settingsFragment"
             app:destination="@id/destination_settings"
-            app:launchSingleTop="true"
             app:popUpTo="@+id/destination_map" />
     </fragment>
 

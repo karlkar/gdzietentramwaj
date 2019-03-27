@@ -10,6 +10,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -235,7 +236,10 @@ class MapsActivity : AppCompatActivity() {
             R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
-                findNavController(R.id.fragment_maps_content).navigate(R.id.action_nav_graph_to_settingsFragment)
+                val handler = Handler()
+                handler.post {
+                    findNavController(R.id.fragment_maps_content).navigate(R.id.action_nav_graph_to_settingsFragment)
+                }
             }
             R.id.menu_item_favorite -> {
                 val intent = Intent(applicationContext, FavoriteLinesActivity::class.java)

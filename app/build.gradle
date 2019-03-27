@@ -78,7 +78,7 @@ androidExtensions {
 }
 
 dependencies {
-    def nav_version = "1.0.0"
+    def nav_version = "2.1.0-alpha01"
     def daggerVersion = '2.16'
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -139,8 +139,8 @@ dependencies {
     freeImplementation 'com.google.firebase:firebase-ads:17.2.0'
     freeImplementation 'androidx.browser:browser:1.0.0'
 
-    implementation "android.arch.navigation:navigation-fragment-ktx:$nav_version"
-    implementation "android.arch.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 }
 
 apply plugin: 'com.google.gms.google-services'
