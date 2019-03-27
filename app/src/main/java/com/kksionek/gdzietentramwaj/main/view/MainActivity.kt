@@ -41,13 +41,18 @@ class MainActivity : AppCompatActivity(),
             .get(MainViewModel::class.java)
     }
 
+
+    override fun onSupportNavigateUp(): Boolean =
+        findNavController(R.id.fragment_maps_content).navigateUp() || super.onSupportNavigateUp()
+
     override fun onStart() {
         super.onStart()
 
         val googleApiAvailability = GoogleApiAvailability.getInstance()
         val result = googleApiAvailability.isGooglePlayServicesAvailable(this)
         if (result != ConnectionResult.SUCCESS) {
-            googleApiAvailability.getErrorDialog(this, result,
+            googleApiAvailability.getErrorDialog(
+                this, result,
                 MY_GOOGLE_API_AVAILABILITY_REQUEST
             ) {
                 finish()

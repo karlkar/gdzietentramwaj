@@ -358,10 +358,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         tramMarkerList: List<TramMarker>,
         animate: Boolean
     ) {
-        if (!::map.isInitialized) {
-            return
-        }
-        if (cameraMoveInProgress.get()) {
+        if (!::map.isInitialized || cameraMoveInProgress.get()) {
             return
         }
         if (animate) {
@@ -395,7 +392,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             val tramMarker = tramMarkerList[i]
             if (diffResult.convertNewPositionToOld(i) == DiffUtil.DiffResult.NO_POSITION) {
                 if (tramMarker.marker == null) {
-                    val oldIconSet = currentOldIconEnabledSetting
                     tramMarker.marker = map.addMarker(
                         MarkerOptions().apply {
                             position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
@@ -408,7 +404,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                     viewModel.iconSettingsProvider
                                 )
                             )
-                            if (!oldIconSet) {
+                            if (!currentOldIconEnabledSetting) {
                                 anchor(0.5f, 0.8f)
                             }
                         }

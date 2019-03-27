@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
@@ -14,7 +16,7 @@ import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
 import javax.inject.Inject
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : Fragment(), OnBackPressedCallback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -53,5 +55,10 @@ class SettingsFragment : Fragment() {
                 viewModel.setIsOldIconSetEnabled(false)
             }
         }
+    }
+
+    override fun handleOnBackPressed(): Boolean {
+        findNavController().navigateUp()
+        return true
     }
 }
