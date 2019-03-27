@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.view
+package com.kksionek.gdzietentramwaj.settings.view
 
 import android.content.Context
 import android.os.Bundle
@@ -8,12 +8,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
+import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
+import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
+import javax.inject.Inject
 
 class SettingsFragment : Fragment() {
 
-    private lateinit var viewModel: MapsViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private lateinit var viewModel: SettingsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,26 +30,27 @@ class SettingsFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        viewModel = ViewModelProviders.of(activity!!)[MapsViewModel::class.java]
+        (activity!!.application as TramApplication).appComponent.inject(this)
+        viewModel = ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        settings_marker_old_radiobutton.isChecked = viewModel.iconSettingsProvider.isOldIconSetEnabled()
-        settings_marker_new_radiobutton.isChecked = !viewModel.iconSettingsProvider.isOldIconSetEnabled()
+        settings_marker_old_radiobutton.isChecked = viewModel.isOldIconSetEnabled()
+        settings_marker_new_radiobutton.isChecked = !viewModel.isOldIconSetEnabled()
 
         settings_marker_old_radiobutton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 settings_marker_new_radiobutton.isChecked = false
-                viewModel.iconSettingsManager.setIsOldIconSetEnabled(true)
+                viewModel.setIsOldIconSetEnabled(true)
             }
         }
 
         settings_marker_new_radiobutton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 settings_marker_old_radiobutton.isChecked = false
-                viewModel.iconSettingsManager.setIsOldIconSetEnabled(false)
+                viewModel.setIsOldIconSetEnabled(false)
             }
         }
     }

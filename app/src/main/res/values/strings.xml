@@ -2,7 +2,7 @@
     <string name="app_name">Gdzie Ten Tramwaj?</string>
     <string name="adMobAppId">ca-app-pub-9982327151344679~9129163343</string>
     <string name="banner_ad_unit_id">ca-app-pub-9982327151344679/1605896548</string>
-    <string name="adMobTestDeviceS7Edge">C8A0397BECC9CDA8A3A1610EA6E92D74</string>
+    <string name="adMobTestDeviceS7Edge">FF6E13B0E9E671F99C2D803B882C5002</string>
     <string name="action_menu_info">O aplikacji</string>
     <string name="refresh">Odśwież</string>
     <string name="action_menu_favorite">Twoje linie</string>
@@ -23,4 +23,5 @@
     <string name="difficulties_bottom_sheet_no_items">Brak utrudnień&#8230; A przynajmniej tak twierdzi ZTM ;)</string>
     <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
     <string name="brigade">Brygada</string>
+    <string name="settings">Ustawienia</string>
 </resources>

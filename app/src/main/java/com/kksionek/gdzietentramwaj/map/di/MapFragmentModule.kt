@@ -1,15 +1,12 @@
 package com.kksionek.gdzietentramwaj.map.di
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
 import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
-import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
-import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
-import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepositoryImpl
+import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.view.AdProvider
@@ -24,25 +21,20 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
-@Module(includes = [MapsActivityModule.MapsViewModelModule::class])
-class MapsActivityModule {
+@Module(includes = [MapFragmentModule.MapsViewModelModule::class])
+class MapFragmentModule {
 
     @Module
     interface MapsViewModelModule {
         @Binds
         @IntoMap
         @ViewModelKey(MapsViewModel::class)
-        fun bindMapsViewModel(mapsActivityViewModel: MapsViewModel): ViewModel
+        fun bindMapsViewModel(mapsViewModel: MapsViewModel): ViewModel
     }
 
     @ActivityScope
     @Provides
     internal fun provideAdProvider(): AdProviderInterface = AdProvider()
-
-    @ActivityScope
-    @Provides
-    internal fun provideMapsViewSettingsRepository(context: Context): MapsViewSettingsRepository =
-        MapsViewSettingsRepositoryImpl(context)
 
     @Singleton
     @Provides
@@ -75,12 +67,6 @@ class MapsActivityModule {
     @Singleton
     @Provides
     internal fun provideIconSettingsProvider(
-        mapsViewSettingsRepository: MapsViewSettingsRepository
-    ): IconSettingsProvider = mapsViewSettingsRepository
-
-    @Singleton
-    @Provides
-    internal fun provideIconSettingsManager(
-        mapsViewSettingsRepository: MapsViewSettingsRepository
-    ): IconSettingsManager = mapsViewSettingsRepository
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): IconSettingsProvider = settingsRepositoryImpl
 }

@@ -3,9 +3,12 @@ package com.kksionek.gdzietentramwaj.base.di
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.favorite.di.FavoriteLinesActivityViewModelModule
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
-import com.kksionek.gdzietentramwaj.map.di.MapsActivityModule
+import com.kksionek.gdzietentramwaj.main.di.MainActivityModule
+import com.kksionek.gdzietentramwaj.main.view.MainActivity
+import com.kksionek.gdzietentramwaj.map.di.MapFragmentModule
 import com.kksionek.gdzietentramwaj.map.view.MapFragment
-import com.kksionek.gdzietentramwaj.map.view.MapsActivity
+import com.kksionek.gdzietentramwaj.settings.di.SettingsFragmentModule
+import com.kksionek.gdzietentramwaj.settings.view.SettingsFragment
 import dagger.Component
 import javax.inject.Singleton
 
@@ -15,13 +18,16 @@ import javax.inject.Singleton
     modules = [
         AppModule::class,
         ViewModelFactoryModule::class,
-        MapsActivityModule::class,
+        MapFragmentModule::class,
+        MainActivityModule::class,
+        SettingsFragmentModule::class,
         FavoriteLinesActivityViewModelModule::class
     ]
 )
 interface AppComponent {
-    fun inject(activity: MapsActivity)
-    fun inject(activity: MapFragment)
+    fun inject(activity: MainActivity)
+    fun inject(fragment: MapFragment)
+    fun inject(fragment: SettingsFragment)
     fun inject(activity: FavoriteLinesActivity)
     fun inject(application: TramApplication)
 }

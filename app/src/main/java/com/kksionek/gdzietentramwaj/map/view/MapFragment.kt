@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.view
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -12,17 +11,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.ShareActionProvider
@@ -45,11 +39,15 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
+import com.kksionek.gdzietentramwaj.base.createDialogView
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
+import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
+import com.kksionek.gdzietentramwaj.showErrorToast
+import com.kksionek.gdzietentramwaj.showSuccessToast
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -73,6 +71,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
 
+    private lateinit var aboutDialogProvider: AboutDialogProvider
+
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
 
@@ -90,22 +90,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             "https://play.google.com/store/apps/details?id=${activity!!.packageName}"
         )
         shareIntent
-    }
-
-    private fun showSuccessToast(text: String) {
-        Toast.makeText(
-            context!!.applicationContext,
-            text,
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun showErrorToast(text: String) {
-        Toast.makeText(
-            context!!.applicationContext,
-            text,
-            Toast.LENGTH_LONG
-        ).show()
     }
 
     private val tramDataObserver =
@@ -166,7 +150,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onAttach(context)
         (activity!!.application as TramApplication).appComponent.inject(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-            .get(MapsViewModel::class.java) // TODO make it fragment's viewmodel
+            .get(MapsViewModel::class.java)
+
+        aboutDialogProvider = activity as? AboutDialogProvider
+            ?: throw IllegalArgumentException("Activity should implement AboutDialogProvider interface")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -192,10 +179,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         adProviderInterface.initialize(context!!, getString(R.string.adMobAppId))
         adProviderInterface.showAd(adview_maps_adview)
         checkLocationPermission(true)
-
-        if (viewModel.shouldShowWelcomeDialog()) {
-            showAboutAppDialog()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -234,7 +217,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_info -> showAboutAppDialog()
+            R.id.menu_item_info -> aboutDialogProvider.showAboutAppDialog()
             R.id.menu_item_refresh -> viewModel.forceReloadTrams()
             R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
@@ -269,38 +252,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onPause()
     }
 
-    private fun showAboutAppDialog() {
-        val view = createDialogView(R.string.disclaimer) ?: return
-        AlertDialog.Builder(context!!)
-            .setTitle(R.string.about_app)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
-            .show()
-    }
-
     private fun removeAds() {
-        val view = createDialogView(R.string.remove_info) ?: return
+        val view = createDialogView(context!!, R.string.remove_info) ?: return
         AlertDialog.Builder(context!!)
             .setTitle(R.string.remove_title)
             .setView(view)
             .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
             .show()
-    }
-
-    @SuppressLint("InflateParams")
-    @Suppress("DEPRECATION")
-    private fun createDialogView(@StringRes textId: Int): View? {
-        val view = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_info, null)
-        view.findViewById<TextView>(R.id.info_dialog_text)?.apply {
-            movementMethod = LinkMovementMethod.getInstance()
-            text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(getString(textId), Html.FROM_HTML_MODE_LEGACY)
-            } else {
-                Html.fromHtml(getString(textId))
-            }
-        }
-        return view
     }
 
     private fun rateApp() {

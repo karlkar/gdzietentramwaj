@@ -12,6 +12,8 @@ import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
+import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
+import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import io.reactivex.functions.Consumer
@@ -81,4 +83,13 @@ class AppModule(private val application: TramApplication) {
     ): Consumer<in Throwable> = Consumer {
         crashReportingService.reportCrash(it, "Global Error Handler")
     }
+
+    @ActivityScope
+    @Provides
+    internal fun provideSettingsRepository(context: Context): SettingsRepositoryImpl = SettingsRepositoryImpl(context)
+
+    @ActivityScope
+    @Provides
+    internal fun provideMapsViewSettingsRepository(settingsRepositoryImpl: SettingsRepositoryImpl): MapsViewSettingsRepository =
+        settingsRepositoryImpl
 }

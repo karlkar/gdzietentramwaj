@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     app:defaultNavHost="true"
     app:navGraph="@navigation/nav_graph"
-    tools:context="com.kksionek.gdzietentramwaj.map.view.MapsActivity">
+    tools:context="com.kksionek.gdzietentramwaj.main.view.MainActivity"
+    tools:layout="@layout/fragment_map">
 
 </fragment>

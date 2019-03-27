@@ -44,7 +44,7 @@
             android:value="${enableCrashReporting}" />
 
         <activity
-            android:name=".map.view.MapsActivity"
+            android:name=".main.view.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name">
             <intent-filter>
@@ -62,7 +62,7 @@
             android:name=".favorite.view.FavoriteLinesActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/action_menu_favorite"
-            android:parentActivityName=".map.view.MapsActivity" />
+            android:parentActivityName=".main.view.MainActivity" />
     </application>
 
 </manifest>
