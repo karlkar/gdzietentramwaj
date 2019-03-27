@@ -27,8 +27,8 @@ class SettingsFragment : Fragment() {
         viewModel = ViewModelProviders.of(activity!!)[MapsViewModel::class.java]
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         settings_marker_old_radiobutton.isChecked = viewModel.iconSettingsProvider.isOldIconSetEnabled()
         settings_marker_new_radiobutton.isChecked = !viewModel.iconSettingsProvider.isOldIconSetEnabled()
@@ -36,21 +36,15 @@ class SettingsFragment : Fragment() {
         settings_marker_old_radiobutton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 settings_marker_new_radiobutton.isChecked = false
-                viewModel.iconSettingsManager.setIsOldIconSetEnabled(isChecked)
+                viewModel.iconSettingsManager.setIsOldIconSetEnabled(true)
             }
         }
 
         settings_marker_new_radiobutton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 settings_marker_old_radiobutton.isChecked = false
-                viewModel.iconSettingsManager.setIsOldIconSetEnabled(isChecked)
+                viewModel.iconSettingsManager.setIsOldIconSetEnabled(false)
             }
         }
-    }
-
-    override fun onPause() {
-        settings_marker_old_radiobutton.setOnCheckedChangeListener(null)
-        settings_marker_new_radiobutton.setOnCheckedChangeListener(null)
-        super.onPause()
     }
 }
