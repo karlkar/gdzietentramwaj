@@ -1,12 +1,11 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinatorlayout_maps_rootView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.kksionek.gdzietentramwaj.main.view.MainActivity">
+    android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/fragment_maps_content"
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -18,5 +17,5 @@
         android:visibility="gone"
         tools:ignore="MissingConstraints" />
 
-    <include layout="@layout/bottom_sheet_difficulties" />
-</android.support.design.widget.CoordinatorLayout>
+    <include layout="@layout/bottom_sheet_difficulties"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

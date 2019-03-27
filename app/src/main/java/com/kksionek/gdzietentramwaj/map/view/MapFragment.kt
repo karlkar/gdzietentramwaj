@@ -49,7 +49,6 @@ import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showErrorToast
 import com.kksionek.gdzietentramwaj.showSuccessToast
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
-import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -177,7 +176,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         )
 
         adProviderInterface.initialize(context!!, getString(R.string.adMobAppId))
-        adProviderInterface.showAd(adview_maps_adview)
+        adProviderInterface.showAd(view.findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
     }
 
