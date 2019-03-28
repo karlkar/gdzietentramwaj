@@ -18,7 +18,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.ShareActionProvider
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuItemCompat
@@ -35,14 +34,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
-import com.kksionek.gdzietentramwaj.base.createDialogView
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
-import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
@@ -193,12 +189,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        @Suppress("ConstantConditionIf")
-        if (BuildConfig.FLAVOR == "paid") {
-            val removeAds = menu.findItem(R.id.menu_item_remove_ads)
-            removeAds.isVisible = false
-        }
-
         val menuShare = menu.findItem(R.id.menu_item_share)
         val shareActionProvider =
             MenuItemCompat.getActionProvider(menuShare) as ShareActionProvider
@@ -222,20 +212,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         when (item.itemId) {
             R.id.menu_item_info -> aboutDialogProvider.showAboutAppDialog()
             R.id.menu_item_refresh -> viewModel.forceReloadTrams()
-            R.id.menu_item_remove_ads -> removeAds()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
                 val handler = Handler()
                 handler.post {
                     findNavController().navigate(R.id.action_nav_graph_to_settingsFragment)
                 }
-            }
-            R.id.menu_item_favorite -> {
-                val intent = Intent(
-                    context!!.applicationContext,
-                    FavoriteLinesActivity::class.java
-                ) // TODO Change it to fragment
-                startActivity(intent)
             }
             R.id.menu_item_favorite_switch -> viewModel.toggleFavorite()
             else -> return super.onOptionsItemSelected(item)
@@ -253,15 +235,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel.onPause()
         adProviderInterface.pause()
         super.onPause()
-    }
-
-    private fun removeAds() {
-        val view = createDialogView(context!!, R.string.remove_info) ?: return
-        AlertDialog.Builder(context!!)
-            .setTitle(R.string.remove_title)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
-            .show()
     }
 
     private fun rateApp() {

@@ -5,7 +5,7 @@
     <string name="adMobTestDeviceS7Edge">FF6E13B0E9E671F99C2D803B882C5002</string>
     <string name="action_menu_info">O aplikacji</string>
     <string name="refresh">Odśwież</string>
-    <string name="action_menu_favorite">Twoje linie</string>
+    <string name="settings_favorite">Twoje linie</string>
     <string name="fav_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
     <string name="toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
     <string name="about_app">O aplikacji</string>
