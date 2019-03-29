@@ -8,6 +8,7 @@ import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
@@ -35,6 +36,13 @@ class TramRepository @Inject constructor(
                         )
                             .subscribeOn(Schedulers.io())
                             .toList()
+                            .retryWhen { errors ->
+                                errors.zipWith(
+                                    Flowable.range(1, 3),
+                                    BiFunction { _: Throwable, i: Int -> i }
+                                )
+                                    .flatMap { _ -> Flowable.timer(500, TimeUnit.MILLISECONDS) }
+                            }
                             .doOnSuccess(favoriteRepositoryAdder)
                             .toNetworkOperationResult()
                             .toFlowable()
