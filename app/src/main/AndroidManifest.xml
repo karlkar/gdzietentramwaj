@@ -58,11 +58,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity
-            android:name=".favorite.view.FavoriteLinesActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/settings_favorite"
-            android:parentActivityName=".main.view.MainActivity" />
     </application>
 
 </manifest>

@@ -13,7 +13,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class FavoriteLinesActivityViewModel @Inject constructor(
+class FavoriteLinesViewModel @Inject constructor(
     private val favoriteTramRepository: FavoriteTramRepository,
     private val crashReportingService: CrashReportingService
 ) : ViewModel() {

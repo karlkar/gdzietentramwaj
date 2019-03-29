@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
@@ -84,7 +85,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         shareIntent.type = "text/plain"
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "https://play.google.com/store/apps/details?id=${activity!!.packageName}"
+            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
         )
         shareIntent
     }
@@ -169,13 +170,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         difficultiesBottomSheet = DifficultiesBottomSheet(
             constraintlayout_bottomsheet_rootview,
-            context!!,
+            view.context,
             this,
             viewModel,
             imageLoader
         )
 
-        adProviderInterface.initialize(context!!, getString(R.string.adMobAppId))
+        adProviderInterface.initialize(view.context, getString(R.string.adMobAppId))
         adProviderInterface.showAd(view.findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
     }
@@ -215,9 +216,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
                 val handler = Handler()
-                handler.post {
-                    findNavController().navigate(R.id.action_nav_graph_to_settingsFragment)
-                }
+                handler.postDelayed(
+                    { findNavController().navigate(R.id.action_nav_graph_to_settingsFragment) },
+                    100
+                )
             }
             R.id.menu_item_favorite_switch -> viewModel.toggleFavorite()
             else -> return super.onOptionsItemSelected(item)
@@ -238,7 +240,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun rateApp() {
-        val uri = Uri.parse("market://details?id=${context!!.packageName}")
+        val uri = Uri.parse("market://details?id=${BuildConfig.APPLICATION_ID}")
         val goToMarket = Intent(Intent.ACTION_VIEW, uri)
         goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         try {
@@ -247,7 +249,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=${context!!.packageName}")
+                    Uri.parse("http://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}")
                 )
             )
         }
@@ -302,7 +304,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         if (ContextCompat.checkSelfPermission(
-                activity!!,
+                context!!,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {

@@ -63,12 +63,12 @@ class TramMarker(tramData: TramData) {
     fun isOnMap(bounds: LatLngBounds): Boolean = bounds.contains(finalPosition)
             || (_prevPosition?.let { bounds.contains(it) } ?: false)
 
-    fun updatePosition(finalPosition: LatLng) {
-        if (finalPosition === this.finalPosition)
+    fun updatePosition(newFinalPosition: LatLng) {
+        if (newFinalPosition === finalPosition)
             _prevPosition = null
         else {
-            _prevPosition = this.finalPosition
-            this.finalPosition = finalPosition
+            _prevPosition = finalPosition
+            finalPosition = newFinalPosition
         }
     }
 

@@ -7,17 +7,34 @@
     <fragment
         android:id="@+id/destination_map"
         android:name="com.kksionek.gdzietentramwaj.map.view.MapFragment"
-        android:label="@string/app_name"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:label="@string/app_name">
         <action
             android:id="@+id/action_nav_graph_to_settingsFragment"
             app:destination="@id/destination_settings"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@+id/destination_map" />
     </fragment>
 
     <fragment
         android:id="@+id/destination_settings"
         android:name="com.kksionek.gdzietentramwaj.settings.view.SettingsFragment"
-        android:label="@string/settings" />
+        android:label="@string/settings">
+        <action
+            android:id="@+id/action_destination_settings_to_favoriteFragment"
+            app:destination="@id/destination_favorite"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@+id/destination_settings" />
+    </fragment>
+    <fragment
+        android:id="@+id/destination_favorite"
+        android:name="com.kksionek.gdzietentramwaj.favorite.view.FavoriteFragment"
+        android:label="@string/settings_favorite" />
 </navigation>

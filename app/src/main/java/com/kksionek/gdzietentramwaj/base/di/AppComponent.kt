@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.base.di
 
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.favorite.di.FavoriteLinesActivityViewModelModule
-import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
+import com.kksionek.gdzietentramwaj.favorite.view.FavoriteFragment
 import com.kksionek.gdzietentramwaj.main.di.MainActivityModule
 import com.kksionek.gdzietentramwaj.main.view.MainActivity
 import com.kksionek.gdzietentramwaj.map.di.MapFragmentModule
@@ -28,6 +28,6 @@ interface AppComponent {
     fun inject(activity: MainActivity)
     fun inject(fragment: MapFragment)
     fun inject(fragment: SettingsFragment)
-    fun inject(activity: FavoriteLinesActivity)
+    fun inject(fragment: FavoriteFragment)
     fun inject(application: TramApplication)
 }

@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.createDialogView
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
-import com.kksionek.gdzietentramwaj.favorite.view.FavoriteLinesActivity
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
 import javax.inject.Inject
@@ -40,7 +38,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
         (activity!!.application as TramApplication).appComponent.inject(this)
         viewModel =
-            ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
+            ViewModelProviders.of(this, viewModelFactory)[SettingsViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,7 +89,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         } else {
             settings_remove_ads_button.setOnClickListener {
                 val dialogView =
-                    createDialogView(context!!.applicationContext, R.string.remove_info)
+                    createDialogView(view.context, R.string.remove_info)
                         ?: return@setOnClickListener
                 AlertDialog.Builder(activity!!)
                     .setTitle(R.string.remove_title)
@@ -102,11 +100,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         }
 
         settings_favorite_lines_button.setOnClickListener {
-            val intent = Intent(
-                context!!.applicationContext,
-                FavoriteLinesActivity::class.java
-            ) // TODO Change it to fragment
-            startActivity(intent)
+            findNavController().navigate(R.id.destination_favorite)
         }
     }
 
