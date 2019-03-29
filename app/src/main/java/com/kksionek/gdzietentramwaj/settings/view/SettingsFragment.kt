@@ -46,32 +46,41 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        settings_marker_new_bus_imageview.findViewById<TextView>(R.id.marker_textview).text = "112"
-        settings_marker_new_tram_imageview.findViewById<TextView>(R.id.marker_textview).text = "25"
+        settings_marker_new_bus_imageview.apply {
+            findViewById<TextView>(R.id.marker_textview).text = "112"
+            setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
+        }
+        settings_marker_new_tram_imageview.apply {
+            findViewById<TextView>(R.id.marker_textview).text = "25"
+            setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
+        }
 
-        settings_marker_old_bus_imageview.findViewById<TextView>(R.id.marker_textview).text = "112"
-        settings_marker_old_tram_imageview.findViewById<TextView>(R.id.marker_textview).text = "25"
+        settings_marker_old_bus_imageview.apply {
+            findViewById<TextView>(R.id.marker_textview).text = "112"
+            setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
+        }
+        settings_marker_old_tram_imageview.apply {
+            findViewById<TextView>(R.id.marker_textview).text = "25"
+            setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
+        }
 
-        settings_marker_old_radiobutton.isChecked = viewModel.isOldIconSetEnabled()
-        settings_marker_new_radiobutton.isChecked = !viewModel.isOldIconSetEnabled()
-
-        settings_marker_new_bus_imageview.setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
-        settings_marker_new_tram_imageview.setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
-
-        settings_marker_old_bus_imageview.setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
-        settings_marker_old_tram_imageview.setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
-
-        settings_marker_old_radiobutton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                settings_marker_new_radiobutton.isChecked = false
-                viewModel.setIsOldIconSetEnabled(true)
+        settings_marker_old_radiobutton.apply {
+            isChecked = viewModel.isOldIconSetEnabled()
+            setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    settings_marker_new_radiobutton.isChecked = false
+                    viewModel.setIsOldIconSetEnabled(true)
+                }
             }
         }
 
-        settings_marker_new_radiobutton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                settings_marker_old_radiobutton.isChecked = false
-                viewModel.setIsOldIconSetEnabled(false)
+        settings_marker_new_radiobutton.apply {
+            isChecked = !viewModel.isOldIconSetEnabled()
+            setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    settings_marker_old_radiobutton.isChecked = false
+                    viewModel.setIsOldIconSetEnabled(false)
+                }
             }
         }
 
@@ -101,8 +110,5 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         }
     }
 
-    override fun handleOnBackPressed(): Boolean {
-        findNavController().navigateUp()
-        return true
-    }
+    override fun handleOnBackPressed(): Boolean = findNavController().navigateUp()
 }
