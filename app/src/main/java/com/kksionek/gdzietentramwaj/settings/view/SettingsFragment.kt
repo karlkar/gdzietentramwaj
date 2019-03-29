@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -44,6 +45,12 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        settings_marker_new_bus_imageview.findViewById<TextView>(R.id.marker_textview).text = "112"
+        settings_marker_new_tram_imageview.findViewById<TextView>(R.id.marker_textview).text = "25"
+
+        settings_marker_old_bus_imageview.findViewById<TextView>(R.id.marker_textview).text = "112"
+        settings_marker_old_tram_imageview.findViewById<TextView>(R.id.marker_textview).text = "25"
 
         settings_marker_old_radiobutton.isChecked = viewModel.isOldIconSetEnabled()
         settings_marker_new_radiobutton.isChecked = !viewModel.isOldIconSetEnabled()

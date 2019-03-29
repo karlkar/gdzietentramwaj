@@ -24,4 +24,7 @@
     <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
     <string name="brigade">Brygada</string>
     <string name="settings">Ustawienia</string>
+    <string name="settings_icon_set_title">Wybierz zestaw ikonek:</string>
+    <string name="settings_icon_set_old_option">Stare ikony</string>
+    <string name="settings_icon_set_new_option">Nowe ikony</string>
 </resources>

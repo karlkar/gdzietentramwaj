@@ -4,13 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Typeface
-import android.graphics.Typeface.BOLD
-import android.graphics.drawable.Drawable
 import android.util.LruCache
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -20,6 +18,7 @@ import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
+
 
 class TramMarker(tramData: TramData) {
 
@@ -79,69 +78,65 @@ class TramMarker(tramData: TramData) {
 
         private val bitmapCache = LruCache<String, BitmapDescriptor>(50)
 
-        private fun drawableToBitmap(drawable: Drawable): Bitmap {
-            var bitmap = Bitmap.createBitmap(
-                drawable.intrinsicWidth,
-                drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            if (!bitmap.isMutable) { // On Galaxy ACE immutable map is returned
-                bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            }
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
-
-            return bitmap
-        }
-
         fun getBitmap(
             line: String,
             context: Context,
             iconSettingsProvider: IconSettingsProvider
         ): BitmapDescriptor {
             val descriptor = bitmapCache[line]
-            if (descriptor == null) {
-                val isTram = checkIfIsTram(line)
-                val textColor = when {
-                    line.length < 3 -> Color.BLACK
-                    line.startsWith("4")
-                            || line.startsWith("5")
-                            || line.startsWith("E") -> Color.RED
-                    line.startsWith("L") -> Color.rgb(76, 165, 80)
-                    else -> Color.BLACK
-                }
-                val oldIconSet = iconSettingsProvider.isOldIconSetEnabled()
-                val clustersPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = textColor
-                    textSize = 35.0f
-                    typeface = Typeface.create(typeface, BOLD)
-                    textAlign = Paint.Align.CENTER
-                }
-                val icon = if (oldIconSet) {
-                    if (isTram) R.drawable.ic_old_tram else R.drawable.ic_old_bus
-                } else {
-                    if (isTram) R.drawable.ic_tram else R.drawable.ic_bus
-                }
-                val drawable = ContextCompat.getDrawable(context, icon)
-                val bitmap = drawableToBitmap(drawable!!)
-
-                val modifier = if (oldIconSet || isTram) 2.15f else 2.8f
-                val canvas = Canvas(bitmap)
-                canvas.drawText(
-                    line,
-                    canvas.width / 2.0f,
-                    canvas.height / modifier - (clustersPaint.fontMetrics.ascent + clustersPaint.fontMetrics.descent) / 2.0f,
-                    clustersPaint
-                )
-
+            return if (descriptor == null) {
+                val bitmap = createBitmap(context, line, iconSettingsProvider.isOldIconSetEnabled())
                 val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
                 bitmapCache.put(line, bitmapDescriptor)
-                return bitmapDescriptor
+                bitmapDescriptor
             } else {
-                return descriptor
+                descriptor
             }
         }
+
+        private fun createBitmap(
+            context: Context,
+            line: String,
+            isOldIconEnabled: Boolean
+        ): Bitmap? {
+            val textColor = getTextColor(line)
+            val isTram = checkIfIsTram(line)
+            val layoutRes = getTramIcon(isOldIconEnabled, isTram)
+            val view = LayoutInflater.from(context).inflate(layoutRes, null)
+
+            val textview = view.findViewById<TextView>(R.id.marker_textview)
+            textview.text = line
+            textview.setTextColor(textColor)
+
+            val measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            view.measure(measureSpec, measureSpec)
+            val measuredWidth = view.measuredWidth
+            val measuredHeight = view.measuredHeight
+
+            view.layout(0, 0, measuredWidth, measuredHeight)
+
+            val bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
+                .apply { eraseColor(Color.TRANSPARENT) }
+
+            Canvas(bitmap).let { view.draw(it) }
+            return bitmap
+        }
+
+        private fun getTextColor(line: String) = when {
+            line.length < 3 -> Color.BLACK
+            line.startsWith("4")
+                    || line.startsWith("5")
+                    || line.startsWith("E") -> Color.RED
+            line.startsWith("L") -> Color.rgb(76, 165, 80)
+            else -> Color.BLACK
+        }
+
+        private fun getTramIcon(isOldIconEnabled: Boolean, isTram: Boolean) =
+            if (isOldIconEnabled) {
+                if (isTram) R.layout.ic_marker_old_tram else R.layout.ic_marker_old_bus
+            } else {
+                if (isTram) R.layout.ic_marker_new_tram else R.layout.ic_marker_new_bus
+            }
 
         private fun checkIfIsTram(line: String) = line.length < 3
 

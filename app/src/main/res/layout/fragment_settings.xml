@@ -11,30 +11,26 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:text="Wybierz zestaw ikonek:"
+        android:text="@string/settings_icon_set_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <include
         android:id="@+id/settings_marker_old_bus_imageview"
+        layout="@layout/ic_marker_old_bus"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_old_bus"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
         app:layout_constraintEnd_toStartOf="@+id/settings_marker_old_tram_imageview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
 
-    <ImageView
+    <include
         android:id="@+id/settings_marker_old_tram_imageview"
+        layout="@layout/ic_marker_old_tram"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_old_tram"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
         app:layout_constraintEnd_toStartOf="@+id/settings_marker_divider_view"
         app:layout_constraintStart_toEndOf="@id/settings_marker_old_bus_imageview"
@@ -44,27 +40,26 @@
         android:id="@+id/settings_marker_old_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stare ikony"
+        android:text="@string/settings_icon_set_old_option"
         app:layout_constraintEnd_toEndOf="@id/settings_marker_old_tram_imageview"
         app:layout_constraintStart_toStartOf="@id/settings_marker_old_bus_imageview"
         app:layout_constraintTop_toBottomOf="@id/settings_marker_old_bus_imageview" />
 
-    <ImageView
+    <include
         android:id="@+id/settings_marker_new_bus_imageview"
+        layout="@layout/ic_marker_new_bus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_bus"
         app:layout_constraintEnd_toStartOf="@+id/settings_marker_new_tram_imageview"
         app:layout_constraintStart_toEndOf="@+id/settings_marker_divider_view"
         app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
 
-    <ImageView
+    <include
         android:id="@+id/settings_marker_new_tram_imageview"
+        layout="@layout/ic_marker_new_tram"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_tram"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/settings_marker_new_bus_imageview"
         app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
 
@@ -72,7 +67,7 @@
         android:id="@+id/settings_marker_new_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nowe ikony"
+        android:text="@string/settings_icon_set_new_option"
         app:layout_constraintEnd_toEndOf="@id/settings_marker_new_tram_imageview"
         app:layout_constraintStart_toStartOf="@id/settings_marker_new_bus_imageview"
         app:layout_constraintTop_toBottomOf="@id/settings_marker_new_bus_imageview" />
@@ -113,8 +108,8 @@
         android:id="@+id/settings_favorite_lines_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/settings_favorite"
         android:layout_marginTop="8dp"
+        android:text="@string/settings_favorite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_1" />
@@ -135,8 +130,8 @@
         android:id="@+id/settings_remove_ads_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/remove_ads"
         android:layout_marginTop="8dp"
+        android:text="@string/remove_ads"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_2" />

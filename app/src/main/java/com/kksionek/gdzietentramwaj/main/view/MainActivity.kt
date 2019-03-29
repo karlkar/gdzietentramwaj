@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(),
         super.onStart()
 
         val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val result = googleApiAvailability.isGooglePlayServicesAvailable(this)
+        val result = googleApiAvailability.isGooglePlayServicesAvailable(this, 13400000)
         if (result != ConnectionResult.SUCCESS) {
             googleApiAvailability.getErrorDialog(
                 this, result,
