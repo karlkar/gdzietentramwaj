@@ -41,7 +41,7 @@ class TramRepository @Inject constructor(
                                     Flowable.range(1, 3),
                                     BiFunction { _: Throwable, i: Int -> i }
                                 )
-                                    .flatMap { _ -> Flowable.timer(500, TimeUnit.MILLISECONDS) }
+                                    .flatMap { i -> Flowable.timer(i * 500L, TimeUnit.MILLISECONDS) }
                             }
                             .doOnSuccess(favoriteRepositoryAdder)
                             .toNetworkOperationResult()
