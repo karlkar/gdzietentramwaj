@@ -7,9 +7,10 @@ import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
 private const val PREF_LAST_VERSION = "LAST_VERSION"
 private const val PREF_OLD_ICON_SET = "OLD_ICON_SET"
+private const val PREF_AUTO_ZOOM = "AUTO_ZOOM"
 
 class SettingsRepositoryImpl(private val context: Context) :
-    MapsViewSettingsRepository, IconSettingsManager, VersionRepository {
+    MapsViewSettingsRepository, IconSettingsManager, VersionRepository, MapSettingsManager {
 
     override fun isFavoriteTramViewEnabled(): Boolean = PreferenceManager
         .getDefaultSharedPreferences(context)
@@ -45,4 +46,15 @@ class SettingsRepositoryImpl(private val context: Context) :
     override fun isOldIconSetEnabled(): Boolean = PreferenceManager
         .getDefaultSharedPreferences(context)
         .getBoolean(PREF_OLD_ICON_SET, false)
+
+    override fun setAutoZoomEnabled(enabled: Boolean) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putBoolean(PREF_AUTO_ZOOM, enabled)
+            .apply()
+    }
+
+    override fun isAutoZoomEnabled(): Boolean = PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getBoolean(PREF_AUTO_ZOOM, true)
 }

@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.settings.di
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import dagger.Binds
@@ -27,4 +28,10 @@ class SettingsFragmentModule {
     internal fun provideIconSettingsManager(
         settingsRepositoryImpl: SettingsRepositoryImpl
     ): IconSettingsManager = settingsRepositoryImpl
+
+    @Singleton
+    @Provides
+    internal fun provideMapSettingsManager(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): MapSettingsManager = settingsRepositoryImpl
 }

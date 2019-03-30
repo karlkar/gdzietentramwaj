@@ -38,7 +38,7 @@ class FavoriteFragment : Fragment(), OnBackPressedCallback {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        (activity!!.application as TramApplication).appComponent.inject(this)
+        (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
             ViewModelProviders.of(this, viewModelFactory)[FavoriteLinesViewModel::class.java]
     }

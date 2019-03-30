@@ -69,7 +69,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
 
-    private lateinit var aboutDialogProvider: AboutDialogProvider
+    private var aboutDialogProvider: AboutDialogProvider? = null
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -126,7 +126,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun reloadAds(location: Location) {
-        adProviderInterface.loadAd(context!!.applicationContext, location)
+        context?.let {
+            adProviderInterface.loadAd(it.applicationContext, location)
+        }
     }
 
     private val favoriteModeObserver = Observer<Boolean?> { favorite ->
@@ -146,7 +148,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (activity!!.application as TramApplication).appComponent.inject(this)
+        (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory)
             .get(MapsViewModel::class.java)
 
@@ -154,6 +156,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         aboutDialogProvider = activity as? AboutDialogProvider
             ?: throw IllegalArgumentException("Activity should implement AboutDialogProvider interface")
+    }
+
+    override fun onDetach() {
+        aboutDialogProvider = null
+        super.onDetach()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -184,7 +191,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.main_menu, menu)
         menu.findItem(R.id.menu_item_refresh)?.also {
-            menuItemRefresh = MenuItemRefreshCtrl(context!!, it)
+            context?.let { context ->
+                menuItemRefresh = MenuItemRefreshCtrl(context, it)
+            }
             if (viewModel.tramData.value is UiState.InProgress) {
                 menuItemRefresh?.startAnimation()
             }
@@ -211,7 +220,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_info -> aboutDialogProvider.showAboutAppDialog()
+            R.id.menu_item_info -> aboutDialogProvider?.showAboutAppDialog()
             R.id.menu_item_refresh -> viewModel.forceReloadTrams()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
@@ -262,12 +271,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 CameraUpdateFactory.newLatLngZoom(WARSAW_LATLNG, 15f)
             )
             setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
-            setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    activity!!.applicationContext,
-                    R.raw.map_style
+            activity?.let {
+                setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                        it.applicationContext,
+                        R.raw.map_style
+                    )
                 )
-            )
+            }
             uiSettings?.apply {
                 isTiltGesturesEnabled = false
                 isZoomControlsEnabled = true
@@ -289,8 +300,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         viewModel.mapControls.observe(this, Observer {
+            val context = context ?: return@Observer
             when (it) {
-                is MapControls.ZoomIn -> map.animateCamera(CameraUpdateFactory.zoomIn())
+                is MapControls.ZoomIn -> {
+                    if (viewModel.mapSettingsProvider.isAutoZoomEnabled()) {
+                        map.animateCamera(CameraUpdateFactory.zoomIn())
+                    } else {
+                        showSuccessToast(context.getString(R.string.map_auto_zoom_disabled_message))
+                    }
+                }
                 is MapControls.MoveTo -> map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
             }
         })
@@ -303,8 +321,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             return true
         }
 
+        val context = context ?: return false
         if (ContextCompat.checkSelfPermission(
-                context!!,
+                context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -333,6 +352,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         tramMarkerList: List<TramMarker>,
         animate: Boolean
     ) {
+        val context = context ?: return
         if (!::map.isInitialized || cameraMoveInProgress.get()) {
             return
         }
@@ -375,7 +395,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
-                                    context!!,
+                                    context,
                                     viewModel.iconSettingsProvider
                                 )
                             )

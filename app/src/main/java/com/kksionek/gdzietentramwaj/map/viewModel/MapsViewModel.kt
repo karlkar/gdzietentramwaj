@@ -17,9 +17,9 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
-import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.TramRepository
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
@@ -51,7 +51,7 @@ class MapsViewModel @Inject constructor(
     private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService,
     val iconSettingsProvider: IconSettingsProvider,
-    val iconSettingsManager: IconSettingsManager // TODO should be in a different viewModel
+    val mapSettingsProvider: MapSettingsProvider
 ) : ViewModel() {
 
     object NoTramsLoadedException : Throwable()
@@ -232,7 +232,7 @@ class MapsViewModel @Inject constructor(
     }
 
     fun toggleFavorite() {
-        val favoriteViewOn = !(favoriteView.value!!)
+        val favoriteViewOn = !(favoriteView.value ?: return)
         mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
         favoriteView.value = favoriteViewOn
         showOrZoom(false)

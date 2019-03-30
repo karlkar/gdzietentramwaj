@@ -36,7 +36,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        (activity!!.application as TramApplication).appComponent.inject(this)
+        (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
             ViewModelProviders.of(this, viewModelFactory)[SettingsViewModel::class.java]
     }
@@ -63,21 +63,21 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         }
 
         settings_marker_old_radiobutton.apply {
-            isChecked = viewModel.isOldIconSetEnabled()
+            isChecked = viewModel.oldIconSetEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     settings_marker_new_radiobutton.isChecked = false
-                    viewModel.setIsOldIconSetEnabled(true)
+                    viewModel.oldIconSetEnabled = true
                 }
             }
         }
 
         settings_marker_new_radiobutton.apply {
-            isChecked = !viewModel.isOldIconSetEnabled()
+            isChecked = !viewModel.oldIconSetEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     settings_marker_old_radiobutton.isChecked = false
-                    viewModel.setIsOldIconSetEnabled(false)
+                    viewModel.oldIconSetEnabled = false
                 }
             }
         }
@@ -91,16 +91,24 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                 val dialogView =
                     createDialogView(view.context, R.string.remove_info)
                         ?: return@setOnClickListener
-                AlertDialog.Builder(activity!!)
-                    .setTitle(R.string.remove_title)
-                    .setView(dialogView)
-                    .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
-                    .show()
+                activity?.let {
+                    AlertDialog.Builder(it)
+                        .setTitle(R.string.remove_title)
+                        .setView(dialogView)
+                        .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
+                        .show()
+                }
             }
         }
 
         settings_favorite_lines_button.setOnClickListener {
             findNavController().navigate(R.id.destination_favorite)
+        }
+
+        settings_auto_zoom_checkbox.isChecked = viewModel.autoZoomEnabled
+
+        settings_auto_zoom_checkbox.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.autoZoomEnabled = isChecked
         }
     }
 
