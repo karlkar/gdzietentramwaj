@@ -1,16 +1,13 @@
 package com.kksionek.gdzietentramwaj.map.di
 
 import androidx.lifecycle.ViewModel
-import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
 import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
-import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
-import com.kksionek.gdzietentramwaj.view.AdProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -32,10 +29,6 @@ class MapFragmentModule {
         @ViewModelKey(MapsViewModel::class)
         fun bindMapsViewModel(mapsViewModel: MapsViewModel): ViewModel
     }
-
-    @ActivityScope
-    @Provides
-    internal fun provideAdProvider(): AdProviderInterface = AdProvider()
 
     @Singleton
     @Provides

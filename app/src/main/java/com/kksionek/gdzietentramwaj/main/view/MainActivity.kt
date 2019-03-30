@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.main.view
 
+import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.createDialogView
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
+import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import javax.inject.Inject
 
 private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
@@ -21,17 +23,23 @@ interface AboutDialogProvider {
     fun showAboutAppDialog()
 }
 
-class MainActivity : AppCompatActivity(),
-    AboutDialogProvider {
+interface LocationChangeListener {
+    fun onLocationChanged(location: Location)
+}
+
+class MainActivity : AppCompatActivity(), AboutDialogProvider, LocationChangeListener {
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
+
+    @Inject
+    internal lateinit var adProviderInterface: AdProviderInterface
 
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+        setContentView(R.layout.activity_main)
 
         setupActionBarWithNavController(findNavController(R.id.fragment_maps_content))
 
@@ -39,8 +47,10 @@ class MainActivity : AppCompatActivity(),
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
             .get(MainViewModel::class.java)
-    }
 
+        adProviderInterface.initialize(this, getString(R.string.adMobAppId))
+        adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
+    }
 
     override fun onSupportNavigateUp(): Boolean =
         findNavController(R.id.fragment_maps_content).navigateUp() || super.onSupportNavigateUp()
@@ -64,6 +74,16 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        adProviderInterface.resume()
+    }
+
+    override fun onPause() {
+        adProviderInterface.pause()
+        super.onPause()
+    }
+
     override fun showAboutAppDialog() {
         val view = createDialogView(this, R.string.disclaimer) ?: return
         AlertDialog.Builder(this)
@@ -71,6 +91,10 @@ class MainActivity : AppCompatActivity(),
             .setView(view)
             .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
             .show()
+    }
+
+    override fun onLocationChanged(location: Location) {
+        adProviderInterface.loadAd(applicationContext, location)
     }
 
     companion object {

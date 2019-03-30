@@ -16,5 +16,5 @@
         android:paddingRight="17dp"
         android:paddingBottom="17dp"
         android:textStyle="bold"
-        tools:text="25"/>
+        tools:text="25" />
 </FrameLayout>

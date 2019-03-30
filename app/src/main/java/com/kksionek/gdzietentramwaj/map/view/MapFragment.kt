@@ -41,6 +41,7 @@ import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
+import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showErrorToast
@@ -70,12 +71,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
 
     private var aboutDialogProvider: AboutDialogProvider? = null
+    private var locationChangeListener: LocationChangeListener? = null
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
-
-    @Inject
-    internal lateinit var adProviderInterface: AdProviderInterface
 
     @Inject
     internal lateinit var imageLoader: ImageLoader
@@ -116,18 +115,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     @Suppress("MissingPermission")
     private val lastLocationObserver = Observer { location: Location? ->
         location?.let {
-            reloadAds(it)
+            locationChangeListener?.onLocationChanged(it)
             if (this::map.isInitialized) {
                 val latLng = LatLng(it.latitude, it.longitude)
                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
                 map.isMyLocationEnabled = checkLocationPermission(false)
             }
-        }
-    }
-
-    private fun reloadAds(location: Location) {
-        context?.let {
-            adProviderInterface.loadAd(it.applicationContext, location)
         }
     }
 
@@ -156,6 +149,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         aboutDialogProvider = activity as? AboutDialogProvider
             ?: throw IllegalArgumentException("Activity should implement AboutDialogProvider interface")
+
+        locationChangeListener = activity as? LocationChangeListener
+            ?: throw IllegalArgumentException("Activity should implement LocationChangeListener interface")
     }
 
     override fun onDetach() {
@@ -183,8 +179,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             imageLoader
         )
 
-        adProviderInterface.initialize(view.context, getString(R.string.adMobAppId))
-        adProviderInterface.showAd(view.findViewById(R.id.adview_maps_adview))
         checkLocationPermission(true)
     }
 
@@ -239,12 +233,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
-        adProviderInterface.resume()
     }
 
     override fun onPause() {
         viewModel.onPause()
-        adProviderInterface.pause()
         super.onPause()
     }
 
