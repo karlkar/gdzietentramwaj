@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.settings.viewModel
 
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import javax.inject.Inject
@@ -25,4 +26,21 @@ class SettingsViewModel @Inject constructor(
         set(value) {
             mapSettingsManager.setAutoZoomEnabled(value)
         }
+
+    fun saveStartLocation(location: LatLng, zoom: Float) {
+        mapSettingsManager.setStartLocation(location, zoom)
+    }
+
+    var startLocationEnabled: Boolean
+        get() = mapSettingsManager.isStartLocationEnabled()
+        set(value) = mapSettingsManager.setStartLocationEnabled(value)
+
+    val startLocationPosition: LatLng?
+        get() = mapSettingsManager.getStartLocationPosition()
+
+    val startLocationZoom: Float?
+        get() = mapSettingsManager.getStartLocationZoom()
+
+    // As there is no "startFragmentForResult" I have to do a workaround
+    var locationChooserFragmentClosedWithResult: Boolean = false
 }

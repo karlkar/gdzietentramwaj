@@ -27,6 +27,8 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
     private lateinit var viewModel: SettingsViewModel
 
+    private var locationChooserFragmentStarted = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,7 +40,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
         (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
-            ViewModelProviders.of(this, viewModelFactory)[SettingsViewModel::class.java]
+            ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -110,6 +112,32 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         settings_auto_zoom_checkbox.setOnCheckedChangeListener { _, isChecked ->
             viewModel.autoZoomEnabled = isChecked
         }
+
+        settings_start_location_checkbox.apply {
+            isChecked = viewModel.startLocationEnabled
+            setOnCheckedChangeListener { _, isChecked ->
+
+                if (isChecked && !viewModel.startLocationEnabled) {
+                    startChooseLocationFragmentForResult()
+                }
+                viewModel.startLocationEnabled = isChecked
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (locationChooserFragmentStarted) {
+            if (!viewModel.locationChooserFragmentClosedWithResult) {
+                settings_start_location_checkbox.isChecked = false
+            }
+            locationChooserFragmentStarted = false
+        }
+    }
+
+    private fun startChooseLocationFragmentForResult() {
+        locationChooserFragmentStarted = true
+        findNavController().navigate(R.id.destination_chooseStartLocation)
     }
 
     override fun handleOnBackPressed(): Boolean = findNavController().navigateUp()

@@ -8,6 +8,7 @@ import com.kksionek.gdzietentramwaj.main.view.MainActivity
 import com.kksionek.gdzietentramwaj.map.di.MapFragmentModule
 import com.kksionek.gdzietentramwaj.map.view.MapFragment
 import com.kksionek.gdzietentramwaj.settings.di.SettingsFragmentModule
+import com.kksionek.gdzietentramwaj.settings.view.ChooseStartLocationFragment
 import com.kksionek.gdzietentramwaj.settings.view.SettingsFragment
 import dagger.Component
 import javax.inject.Singleton
@@ -28,6 +29,7 @@ interface AppComponent {
     fun inject(activity: MainActivity)
     fun inject(fragment: MapFragment)
     fun inject(fragment: SettingsFragment)
+    fun inject(fragment: ChooseStartLocationFragment)
     fun inject(fragment: FavoriteFragment)
     fun inject(application: TramApplication)
 }

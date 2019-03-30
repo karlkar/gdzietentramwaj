@@ -17,7 +17,7 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesViewModel
-import kotlinx.android.synthetic.main.activity_favorite_lines.*
+import kotlinx.android.synthetic.main.fragment_favorite.*
 import javax.inject.Inject
 
 private const val COLUMN_COUNT = 7
@@ -33,7 +33,7 @@ class FavoriteFragment : Fragment(), OnBackPressedCallback {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.activity_favorite_lines, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_favorite, container, false)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

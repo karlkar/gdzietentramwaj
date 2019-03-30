@@ -150,7 +150,7 @@
 
     <CheckBox
         android:id="@+id/settings_auto_zoom_checkbox"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -165,12 +165,12 @@
         android:id="@+id/settings_auto_zoom_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:text="Gdy oddalasz mapę może się zdarzyć, że powinno na niej być widać bardzo dużo pojazdów. Niestety dla niektórych telefonów jest to za dużo i żeby uniknąć problemów ze stabilnością aplikacji musiałem wprowadzić limit widocznych pojazdów. Przy włączonym automatycznym przybliżaniu mapa będzie się przybliżała tak, żeby móc wyświetlić tyle ile się da."
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_checkbox" />
 
     <View
@@ -184,5 +184,42 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_textview" />
+
+    <CheckBox
+        android:id="@+id/settings_start_location_checkbox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Ustawienie początkowej lokalizacji"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_4"/>
+
+    <TextView
+        android:id="@+id/settings_start_location_description_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="Możesz wybrać lokalizację, która będzie pokazywana tuż po uruchomieniu aplikacji"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_start_location_checkbox" />
+
+    <View
+        android:id="@+id/settings_divider_horizontal_5"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_start_location_description_textview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

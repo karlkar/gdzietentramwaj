@@ -32,9 +32,22 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@+id/destination_settings" />
+        <action
+            android:id="@+id/action_destination_settings_to_chooseStartLocationFragment"
+            app:destination="@id/destination_chooseStartLocation"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
+
     <fragment
         android:id="@+id/destination_favorite"
         android:name="com.kksionek.gdzietentramwaj.favorite.view.FavoriteFragment"
         android:label="@string/settings_favorite" />
+
+    <fragment
+        android:id="@+id/destination_chooseStartLocation"
+        android:name="com.kksionek.gdzietentramwaj.settings.view.ChooseStartLocationFragment"
+        android:label="Wybierz lokalizację początkową" />
 </navigation>
