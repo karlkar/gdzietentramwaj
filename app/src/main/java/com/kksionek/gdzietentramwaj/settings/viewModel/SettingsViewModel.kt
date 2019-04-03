@@ -41,6 +41,10 @@ class SettingsViewModel @Inject constructor(
     val startLocationZoom: Float?
         get() = mapSettingsManager.getStartLocationZoom()
 
+    var brigadeShowingEnabled: Boolean
+        get() = mapSettingsManager.isBrigadeShowingEnabled()
+        set(value) = mapSettingsManager.setBrigadeShowingEnabled(value)
+
     // As there is no "startFragmentForResult" I have to do a workaround
     var locationChooserFragmentClosedWithResult: Boolean = false
 }

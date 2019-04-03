@@ -13,6 +13,8 @@ interface MapSettingsProvider {
 
     fun getStartLocationZoom(): Float?
 
+    fun isBrigadeShowingEnabled(): Boolean
+
     fun getCity(): Cities
 
     fun getDefaultZoom(): Float

@@ -123,6 +123,13 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                 viewModel.startLocationEnabled = isChecked
             }
         }
+
+        settings_brigade_showing_checkbox.apply {
+            isChecked = viewModel.brigadeShowingEnabled
+            setOnCheckedChangeListener { _, isChecked ->
+                viewModel.brigadeShowingEnabled = isChecked
+            }
+        }
     }
 
     override fun onResume() {

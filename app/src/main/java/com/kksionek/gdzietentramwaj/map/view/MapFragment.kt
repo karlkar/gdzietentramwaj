@@ -279,7 +279,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             isMyLocationEnabled = checkLocationPermission(false)
 
             setOnMarkerClickListener {
-                if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
+                if (viewModel.mapSettingsProvider.isBrigadeShowingEnabled()) {
+                    if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
+                }
                 return@setOnMarkerClickListener true
             }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }

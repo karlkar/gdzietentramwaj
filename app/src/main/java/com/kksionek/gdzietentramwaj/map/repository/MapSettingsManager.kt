@@ -9,4 +9,6 @@ interface MapSettingsManager: MapSettingsProvider {
     fun setStartLocationEnabled(enabled: Boolean)
 
     fun setStartLocation(location: LatLng, zoom: Float)
+
+    fun setBrigadeShowingEnabled(enabled: Boolean)
 }

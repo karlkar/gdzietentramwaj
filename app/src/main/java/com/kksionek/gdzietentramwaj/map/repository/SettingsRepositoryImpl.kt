@@ -16,6 +16,7 @@ private const val PREF_START_LOCATION = "START_LOCATION"
 private const val PREF_START_LOCATION_LATITUDE = "START_LOCATION_LATITUDE"
 private const val PREF_START_LOCATION_LONGITUDE = "START_LOCATION_LONGITTUDE"
 private const val PREF_START_LOCATION_ZOOM = "START_LOCATION_ZOOM"
+private const val PREF_BRIGADE_SHOWING = "BRIGADE_SHOWING"
 
 class SettingsRepositoryImpl(context: Context) :
     MapsViewSettingsRepository, IconSettingsManager, VersionRepository, MapSettingsManager {
@@ -96,6 +97,16 @@ class SettingsRepositoryImpl(context: Context) :
         sharedPreferences
             .getFloat(PREF_START_LOCATION_ZOOM, 0f)
             .let { if (it == 0f) null else it }
+
+    override fun setBrigadeShowingEnabled(enabled: Boolean) {
+        sharedPreferences
+            .edit()
+            .putBoolean(PREF_BRIGADE_SHOWING, enabled)
+            .apply()
+    }
+
+    override fun isBrigadeShowingEnabled(): Boolean =
+        sharedPreferences.getBoolean(PREF_BRIGADE_SHOWING, true)
 
     override fun getCity(): Cities = Cities.WARSAW
 
