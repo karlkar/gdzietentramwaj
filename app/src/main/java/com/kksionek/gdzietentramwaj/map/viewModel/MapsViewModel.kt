@@ -5,12 +5,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.WARSAW_LOCATION
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
@@ -26,6 +26,8 @@ import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
+import com.kksionek.gdzietentramwaj.toLatLng
+import com.kksionek.gdzietentramwaj.toLocation
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -72,6 +74,7 @@ class MapsViewModel @Inject constructor(
     private val _lastLocation = MutableLiveData<Location>()
     val lastLocation: LiveData<Location> = _lastLocation
 
+    // TODO Create separate viewModel for difficulties?
     private val _difficulties = MutableLiveData<UiState<List<DifficultiesEntity>>>()
     val difficulties: LiveData<UiState<List<DifficultiesEntity>>> = _difficulties
 
@@ -85,7 +88,20 @@ class MapsViewModel @Inject constructor(
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
 
+    val mapInitialPosition: LatLng
+    val mapInitialZoom: Float
+
     init {
+        val defaultLocation = mapSettingsProvider.getCity().latLng
+        val defaultZoom = mapSettingsProvider.getDefaultZoom()
+        if (mapSettingsProvider.isStartLocationEnabled()) {
+            mapInitialPosition = mapSettingsProvider.getStartLocationPosition() ?: defaultLocation
+            mapInitialZoom = mapSettingsProvider.getStartLocationZoom() ?: defaultZoom
+        } else {
+            mapInitialPosition = defaultLocation
+            mapInitialZoom = defaultZoom
+        }
+
         observeFavoriteTrams()
         forceReloadDifficulties()
     }
@@ -109,10 +125,14 @@ class MapsViewModel @Inject constructor(
         )
     }
 
+    // This one has to be called when the map is ready to use
     fun forceReloadLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
-            .onErrorReturnItem(WARSAW_LOCATION)
+            .onErrorReturnItem(mapSettingsProvider.getCity().latLng.toLocation())
             .subscribe { location ->
+                if (!mapSettingsProvider.isStartLocationEnabled()) {
+                    _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
+                }
                 _lastLocation.postValue(location)
             })
     }
@@ -127,8 +147,10 @@ class MapsViewModel @Inject constructor(
                 when (operationResult) {
                     is NetworkOperationResult.Success<List<TramData>> ->
                         handleSuccess(operationResult)
-                    is NetworkOperationResult.Error -> handleError(operationResult)
-                    is NetworkOperationResult.InProgress -> _tramData.postValue(UiState.InProgress())
+                    is NetworkOperationResult.Error ->
+                        handleError(operationResult)
+                    is NetworkOperationResult.InProgress ->
+                        _tramData.postValue(UiState.InProgress())
                 }.makeExhaustive
             }
     }
@@ -138,7 +160,7 @@ class MapsViewModel @Inject constructor(
             .map { allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(it) }
         allKnownTrams = allTrams.associateBy { it.id }
 
-        showOrZoom(true, true)
+        showOrZoom(animate = true, newData = true)
     }
 
     private fun handleError(operationResult: NetworkOperationResult.Error<List<TramData>>) {
@@ -163,6 +185,7 @@ class MapsViewModel @Inject constructor(
                         )
                     }
                     if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "Exception", operationResult.throwable)
                         UiState.Error(
                             R.string.debug_error_message,
                             listOf(
@@ -208,8 +231,10 @@ class MapsViewModel @Inject constructor(
 
         if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
             postMarkers(onlyVisibleTrams, animate, newData)
-        } else {
+        } else if (mapSettingsProvider.isAutoZoomEnabled()) {
             _mapControls.postValue(MapControls.ZoomIn)
+        } else {
+            _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
         }
     }
 
@@ -221,10 +246,8 @@ class MapsViewModel @Inject constructor(
         _tramData.postValue(UiState.Success(BusTramLoading(visibleTrams, animate, newData)))
     }
 
-    private fun isMarkerLineVisible(line: String): Boolean {
-        return favoriteLock.read {
-            !(favoriteView.value ?: false) || line in favoriteTrams
-        }
+    private fun isMarkerLineVisible(line: String): Boolean = favoriteLock.read {
+        !(favoriteView.value ?: false) || line in favoriteTrams
     }
 
     private fun stopFetchingTrams() {

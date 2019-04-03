@@ -30,14 +30,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
@@ -117,8 +115,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         location?.let {
             locationChangeListener?.onLocationChanged(it)
             if (this::map.isInitialized) {
-                val latLng = LatLng(it.latitude, it.longitude)
-                map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
                 map.isMyLocationEnabled = checkLocationPermission(false)
             }
         }
@@ -258,9 +254,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        val cameraStartPosition = viewModel.mapInitialPosition
+        val cameraStartZoom = viewModel.mapInitialZoom
         map.apply {
             moveCamera(
-                CameraUpdateFactory.newLatLngZoom(WARSAW_LATLNG, 15f)
+                CameraUpdateFactory.newLatLngZoom(cameraStartPosition, cameraStartZoom)
             )
             setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
             activity?.let {
@@ -294,15 +292,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel.mapControls.observe(this, Observer {
             val context = context ?: return@Observer
             when (it) {
-                is MapControls.ZoomIn -> {
-                    if (viewModel.mapSettingsProvider.isAutoZoomEnabled()) {
-                        map.animateCamera(CameraUpdateFactory.zoomIn())
-                    } else {
-                        showSuccessToast(context.getString(R.string.map_auto_zoom_disabled_message))
-                    }
+                is MapControls.ZoomIn ->
+                    map.animateCamera(CameraUpdateFactory.zoomIn())
+                is MapControls.IgnoredZoomIn ->
+                    showSuccessToast(context.getString(it.data))
+                is MapControls.MoveTo -> {
+                    map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
                 }
-                is MapControls.MoveTo -> map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
-            }
+            }.makeExhaustive
         })
 
         viewModel.forceReloadLastLocation()
@@ -335,7 +332,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        viewModel.forceReloadLastLocation()
+        if (this::map.isInitialized) {
+            viewModel.forceReloadLastLocation()
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 

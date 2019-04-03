@@ -5,6 +5,7 @@ import android.preference.PreferenceManager
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.getDouble
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
+import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.putDouble
 
 private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
@@ -95,4 +96,8 @@ class SettingsRepositoryImpl(context: Context) :
         sharedPreferences
             .getFloat(PREF_START_LOCATION_ZOOM, 0f)
             .let { if (it == 0f) null else it }
+
+    override fun getCity(): Cities = Cities.WARSAW
+
+    override fun getDefaultZoom(): Float = 15f
 }
