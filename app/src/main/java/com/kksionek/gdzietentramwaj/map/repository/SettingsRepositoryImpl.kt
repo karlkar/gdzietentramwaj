@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.getDouble
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 import com.kksionek.gdzietentramwaj.map.dataSource.Cities
+import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.putDouble
 
 private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
@@ -17,6 +18,7 @@ private const val PREF_START_LOCATION_LATITUDE = "START_LOCATION_LATITUDE"
 private const val PREF_START_LOCATION_LONGITUDE = "START_LOCATION_LONGITTUDE"
 private const val PREF_START_LOCATION_ZOOM = "START_LOCATION_ZOOM"
 private const val PREF_BRIGADE_SHOWING = "BRIGADE_SHOWING"
+private const val PREF_MAP_TYPE = "MAP_TYPE"
 
 class SettingsRepositoryImpl(context: Context) :
     MapsViewSettingsRepository, IconSettingsManager, VersionRepository, MapSettingsManager {
@@ -107,6 +109,18 @@ class SettingsRepositoryImpl(context: Context) :
 
     override fun isBrigadeShowingEnabled(): Boolean =
         sharedPreferences.getBoolean(PREF_BRIGADE_SHOWING, true)
+
+    override fun setMapType(type: MapTypes) {
+        sharedPreferences
+            .edit()
+            .putInt(PREF_MAP_TYPE, type.googleCode)
+            .apply()
+    }
+
+    override fun getMapType(): MapTypes =
+        sharedPreferences
+            .getInt(PREF_MAP_TYPE, -1)
+            .let { MapTypes.ofValue(it) }
 
     override fun getCity(): Cities = Cities.WARSAW
 

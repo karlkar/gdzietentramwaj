@@ -14,12 +14,13 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
-import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.TramRepository
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
@@ -53,7 +54,7 @@ class MapsViewModel @Inject constructor(
     private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService,
     val iconSettingsProvider: IconSettingsProvider,
-    val mapSettingsProvider: MapSettingsProvider
+    val mapSettingsManager: MapSettingsManager
 ) : ViewModel() {
 
     object NoTramsLoadedException : Throwable()
@@ -92,11 +93,11 @@ class MapsViewModel @Inject constructor(
     val mapInitialZoom: Float
 
     init {
-        val defaultLocation = mapSettingsProvider.getCity().latLng
-        val defaultZoom = mapSettingsProvider.getDefaultZoom()
-        if (mapSettingsProvider.isStartLocationEnabled()) {
-            mapInitialPosition = mapSettingsProvider.getStartLocationPosition() ?: defaultLocation
-            mapInitialZoom = mapSettingsProvider.getStartLocationZoom() ?: defaultZoom
+        val defaultLocation = mapSettingsManager.getCity().latLng
+        val defaultZoom = mapSettingsManager.getDefaultZoom()
+        if (mapSettingsManager.isStartLocationEnabled()) {
+            mapInitialPosition = mapSettingsManager.getStartLocationPosition() ?: defaultLocation
+            mapInitialZoom = mapSettingsManager.getStartLocationZoom() ?: defaultZoom
         } else {
             mapInitialPosition = defaultLocation
             mapInitialZoom = defaultZoom
@@ -128,9 +129,9 @@ class MapsViewModel @Inject constructor(
     // This one has to be called when the map is ready to use
     fun forceReloadLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
-            .onErrorReturnItem(mapSettingsProvider.getCity().latLng.toLocation())
+            .onErrorReturnItem(mapSettingsManager.getCity().latLng.toLocation())
             .subscribe { location ->
-                if (!mapSettingsProvider.isStartLocationEnabled()) {
+                if (!mapSettingsManager.isStartLocationEnabled()) {
                     _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
                 }
                 _lastLocation.postValue(location)
@@ -231,7 +232,7 @@ class MapsViewModel @Inject constructor(
 
         if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
             postMarkers(onlyVisibleTrams, animate, newData)
-        } else if (mapSettingsProvider.isAutoZoomEnabled()) {
+        } else if (mapSettingsManager.isAutoZoomEnabled()) {
             _mapControls.postValue(MapControls.ZoomIn)
         } else {
             _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
@@ -286,6 +287,15 @@ class MapsViewModel @Inject constructor(
                 }
                 .subscribe { _difficulties.postValue(it) })
     }
+
+    fun onSwitchMapTypeButtonClicked() {
+        val currentMapType = mapSettingsManager.getMapType()
+        val newMapType = currentMapType.next()
+        mapSettingsManager.setMapType(newMapType)
+        _mapControls.postValue(MapControls.ChangeType(newMapType))
+    }
+
+    fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
     fun onResume() {
         startFetchingTrams()

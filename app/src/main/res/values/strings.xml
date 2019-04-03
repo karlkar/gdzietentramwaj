@@ -28,6 +28,7 @@
     <string name="settings_icon_set_old_option">Stare ikony</string>
     <string name="settings_icon_set_new_option">Nowe ikony</string>
     <string name="map_auto_zoom_disabled_message">Przybliż mapę, aby zobaczyć wszystkie pojazdy.</string>
+    <string name="map_change_map_type">Zmień typ mapy</string>
     <string name="settings_auto_map_zooming_check">Automatyczne przybliżanie mapy</string>
     <string name="settings_auto_map_zooming_description">Gdy oddalasz mapę może się zdarzyć, że powinno na niej być widać bardzo dużo pojazdów. Niestety dla niektórych telefonów jest to za dużo i żeby uniknąć problemów ze stabilnością aplikacji musiałem wprowadzić limit widocznych pojazdów. Przy włączonym automatycznym przybliżaniu mapa będzie się przybliżała tak, żeby móc wyświetlić tyle ile się da.</string>
     <string name="settings_start_location_check">Ustawienie początkowej lokalizacji</string>

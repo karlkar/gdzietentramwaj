@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
 import com.google.android.gms.maps.model.LatLng
+import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 
 interface MapSettingsManager: MapSettingsProvider {
 
@@ -11,4 +12,6 @@ interface MapSettingsManager: MapSettingsProvider {
     fun setStartLocation(location: LatLng, zoom: Float)
 
     fun setBrigadeShowingEnabled(enabled: Boolean)
+
+    fun setMapType(type: MapTypes)
 }

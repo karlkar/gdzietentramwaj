@@ -45,6 +45,7 @@ import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showErrorToast
 import com.kksionek.gdzietentramwaj.showSuccessToast
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
+import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -167,6 +168,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel.lastLocation.observe(this, lastLocationObserver)
         viewModel.favoriteView.observe(this, favoriteModeObserver)
 
+        map_switch_type_imagebutton.setOnClickListener {
+            viewModel.onSwitchMapTypeButtonClicked()
+        }
+
         difficultiesBottomSheet = DifficultiesBottomSheet(
             constraintlayout_bottomsheet_rootview,
             view.context,
@@ -183,9 +188,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         menu.findItem(R.id.menu_item_refresh)?.also {
             context?.let { context ->
                 menuItemRefresh = MenuItemRefreshCtrl(context, it)
-            }
-            if (viewModel.tramData.value is UiState.InProgress) {
-                menuItemRefresh?.startAnimation()
+                if (viewModel.tramData.value is UiState.InProgress) {
+                    menuItemRefresh?.startAnimation()
+                }
             }
         }
 
@@ -277,9 +282,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             isIndoorEnabled = false
             isTrafficEnabled = false
             isMyLocationEnabled = checkLocationPermission(false)
+            mapType = viewModel.getMapType().googleCode
 
             setOnMarkerClickListener {
-                if (viewModel.mapSettingsProvider.isBrigadeShowingEnabled()) {
+                if (viewModel.mapSettingsManager.isBrigadeShowingEnabled()) {
                     if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
                 }
                 return@setOnMarkerClickListener true
@@ -298,9 +304,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     map.animateCamera(CameraUpdateFactory.zoomIn())
                 is MapControls.IgnoredZoomIn ->
                     showSuccessToast(context.getString(it.data))
-                is MapControls.MoveTo -> {
+                is MapControls.MoveTo ->
                     map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
-                }
+                is MapControls.ChangeType ->
+                    map.mapType = it.mapType.googleCode
             }.makeExhaustive
         })
 
