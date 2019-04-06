@@ -14,6 +14,8 @@ import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+private const val MAX_RETRIES = 3
+
 class TramRepository @Inject constructor(
     private val tramDao: TramDao,
     private val tramInterface: TramInterface,
@@ -38,10 +40,16 @@ class TramRepository @Inject constructor(
                             .toList()
                             .retryWhen { errors ->
                                 errors.zipWith(
-                                    Flowable.range(1, 3),
-                                    BiFunction { _: Throwable, i: Int -> i }
+                                    Flowable.range(1, MAX_RETRIES + 1),
+                                    BiFunction { t: Throwable, i: Int -> i to t }
                                 )
-                                    .flatMap { i -> Flowable.timer(i * 500L, TimeUnit.MILLISECONDS) }
+                                    .flatMap { (retry, error) ->
+                                        if (retry < MAX_RETRIES) {
+                                            Flowable.timer(retry * 100L, TimeUnit.MILLISECONDS)
+                                        } else {
+                                            Flowable.error(error)
+                                        }
+                                    }
                             }
                             .doOnSuccess(favoriteRepositoryAdder)
                             .toNetworkOperationResult()
