@@ -18,6 +18,7 @@ private const val PREF_START_LOCATION_LATITUDE = "START_LOCATION_LATITUDE"
 private const val PREF_START_LOCATION_LONGITUDE = "START_LOCATION_LONGITTUDE"
 private const val PREF_START_LOCATION_ZOOM = "START_LOCATION_ZOOM"
 private const val PREF_BRIGADE_SHOWING = "BRIGADE_SHOWING"
+private const val PREF_TRAFFIC_SHOWING = "TRAFFIC_SHOWING"
 private const val PREF_MAP_TYPE = "MAP_TYPE"
 
 class SettingsRepositoryImpl(context: Context) :
@@ -109,6 +110,16 @@ class SettingsRepositoryImpl(context: Context) :
 
     override fun isBrigadeShowingEnabled(): Boolean =
         sharedPreferences.getBoolean(PREF_BRIGADE_SHOWING, true)
+
+    override fun setTrafficShowingEnabled(enabled: Boolean) {
+        sharedPreferences
+            .edit()
+            .putBoolean(PREF_TRAFFIC_SHOWING, enabled)
+            .apply()
+    }
+
+    override fun isTrafficShowingEnabled(): Boolean =
+        sharedPreferences.getBoolean(PREF_TRAFFIC_SHOWING, false)
 
     override fun setMapType(type: MapTypes) {
         sharedPreferences

@@ -234,6 +234,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
+        if (this::map.isInitialized) {
+            map.isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
+        }
     }
 
     override fun onPause() {
@@ -280,7 +283,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
             isBuildingsEnabled = false
             isIndoorEnabled = false
-            isTrafficEnabled = false
+            isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
             isMyLocationEnabled = checkLocationPermission(false)
             mapType = viewModel.getMapType().googleCode
 

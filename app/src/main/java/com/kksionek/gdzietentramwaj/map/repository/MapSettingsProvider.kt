@@ -16,6 +16,8 @@ interface MapSettingsProvider {
 
     fun isBrigadeShowingEnabled(): Boolean
 
+    fun isTrafficShowingEnabled(): Boolean
+
     fun getCity(): Cities
 
     fun getDefaultZoom(): Float

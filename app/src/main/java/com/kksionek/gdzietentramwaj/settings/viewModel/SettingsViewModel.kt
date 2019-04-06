@@ -45,6 +45,10 @@ class SettingsViewModel @Inject constructor(
         get() = mapSettingsManager.isBrigadeShowingEnabled()
         set(value) = mapSettingsManager.setBrigadeShowingEnabled(value)
 
+    var trafficShowingEnabled: Boolean
+        get() = mapSettingsManager.isTrafficShowingEnabled()
+        set(value) = mapSettingsManager.setTrafficShowingEnabled(value)
+
     // As there is no "startFragmentForResult" I have to do a workaround
     var locationChooserFragmentClosedWithResult: Boolean = false
 }

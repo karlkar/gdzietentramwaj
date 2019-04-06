@@ -13,5 +13,7 @@ interface MapSettingsManager: MapSettingsProvider {
 
     fun setBrigadeShowingEnabled(enabled: Boolean)
 
+    fun setTrafficShowingEnabled(enabled: Boolean)
+
     fun setMapType(type: MapTypes)
 }

@@ -130,6 +130,13 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                 viewModel.brigadeShowingEnabled = isChecked
             }
         }
+
+        settings_traffic_showing_checkbox.apply {
+            isChecked = viewModel.trafficShowingEnabled
+            setOnCheckedChangeListener { _, isChecked ->
+                viewModel.trafficShowingEnabled = isChecked
+            }
+        }
     }
 
     override fun onResume() {

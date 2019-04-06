@@ -34,4 +34,5 @@
     <string name="settings_start_location_check">Ustawienie początkowej lokalizacji</string>
     <string name="settings_start_location_description">Możesz wybrać lokalizację, która będzie pokazywana tuż po uruchomieniu aplikacji</string>
     <string name="settings_brigade_showing_check">Pokazuj numer brygady po kliknięciu na ikonkę pojazdu</string>
+    <string name="settings_traffic_showing_check">Pokazuj informacje o natężeniu ruchu</string>
 </resources>
