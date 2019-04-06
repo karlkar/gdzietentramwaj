@@ -1,250 +1,255 @@
-<?xml version="1.0" encoding="utf-8"?><!-- TODO Consider adding scroll view -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/settings_marker_title_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/settings_icon_set_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <include
-        android:id="@+id/settings_marker_old_bus_imageview"
-        layout="@layout/ic_marker_old_bus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
-        app:layout_constraintEnd_toStartOf="@+id/settings_marker_old_tram_imageview"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
+        <TextView
+            android:id="@+id/settings_marker_title_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/settings_icon_set_title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/settings_marker_old_tram_imageview"
-        layout="@layout/ic_marker_old_tram"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
-        app:layout_constraintEnd_toStartOf="@+id/settings_marker_divider_view"
-        app:layout_constraintStart_toEndOf="@id/settings_marker_old_bus_imageview"
-        app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
+        <include
+            android:id="@+id/settings_marker_old_bus_imageview"
+            layout="@layout/ic_marker_old_bus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
+            app:layout_constraintEnd_toStartOf="@+id/settings_marker_old_tram_imageview"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
 
-    <RadioButton
-        android:id="@+id/settings_marker_old_radiobutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/settings_icon_set_old_option"
-        app:layout_constraintEnd_toEndOf="@id/settings_marker_old_tram_imageview"
-        app:layout_constraintStart_toStartOf="@id/settings_marker_old_bus_imageview"
-        app:layout_constraintTop_toBottomOf="@id/settings_marker_old_bus_imageview" />
+        <include
+            android:id="@+id/settings_marker_old_tram_imageview"
+            layout="@layout/ic_marker_old_tram"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_bus_imageview"
+            app:layout_constraintEnd_toStartOf="@+id/settings_marker_divider_view"
+            app:layout_constraintStart_toEndOf="@id/settings_marker_old_bus_imageview"
+            app:layout_constraintTop_toTopOf="@id/settings_marker_new_bus_imageview" />
 
-    <include
-        android:id="@+id/settings_marker_new_bus_imageview"
-        layout="@layout/ic_marker_new_bus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/settings_marker_new_tram_imageview"
-        app:layout_constraintStart_toEndOf="@+id/settings_marker_divider_view"
-        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+        <RadioButton
+            android:id="@+id/settings_marker_old_radiobutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_icon_set_old_option"
+            app:layout_constraintEnd_toEndOf="@id/settings_marker_old_tram_imageview"
+            app:layout_constraintStart_toStartOf="@id/settings_marker_old_bus_imageview"
+            app:layout_constraintTop_toBottomOf="@id/settings_marker_old_bus_imageview" />
 
-    <include
-        android:id="@+id/settings_marker_new_tram_imageview"
-        layout="@layout/ic_marker_new_tram"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/settings_marker_new_bus_imageview"
-        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+        <include
+            android:id="@+id/settings_marker_new_bus_imageview"
+            layout="@layout/ic_marker_new_bus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@+id/settings_marker_new_tram_imageview"
+            app:layout_constraintStart_toEndOf="@+id/settings_marker_divider_view"
+            app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
 
-    <RadioButton
-        android:id="@+id/settings_marker_new_radiobutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/settings_icon_set_new_option"
-        app:layout_constraintEnd_toEndOf="@id/settings_marker_new_tram_imageview"
-        app:layout_constraintStart_toStartOf="@id/settings_marker_new_bus_imageview"
-        app:layout_constraintTop_toBottomOf="@id/settings_marker_new_bus_imageview" />
+        <include
+            android:id="@+id/settings_marker_new_tram_imageview"
+            layout="@layout/ic_marker_new_tram"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/settings_marker_new_bus_imageview"
+            app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
 
-    <View
-        android:id="@+id/settings_marker_divider_view"
-        android:layout_width="1dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_radiobutton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
+        <RadioButton
+            android:id="@+id/settings_marker_new_radiobutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_icon_set_new_option"
+            app:layout_constraintEnd_toEndOf="@id/settings_marker_new_tram_imageview"
+            app:layout_constraintStart_toStartOf="@id/settings_marker_new_bus_imageview"
+            app:layout_constraintTop_toBottomOf="@id/settings_marker_new_bus_imageview" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/settings_icon_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="settings_marker_new_radiobutton,settings_marker_old_radiobutton" />
+        <View
+            android:id="@+id/settings_marker_divider_view"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="@id/settings_marker_new_radiobutton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_marker_title_textview" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_1"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_icon_barrier" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/settings_icon_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="settings_marker_new_radiobutton,settings_marker_old_radiobutton" />
 
-    <Button
-        android:id="@+id/settings_favorite_lines_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/settings_favorite"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_1" />
+        <View
+            android:id="@+id/settings_divider_horizontal_1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_icon_barrier" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_2"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_favorite_lines_button" />
+        <Button
+            android:id="@+id/settings_favorite_lines_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/settings_favorite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_1" />
 
-    <Button
-        android:id="@+id/settings_remove_ads_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/remove_ads"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_2" />
+        <View
+            android:id="@+id/settings_divider_horizontal_2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_favorite_lines_button" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_3"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_remove_ads_button" />
+        <Button
+            android:id="@+id/settings_remove_ads_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/remove_ads"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_2" />
 
-    <CheckBox
-        android:id="@+id/settings_auto_zoom_checkbox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/settings_auto_map_zooming_check"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_3" />
+        <View
+            android:id="@+id/settings_divider_horizontal_3"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_remove_ads_button" />
 
-    <TextView
-        android:id="@+id/settings_auto_zoom_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/settings_auto_map_zooming_description"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_checkbox" />
+        <CheckBox
+            android:id="@+id/settings_auto_zoom_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/settings_auto_map_zooming_check"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_3" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_4"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_textview" />
+        <TextView
+            android:id="@+id/settings_auto_zoom_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/settings_auto_map_zooming_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_checkbox" />
 
-    <CheckBox
-        android:id="@+id/settings_start_location_checkbox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/settings_start_location_check"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_4" />
+        <View
+            android:id="@+id/settings_divider_horizontal_4"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_auto_zoom_textview" />
 
-    <TextView
-        android:id="@+id/settings_start_location_description_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/settings_start_location_description"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_start_location_checkbox" />
+        <CheckBox
+            android:id="@+id/settings_start_location_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/settings_start_location_check"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_4" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_5"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_start_location_description_textview" />
+        <TextView
+            android:id="@+id/settings_start_location_description_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/settings_start_location_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_start_location_checkbox" />
 
-    <CheckBox
-        android:id="@+id/settings_brigade_showing_checkbox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/settings_brigade_showing_check"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_5" />
+        <View
+            android:id="@+id/settings_divider_horizontal_5"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_start_location_description_textview" />
 
-    <View
-        android:id="@+id/settings_divider_horizontal_6"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_brigade_showing_checkbox" />
+        <CheckBox
+            android:id="@+id/settings_brigade_showing_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/settings_brigade_showing_check"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_divider_horizontal_5" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:id="@+id/settings_divider_horizontal_6"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settings_brigade_showing_checkbox" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
