@@ -1,20 +1,20 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.base.createDialogView
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
@@ -90,16 +90,11 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             settings_divider_horizontal_3.visibility = View.GONE
         } else {
             settings_remove_ads_button.setOnClickListener {
-                val dialogView =
-                    createDialogView(view.context, R.string.remove_info)
-                        ?: return@setOnClickListener
-                activity?.let {
-                    AlertDialog.Builder(it)
-                        .setTitle(R.string.remove_title)
-                        .setView(dialogView)
-                        .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
-                        .show()
-                }
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj.pro")
+                )
+                startActivity(intent)
             }
         }
 
@@ -107,13 +102,13 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             findNavController().navigate(R.id.destination_favorite)
         }
 
-        settings_auto_zoom_checkbox.isChecked = viewModel.autoZoomEnabled
+        settings_auto_zoom_switch.isChecked = viewModel.autoZoomEnabled
 
-        settings_auto_zoom_checkbox.setOnCheckedChangeListener { _, isChecked ->
+        settings_auto_zoom_switch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.autoZoomEnabled = isChecked
         }
 
-        settings_start_location_checkbox.apply {
+        settings_start_location_switch.apply {
             isChecked = viewModel.startLocationEnabled
             setOnCheckedChangeListener { _, isChecked ->
 
@@ -124,14 +119,14 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             }
         }
 
-        settings_brigade_showing_checkbox.apply {
+        settings_brigade_showing_switch.apply {
             isChecked = viewModel.brigadeShowingEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.brigadeShowingEnabled = isChecked
             }
         }
 
-        settings_traffic_showing_checkbox.apply {
+        settings_traffic_showing_switch.apply {
             isChecked = viewModel.trafficShowingEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.trafficShowingEnabled = isChecked
@@ -143,7 +138,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         super.onResume()
         if (locationChooserFragmentStarted) {
             if (!viewModel.locationChooserFragmentClosedWithResult) {
-                settings_start_location_checkbox.isChecked = false
+                settings_start_location_switch.isChecked = false
             }
             locationChooserFragmentStarted = false
         }

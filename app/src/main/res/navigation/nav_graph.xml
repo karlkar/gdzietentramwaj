@@ -44,10 +44,10 @@
     <fragment
         android:id="@+id/destination_favorite"
         android:name="com.kksionek.gdzietentramwaj.favorite.view.FavoriteFragment"
-        android:label="@string/settings_favorite" />
+        android:label="@string/destination_favorite_title" />
 
     <fragment
         android:id="@+id/destination_chooseStartLocation"
         android:name="com.kksionek.gdzietentramwaj.settings.view.ChooseStartLocationFragment"
-        android:label="Wybierz lokalizację początkową" />
+        android:label="@string/destination_chooseStartLocation_title" />
 </navigation>
