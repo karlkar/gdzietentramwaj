@@ -86,6 +86,8 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
         @Suppress("ConstantConditionIf")
         if (BuildConfig.FLAVOR == "paid") {
+            settings_remove_ads_title.visibility = View.GONE
+            settings_remove_ads_description.visibility = View.GONE
             settings_remove_ads_button.visibility = View.GONE
             settings_divider_horizontal_3.visibility = View.GONE
         } else {
