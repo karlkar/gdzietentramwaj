@@ -75,7 +75,6 @@ class MapsViewModel @Inject constructor(
     private val _lastLocation = MutableLiveData<Location>()
     val lastLocation: LiveData<Location> = _lastLocation
 
-    // TODO Create separate viewModel for difficulties?
     private val _difficulties = MutableLiveData<UiState<List<DifficultiesEntity>>>()
     val difficulties: LiveData<UiState<List<DifficultiesEntity>>> = _difficulties
 

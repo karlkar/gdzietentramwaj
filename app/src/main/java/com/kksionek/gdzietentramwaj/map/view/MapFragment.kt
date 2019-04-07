@@ -205,6 +205,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return super.onCreateOptionsMenu(menu, menuInflater)
     }
 
+    override fun onDestroyOptionsMenu() {
+        menuItemRefresh?.endAnimation()
+        menuItemRefresh = null
+        super.onDestroyOptionsMenu()
+    }
+
     private fun setFavoriteButtonIcon(favoriteEnabled: Boolean) {
         if (::menuItemFavoriteSwitch.isInitialized) {
             menuItemFavoriteSwitch.setIcon(

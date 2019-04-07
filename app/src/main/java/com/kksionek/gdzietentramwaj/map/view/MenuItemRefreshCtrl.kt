@@ -15,19 +15,19 @@ class MenuItemRefreshCtrl(
     private val context: Context,
     private val menuItem: MenuItem
 ) {
-    private val mRotationAnimation: Animation by lazy {
+    private val rotationAnimation: Animation by lazy {
         AnimationUtils.loadAnimation(context, R.anim.anim_rotate)
     }
-    private val mRefreshImage: ImageView by lazy {
+    private val refreshImage: ImageView by lazy {
         LayoutInflater.from(context).inflate(R.layout.view_refresh_action, null) as ImageView
     }
 
     fun startAnimation() {
         if (menuItem.actionView == null) {
-            mRefreshImage.startAnimation(mRotationAnimation)
-            menuItem.actionView = mRefreshImage
-            menuItem.isEnabled = false
+            refreshImage.startAnimation(rotationAnimation)
+            menuItem.actionView = refreshImage
         }
+        menuItem.isEnabled = false
     }
 
     fun endAnimation() {
