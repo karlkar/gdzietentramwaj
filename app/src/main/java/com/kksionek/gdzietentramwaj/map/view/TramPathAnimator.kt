@@ -7,6 +7,8 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.maps.android.SphericalUtil
 
+const val ANIMATION_DURATION = 3000L
+
 class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
 
     private val animationMarkers = mutableListOf<TramMarker>()
@@ -44,7 +46,7 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
 
     private val valueAnimator = ValueAnimator
         .ofFloat(0F, 1F)
-        .setDuration(3000).apply { addUpdateListener(animatorUpdateListener) }
+        .setDuration(ANIMATION_DURATION).apply { addUpdateListener(animatorUpdateListener) }
 
     @UiThread
     fun removeAllAnimatedMarkers() {

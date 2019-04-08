@@ -10,7 +10,8 @@ sealed class MapControls {
 
     data class IgnoredZoomIn(@StringRes val data: Int) : MapControls()
 
-    data class MoveTo(val location: LatLng) : MapControls()
+    data class MoveTo(val location: LatLng, val customAnimationDuration: Boolean = false) :
+        MapControls()
 
     data class ChangeType(val mapType: MapTypes) : MapControls()
 }

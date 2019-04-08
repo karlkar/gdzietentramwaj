@@ -65,6 +65,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
 
+    private lateinit var vehicleInfoWindowAdapter: VehicleInfoWindowAdapter
+
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
@@ -159,6 +161,21 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        map_followed_constraintlayout.apply {
+            post {
+                y = -height.toFloat()
+                visibility = View.VISIBLE
+            }
+        }
+
+        map_followed_cancel_button.setOnClickListener {
+            viewModel.followedVehicleId = null
+            map_followed_constraintlayout.animate()
+                .y(-map_followed_constraintlayout.height.toFloat())
+                .setDuration(1000L)
+                .start()
+        }
+
         if (!this::map.isInitialized) {
             (childFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment)
                 ?.getMapAsync(this)
@@ -179,6 +196,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             viewModel,
             imageLoader
         )
+
+        vehicleInfoWindowAdapter = VehicleInfoWindowAdapter(view.context)
 
         checkLocationPermission(true)
     }
@@ -293,11 +312,23 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             isMyLocationEnabled = checkLocationPermission(false)
             mapType = viewModel.getMapType().googleCode
 
+            setInfoWindowAdapter(vehicleInfoWindowAdapter)
+
             setOnMarkerClickListener {
                 if (viewModel.mapSettingsManager.isBrigadeShowingEnabled()) {
-                    if (it.isInfoWindowShown) it.hideInfoWindow() else it.showInfoWindow()
+                    it.showInfoWindow()
                 }
                 return@setOnMarkerClickListener true
+            }
+            setOnInfoWindowClickListener {
+                viewModel.followedVehicleId = it.tag as String
+                map_followed_constraintlayout.animate()
+                    .y(0f)
+                    .setDuration(1000L)
+                    .start()
+                map_followed_textview.text =
+                    getString(R.string.map_followed_text, it.title, it.snippet)
+                it.hideInfoWindow()
             }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
@@ -313,8 +344,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     map.animateCamera(CameraUpdateFactory.zoomIn())
                 is MapControls.IgnoredZoomIn ->
                     showSuccessToast(context.getString(it.data))
-                is MapControls.MoveTo ->
-                    map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
+                is MapControls.MoveTo -> {
+                    if (it.customAnimationDuration) {
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLng(it.location),
+                            ANIMATION_DURATION.toInt(),
+                            null
+                        )
+                    } else {
+                        map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
+                    }
+                }
                 is MapControls.ChangeType ->
                     map.mapType = it.mapType.googleCode
             }.makeExhaustive
@@ -399,8 +439,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     tramMarker.marker = map.addMarker(
                         MarkerOptions().apply {
                             position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
-                            title(getString(R.string.brigade))
-                            snippet(tramMarker.brigade)
+                            title(getString(R.string.marker_info_line, tramMarker.tramLine))
+                            snippet(getString(R.string.marker_info_brigade, tramMarker.brigade))
                             icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
@@ -413,6 +453,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             }
                         }
                     )
+                    tramMarker.marker?.tag = tramMarker.id
                 }
                 if (tramMarker.polyline == null) {
                     val newPoints = polylineGenerator.generatePolylinePoints(
