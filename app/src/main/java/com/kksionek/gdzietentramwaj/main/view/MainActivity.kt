@@ -9,6 +9,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.createDialogView
@@ -85,7 +86,10 @@ class MainActivity : AppCompatActivity(), AboutDialogProvider, LocationChangeLis
     }
 
     override fun showAboutAppDialog() {
-        val view = createDialogView(this, R.string.disclaimer) ?: return
+        val view = createDialogView(
+            this,
+            getString(R.string.disclaimer, BuildConfig.APPLICATION_ID)
+        ) ?: return
         AlertDialog.Builder(this)
             .setTitle(R.string.about_app)
             .setView(view)
