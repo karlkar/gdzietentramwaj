@@ -34,7 +34,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Śledzony pojazd\nLinia 234\nBrygada 6" />
+            tools:text="Śledzony pojazd\nLinia 234 Brygada 6" />
 
         <Button
             android:id="@+id/map_followed_cancel_button"

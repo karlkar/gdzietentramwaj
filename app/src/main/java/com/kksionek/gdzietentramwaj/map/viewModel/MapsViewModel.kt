@@ -63,7 +63,11 @@ class MapsViewModel @Inject constructor(
         value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
     }
 
-    var followedVehicleId: String? = null
+    var followedVehicle: FollowedTramData? by Delegates.observable(null) { _, _: FollowedTramData?, value: FollowedTramData? ->
+        value?.let {
+            _mapControls.postValue(MapControls.MoveTo(it.latLng))
+        }
+    }
 
     private val _mapControls = MutableLiveData<MapControls>()
     val mapControls: LiveData<MapControls> = _mapControls
@@ -239,8 +243,9 @@ class MapsViewModel @Inject constructor(
             _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
         }
 
-        if (followedVehicleId != null && animate) {
-            allTrams.firstOrNull { it.id == followedVehicleId }?.let { tramMarker ->
+        val followed = followedVehicle
+        if (followed != null && animate) {
+            allTrams.firstOrNull { it.id == followed.id }?.let { tramMarker ->
                 _mapControls.postValue(MapControls.MoveTo(tramMarker.finalPosition, true))
             }
         }

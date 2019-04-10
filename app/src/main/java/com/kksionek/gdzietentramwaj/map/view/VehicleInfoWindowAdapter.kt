@@ -14,8 +14,6 @@ class VehicleInfoWindowAdapter(
     context: Context
 ) : GoogleMap.InfoWindowAdapter, LayoutContainer {
 
-    private var markerId: String? = null
-
     @SuppressLint("InflateParams")
     override val containerView: View =
         LayoutInflater.from(context).inflate(R.layout.info_window, null)
@@ -23,12 +21,10 @@ class VehicleInfoWindowAdapter(
     override fun getInfoContents(marker: Marker?): View {
         info_window_title_textview.text = marker?.title
         info_window_description_textview.text = marker?.snippet
-        markerId = marker?.tag as String
         return containerView
     }
 
     override fun getInfoWindow(marker: Marker?): View? {
         return null
     }
-
 }
