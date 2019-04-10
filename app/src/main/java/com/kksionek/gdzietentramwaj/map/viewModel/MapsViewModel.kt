@@ -16,13 +16,13 @@ import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.TramRepository
+import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
@@ -36,9 +36,6 @@ import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
 import kotlin.concurrent.read
@@ -147,11 +144,10 @@ class MapsViewModel @Inject constructor(
         tramFetchingDisposable?.dispose()
         tramFetchingDisposable = tramRepository.dataStream
             .subscribeOn(Schedulers.io())
-            .filterOutOutdated()
             .transformEmptyListToError()
             .subscribe { operationResult ->
                 when (operationResult) {
-                    is NetworkOperationResult.Success<List<TramData>> ->
+                    is NetworkOperationResult.Success<List<VehicleData>> ->
                         handleSuccess(operationResult)
                     is NetworkOperationResult.Error ->
                         handleError(operationResult)
@@ -161,7 +157,7 @@ class MapsViewModel @Inject constructor(
             }
     }
 
-    private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<TramData>>) {
+    private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
         allTrams = operationResult.data
             .map { allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(it) }
         allKnownTrams = allTrams.associateBy { it.id }
@@ -169,7 +165,7 @@ class MapsViewModel @Inject constructor(
         showOrZoom(animate = true, newData = true)
     }
 
-    private fun handleError(operationResult: NetworkOperationResult.Error<List<TramData>>) {
+    private fun handleError(operationResult: NetworkOperationResult.Error<List<VehicleData>>) {
         val uiState: UiState.Error<BusTramLoading> = when (operationResult.throwable) {
             NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
             is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
@@ -209,21 +205,9 @@ class MapsViewModel @Inject constructor(
         _tramData.postValue(uiState)
     }
 
-    private fun Flowable<NetworkOperationResult<List<TramData>>>.filterOutOutdated() =
-        map { result ->
-            if (result is NetworkOperationResult.Success<List<TramData>>) {
-                val refDate = Calendar.getInstance()
-                    .apply { add(Calendar.MINUTE, -2) }
-                    .let { dateFormat.format(it.time) }
-                NetworkOperationResult.Success(result.data.filter { refDate <= it.time })
-            } else {
-                result
-            }
-        }
-
-    private fun Flowable<NetworkOperationResult<List<TramData>>>.transformEmptyListToError() =
+    private fun Flowable<NetworkOperationResult<List<VehicleData>>>.transformEmptyListToError() =
         map {
-            if (it is NetworkOperationResult.Success<List<TramData>> && it.data.isEmpty()) {
+            if (it is NetworkOperationResult.Success<List<VehicleData>> && it.data.isEmpty()) {
                 NetworkOperationResult.Error(NoTramsLoadedException)
             } else {
                 it
@@ -325,10 +309,5 @@ class MapsViewModel @Inject constructor(
 
     companion object {
         const val TAG = "MapsViewModel"
-
-        private val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.US
-        )
     }
 }

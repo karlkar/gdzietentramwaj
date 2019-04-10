@@ -1,9 +1,10 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.map.dataSource.TramData
-import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSourceFactory
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
@@ -18,12 +19,15 @@ private const val MAX_RETRIES = 3
 
 class TramRepository @Inject constructor(
     private val tramDao: TramDao,
-    private val tramInterface: TramInterface,
+    private val vehicleDataSourceFactory: VehicleDataSourceFactory,
     private val favoriteRepositoryAdder: FavoriteLinesConsumer
 ) {
     private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
-    val dataStream: Flowable<NetworkOperationResult<List<TramData>>> =
+    private var selectedCity = Cities.KRAKOW
+    private var vehicleDataSource: VehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
+
+    val dataStream: Flowable<NetworkOperationResult<List<VehicleData>>> =
         dataTrigger.toFlowable(BackpressureStrategy.DROP)
             .startWith(Unit)
             .switchMapDelayError {
@@ -31,10 +35,10 @@ class TramRepository @Inject constructor(
                     .subscribeOn(Schedulers.io())
                     .flatMap {
                         Observable.mergeDelayError(
-                            tramInterface.trams()
-                                .flatMapObservable { (list) -> Observable.fromIterable(list) },
-                            tramInterface.buses()
-                                .flatMapObservable { (list) -> Observable.fromIterable(list) }
+                            vehicleDataSource.trams()
+                                .flatMapObservable { list -> Observable.fromIterable(list) },
+                            vehicleDataSource.buses()
+                                .flatMapObservable { list -> Observable.fromIterable(list) }
                         )
                             .subscribeOn(Schedulers.io())
                             .toList()
@@ -63,5 +67,11 @@ class TramRepository @Inject constructor(
 
     fun forceReload() {
         dataTrigger.onNext(Unit)
+    }
+
+    fun changeCity(city: Cities) {
+        if (selectedCity == city) return
+        selectedCity = city
+        vehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
     }
 }

@@ -3,7 +3,7 @@ package com.kksionek.gdzietentramwaj.map.di
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
-import com.kksionek.gdzietentramwaj.map.dataSource.TramInterface
+import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.ZtmVehicleInterface
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -32,16 +32,26 @@ class MapFragmentModule {
 
     @Singleton
     @Provides
+    internal fun provideRetrofitBuilder( // TODO Change to some class like interfaceBuilder
+        okHttpClient: OkHttpClient,
+        rxAdapter: CallAdapter.Factory
+    ): Retrofit.Builder = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(okHttpClient)
+        .addCallAdapterFactory(rxAdapter)
+
+    @Singleton
+    @Provides
     internal fun provideTramInterface(
         okHttpClient: OkHttpClient,
         rxAdapter: CallAdapter.Factory
-    ): TramInterface {
+    ): ZtmVehicleInterface {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .addCallAdapterFactory(rxAdapter)
             .baseUrl("https://api.um.warszawa.pl/")
-            .build().create(TramInterface::class.java)
+            .build().create(ZtmVehicleInterface::class.java)
     }
 
     @Singleton

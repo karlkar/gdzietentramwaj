@@ -133,7 +133,7 @@ class SettingsRepositoryImpl(context: Context) :
             .getInt(PREF_MAP_TYPE, -1)
             .let { MapTypes.ofValue(it) }
 
-    override fun getCity(): Cities = Cities.WARSAW
+    override fun getCity(): Cities = Cities.KRAKOW
 
     override fun getDefaultZoom(): Float = 15f
 }

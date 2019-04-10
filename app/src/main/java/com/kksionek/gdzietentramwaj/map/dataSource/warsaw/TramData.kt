@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.dataSource
+package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
@@ -18,7 +18,6 @@ data class TramData(
     val id: String
         get() = "$firstLine/$brigade"
 
-    private var mLatLng: LatLng? = null
     val latLng: LatLng
-        get() = mLatLng ?: LatLng(lat, lng).also { mLatLng = it }
+        get() = LatLng(lat, lng)
 }

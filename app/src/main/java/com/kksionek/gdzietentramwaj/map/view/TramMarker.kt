@@ -16,11 +16,11 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.dataSource.TramData
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
+import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 
 
-class TramMarker(tramData: TramData) {
+class TramMarker(tramData: VehicleData) {
 
     val tramLine: String = tramData.firstLine
 
