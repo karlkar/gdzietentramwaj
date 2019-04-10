@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Anuluj"
+            android:text="@string/map_followed_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -53,14 +53,16 @@
         android:id="@+id/map_switch_type_imagebutton"
         android:layout_width="38dp"
         android:layout_height="38dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
+        android:layout_gravity="right"
         android:background="@drawable/map_button_ripple"
         android:contentDescription="@string/map_change_map_type"
         android:src="@drawable/ic_map"
-        android:tint="#555555" />
+        android:tint="#555555"
+        tools:ignore="RtlHardcoded" />
 
     <include layout="@layout/bottom_sheet_difficulties" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
