@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
-import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSourceFactory

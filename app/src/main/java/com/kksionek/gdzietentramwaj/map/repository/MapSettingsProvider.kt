@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
 import com.google.android.gms.maps.model.LatLng
-import com.kksionek.gdzietentramwaj.map.dataSource.Cities
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 
 interface MapSettingsProvider {

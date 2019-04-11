@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.dataSource
 
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.krakow.TtssVehicleDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.ZtmVehicleDataSourceFactory
 import javax.inject.Inject

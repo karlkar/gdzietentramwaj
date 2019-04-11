@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.dataSource
+package com.kksionek.gdzietentramwaj.base.dataSource
 
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.KRAKOW_LATLNG

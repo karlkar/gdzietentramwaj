@@ -3,9 +3,9 @@ package com.kksionek.gdzietentramwaj.map.repository
 import android.content.Context
 import android.preference.PreferenceManager
 import com.google.android.gms.maps.model.LatLng
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.getDouble
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
-import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.putDouble
 

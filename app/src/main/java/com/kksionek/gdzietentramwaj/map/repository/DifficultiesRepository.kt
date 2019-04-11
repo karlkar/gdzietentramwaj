@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
-import com.kksionek.gdzietentramwaj.map.dataSource.Cities
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity

@@ -12,8 +12,8 @@ import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
