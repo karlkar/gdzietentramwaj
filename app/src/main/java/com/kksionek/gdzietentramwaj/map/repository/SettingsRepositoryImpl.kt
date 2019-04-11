@@ -20,6 +20,7 @@ private const val PREF_START_LOCATION_ZOOM = "START_LOCATION_ZOOM"
 private const val PREF_BRIGADE_SHOWING = "BRIGADE_SHOWING"
 private const val PREF_TRAFFIC_SHOWING = "TRAFFIC_SHOWING"
 private const val PREF_MAP_TYPE = "MAP_TYPE"
+private const val PREF_CITY = "CITY"
 
 class SettingsRepositoryImpl(context: Context) :
     MapsViewSettingsRepository, IconSettingsManager, VersionRepository, MapSettingsManager {
@@ -133,7 +134,17 @@ class SettingsRepositoryImpl(context: Context) :
             .getInt(PREF_MAP_TYPE, -1)
             .let { MapTypes.ofValue(it) }
 
-    override fun getCity(): Cities = Cities.KRAKOW
+    override fun getCity(): Cities =
+        sharedPreferences
+            .getInt(PREF_CITY, 0)
+            .let { Cities.ofValue(it) }
+
+    override fun setCity(city: Cities) {
+        sharedPreferences
+            .edit()
+            .putInt(PREF_CITY, city.ordinal)
+            .apply()
+    }
 
     override fun getDefaultZoom(): Float = 15f
 }

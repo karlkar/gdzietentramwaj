@@ -6,5 +6,9 @@ import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
 
 enum class Cities(val latLng: LatLng) {
     WARSAW(WARSAW_LATLNG),
-    KRAKOW(KRAKOW_LATLNG)
+    KRAKOW(KRAKOW_LATLNG);
+
+    companion object {
+        fun ofValue(code: Int) = Cities.values().firstOrNull { it.ordinal == code } ?: WARSAW
+    }
 }

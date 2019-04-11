@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
 import com.google.android.gms.maps.model.LatLng
+import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 
 interface MapSettingsManager: MapSettingsProvider {
@@ -14,6 +15,8 @@ interface MapSettingsManager: MapSettingsProvider {
     fun setBrigadeShowingEnabled(enabled: Boolean)
 
     fun setTrafficShowingEnabled(enabled: Boolean)
+
+    fun setCity(city: Cities)
 
     fun setMapType(type: MapTypes)
 }

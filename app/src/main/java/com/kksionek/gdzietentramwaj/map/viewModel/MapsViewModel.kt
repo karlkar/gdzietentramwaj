@@ -142,7 +142,7 @@ class MapsViewModel @Inject constructor(
 
     private fun startFetchingTrams() {
         tramFetchingDisposable?.dispose()
-        tramFetchingDisposable = tramRepository.dataStream
+        tramFetchingDisposable = tramRepository.dataStream(mapSettingsManager.getCity())
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -294,6 +294,7 @@ class MapsViewModel @Inject constructor(
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
     fun onResume() {
+
         startFetchingTrams()
     }
 

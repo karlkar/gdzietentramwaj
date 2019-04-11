@@ -24,11 +24,15 @@ class TramRepository @Inject constructor(
 ) {
     private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
-    private var selectedCity = Cities.KRAKOW
-    private var vehicleDataSource: VehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
+    private var selectedCity: Cities = Cities.WARSAW
+    private lateinit var vehicleDataSource: VehicleDataSource
 
-    val dataStream: Flowable<NetworkOperationResult<List<VehicleData>>> =
-        dataTrigger.toFlowable(BackpressureStrategy.DROP)
+    fun dataStream(city: Cities): Flowable<NetworkOperationResult<List<VehicleData>>> {
+        if (selectedCity != city || !this::vehicleDataSource.isInitialized) {
+            selectedCity = city
+            vehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
+        }
+        return dataTrigger.toFlowable(BackpressureStrategy.DROP)
             .startWith(Unit)
             .switchMapDelayError {
                 Flowable.interval(0, 10, TimeUnit.SECONDS)
@@ -61,17 +65,12 @@ class TramRepository @Inject constructor(
                             .startWith(NetworkOperationResult.InProgress())
                     }
             }
+    }
 
     val favoriteTrams: Flowable<List<String>>
         get() = tramDao.getFavoriteTrams()
 
     fun forceReload() {
         dataTrigger.onNext(Unit)
-    }
-
-    fun changeCity(city: Cities) {
-        if (selectedCity == city) return
-        selectedCity = city
-        vehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
     }
 }
