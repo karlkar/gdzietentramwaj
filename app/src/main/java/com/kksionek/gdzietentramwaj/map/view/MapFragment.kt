@@ -18,6 +18,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.BounceInterpolator
+import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.ShareActionProvider
 import androidx.core.content.ContextCompat
@@ -121,6 +122,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             locationChangeListener?.onLocationChanged(it)
             if (this::map.isInitialized) {
                 map.isMyLocationEnabled = checkLocationPermission(false)
+                setSwitchButtonMargin()
             }
         }
     }
@@ -204,6 +206,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         vehicleInfoWindowAdapter = VehicleInfoWindowAdapter(view.context)
 
         checkLocationPermission(true)
+    }
+
+    private fun setSwitchButtonMargin() {
+        @DimenRes
+        val marginForMapSwitchButton: Int = if (this::map.isInitialized && map.isMyLocationEnabled) {
+            R.dimen.map_layer_margin_big
+        } else {
+            R.dimen.map_layer_margin_small
+        }
+        map_switch_type_imagebutton.layoutParams =
+            (map_switch_type_imagebutton.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                topMargin = resources.getDimensionPixelOffset(marginForMapSwitchButton)
+            }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -314,6 +329,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             isIndoorEnabled = false
             isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
             isMyLocationEnabled = checkLocationPermission(false)
+            setSwitchButtonMargin()
             mapType = viewModel.getMapType().googleCode
 
             setInfoWindowAdapter(vehicleInfoWindowAdapter)

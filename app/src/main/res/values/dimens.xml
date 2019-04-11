@@ -3,4 +3,6 @@
     <dimen name="dialog_margin">10dp</dimen>
     <dimen name="grid_offset">3dp</dimen>
     <dimen name="map_zoom_offset">20dp</dimen>
+    <dimen name="map_layer_margin_small">8dp</dimen>
+    <dimen name="map_layer_margin_big">56dp</dimen>
 </resources>
