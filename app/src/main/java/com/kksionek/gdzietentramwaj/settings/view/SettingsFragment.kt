@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -15,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
@@ -132,6 +135,28 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             isChecked = viewModel.trafficShowingEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.trafficShowingEnabled = isChecked
+            }
+        }
+
+        settings_city_spinner.apply {
+            adapter = ArrayAdapter(
+                view.context,
+                android.R.layout.simple_spinner_dropdown_item,
+                Cities.values().map { getString(it.humanReadableName) }
+            )
+            setSelection(Cities.values().indexOf(viewModel.city))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
+
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    viewModel.city = Cities.values()[position]
+                }
             }
         }
     }

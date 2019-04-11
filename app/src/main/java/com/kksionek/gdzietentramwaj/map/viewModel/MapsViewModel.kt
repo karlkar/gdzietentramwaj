@@ -304,6 +304,7 @@ class MapsViewModel @Inject constructor(
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
     fun onResume() {
+        forceReloadDifficulties()
         startFetchingTrams()
     }
 

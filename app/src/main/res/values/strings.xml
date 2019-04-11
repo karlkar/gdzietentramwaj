@@ -46,4 +46,7 @@
     <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
     <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl&lt;br&gt;&lt;br&gt;Autor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.&lt;br&gt;&lt;br&gt;Jeśli aplikacja Ci się podoba oceń ją w &lt;a href="http://play.google.com/store/apps/details?id=%1$s"&gt;sklepie Google Play!&lt;/a&gt;</string>
     <string name="map_followed_cancel">Anuluj</string>
+    <string name="settings_city_title">Wybierz swoje miasto</string>
+    <string name="warsaw">Warszawa</string>
+    <string name="krakow">Kraków</string>
 </resources>
