@@ -34,6 +34,7 @@ class DifficultiesBottomSheet(
         Observer { difficulties: UiState<List<DifficultiesEntity>>? ->
             when (difficulties) {
                 is UiState.Success -> {
+                    containerView.visibility = View.VISIBLE
                     stopDifficultiesLoading()
                     if (difficulties.data.isEmpty()) {
                         textview_difficulties_message.text =
@@ -49,6 +50,7 @@ class DifficultiesBottomSheet(
                     }
                 }
                 is UiState.Error -> {
+                    containerView.visibility = View.VISIBLE
                     textview_difficulties_message.text =
                         context.getText(R.string.error_failed_to_reload_difficulties)
                     recyclerview_difficulties_difficulties.visibility = View.GONE
@@ -56,9 +58,11 @@ class DifficultiesBottomSheet(
                     stopDifficultiesLoading()
                 }
                 is UiState.InProgress -> {
+                    containerView.visibility = View.VISIBLE
                     startDifficultiesLoading()
                 }
                 null -> {
+                    containerView.visibility = View.GONE
                 }
             }.makeExhaustive
         }

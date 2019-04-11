@@ -14,9 +14,9 @@ interface ZtmVehicleInterface {
 
     @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=$ID&apikey=$APIKEY&type=$TYPE_BUS")
-    fun buses(): Single<TramList>
+    fun buses(): Single<ZtmVehicleResponse>
 
     @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=$ID&apikey=$APIKEY&type=$TYPE_TRAM")
-    fun trams(): Single<TramList>
+    fun trams(): Single<ZtmVehicleResponse>
 }

@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class VehicleZtmInterface(
+class ZtmVehicleDataSource(
     private val ztmVehicleInterface: ZtmVehicleInterface
 ) : VehicleDataSource {
 
@@ -25,7 +25,7 @@ class VehicleZtmInterface(
                 list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
             }
 
-    private fun Single<TramList>.filterOutOutdated() =
+    private fun Single<ZtmVehicleResponse>.filterOutOutdated() =
         map { result ->
             val refDate = Calendar.getInstance()
                 .apply { add(Calendar.MINUTE, -2) }

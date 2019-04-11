@@ -4,7 +4,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 import io.reactivex.Single
 
-class VehicleTtssInterface(
+class TtssVehicleDataSource(
     private val ttssTramInterface: TtssTramInterface,
     private val ttssBusInterface: TtssBusInterface
 ) : VehicleDataSource {

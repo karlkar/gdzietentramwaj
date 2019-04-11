@@ -13,6 +13,7 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.makeExhaustive
+import com.kksionek.gdzietentramwaj.map.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
@@ -87,15 +88,19 @@ class MapsViewModel @Inject constructor(
 
     private val compositeDisposable = CompositeDisposable()
     private var tramFetchingDisposable: Disposable? = null
+    private var difficultiesDisposable: Disposable? = null
 
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
+
+    private val selectedCity: Cities
+        get() = mapSettingsManager.getCity()
 
     val mapInitialPosition: LatLng
     val mapInitialZoom: Float
 
     init {
-        val defaultLocation = mapSettingsManager.getCity().latLng
+        val defaultLocation = selectedCity.latLng
         val defaultZoom = mapSettingsManager.getDefaultZoom()
         if (mapSettingsManager.isStartLocationEnabled()) {
             mapInitialPosition = mapSettingsManager.getStartLocationPosition() ?: defaultLocation
@@ -131,7 +136,7 @@ class MapsViewModel @Inject constructor(
     // This one has to be called when the map is ready to use
     fun forceReloadLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
-            .onErrorReturnItem(mapSettingsManager.getCity().latLng.toLocation())
+            .onErrorReturnItem(selectedCity.latLng.toLocation())
             .subscribe { location ->
                 if (!mapSettingsManager.isStartLocationEnabled()) {
                     _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
@@ -142,7 +147,7 @@ class MapsViewModel @Inject constructor(
 
     private fun startFetchingTrams() {
         tramFetchingDisposable?.dispose()
-        tramFetchingDisposable = tramRepository.dataStream(mapSettingsManager.getCity())
+        tramFetchingDisposable = tramRepository.dataStream(selectedCity)
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -263,25 +268,30 @@ class MapsViewModel @Inject constructor(
     }
 
     fun forceReloadDifficulties() {
-        compositeDisposable.add(
-            difficultiesRepository.getDifficulties()
-                .map { result ->
-                    when (result) {
-                        is NetworkOperationResult.Success -> UiState.Success(result.data)
-                        is NetworkOperationResult.Error -> {
-                            Log.e(TAG, "Failed to reload difficulties", result.throwable)
-                            if (result.throwable !is HttpException) {
-                                crashReportingService.reportCrash(
-                                    result.throwable,
-                                    "Failed to reload difficulties"
-                                )
-                            }
-                            UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
+        val city = selectedCity
+        difficultiesDisposable?.dispose()
+        if (!difficultiesRepository.supportsDifficulties(city)) {
+            _difficulties.postValue(null)
+            return
+        }
+        difficultiesDisposable = difficultiesRepository.getDifficulties(city)
+            .map { result ->
+                when (result) {
+                    is NetworkOperationResult.Success -> UiState.Success(result.data)
+                    is NetworkOperationResult.Error -> {
+                        Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                        if (result.throwable !is HttpException) {
+                            crashReportingService.reportCrash(
+                                result.throwable,
+                                "Failed to reload difficulties"
+                            )
                         }
-                        is NetworkOperationResult.InProgress -> UiState.InProgress()
+                        UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
                     }
+                    is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
-                .subscribe { _difficulties.postValue(it) })
+            }
+            .subscribe { _difficulties.postValue(it) }
     }
 
     fun onSwitchMapTypeButtonClicked() {
@@ -294,7 +304,6 @@ class MapsViewModel @Inject constructor(
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
     fun onResume() {
-
         startFetchingTrams()
     }
 

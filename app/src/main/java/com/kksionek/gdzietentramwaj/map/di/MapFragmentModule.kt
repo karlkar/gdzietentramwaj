@@ -2,8 +2,6 @@ package com.kksionek.gdzietentramwaj.map.di
 
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesInterface
-import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.ZtmVehicleInterface
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -36,38 +34,11 @@ class MapFragmentModule {
         okHttpClient: OkHttpClient,
         rxAdapter: CallAdapter.Factory
     ): Retrofit.Builder = Retrofit.Builder()
+        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .client(okHttpClient)
         .addCallAdapterFactory(rxAdapter)
-
-    @Singleton
-    @Provides
-    internal fun provideTramInterface(
-        okHttpClient: OkHttpClient,
-        rxAdapter: CallAdapter.Factory
-    ): ZtmVehicleInterface {
-        return Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .addCallAdapterFactory(rxAdapter)
-            .baseUrl("https://api.um.warszawa.pl/")
-            .build().create(ZtmVehicleInterface::class.java)
-    }
-
-    @Singleton
-    @Provides
-    internal fun provideDifficultiesInterface(
-        okHttpClient: OkHttpClient,
-        rxAdapter: CallAdapter.Factory
-    ): DifficultiesInterface {
-        return Retrofit.Builder()
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .client(okHttpClient)
-            .addCallAdapterFactory(rxAdapter)
-            .baseUrl("https://www.ztm.waw.pl/")
-            .build().create(DifficultiesInterface::class.java)
-    }
-
+    
     @Singleton
     @Provides
     internal fun provideIconSettingsProvider(

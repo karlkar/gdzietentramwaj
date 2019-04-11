@@ -1,17 +1,17 @@
 package com.kksionek.gdzietentramwaj.map.dataSource
 
-import com.kksionek.gdzietentramwaj.map.dataSource.krakow.TtssInterfaceFactory
-import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.ZtmInterfaceFactory
+import com.kksionek.gdzietentramwaj.map.dataSource.krakow.TtssVehicleDataSourceFactory
+import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.ZtmVehicleDataSourceFactory
 import javax.inject.Inject
 
 class VehicleDataSourceFactory @Inject constructor(
-    private val ztmInterfaceFactory: ZtmInterfaceFactory,
-    private val ttssInterfaceFactory: TtssInterfaceFactory
+    private val ztmVehicleDataSourceFactory: ZtmVehicleDataSourceFactory,
+    private val ttssVehicleDataSourceFactory: TtssVehicleDataSourceFactory
 ) {
 
     fun create(city: Cities): VehicleDataSource =
         when (city) {
-            Cities.WARSAW -> ztmInterfaceFactory.create()
-            Cities.KRAKOW -> ttssInterfaceFactory.create()
+            Cities.WARSAW -> ztmVehicleDataSourceFactory.create()
+            Cities.KRAKOW -> ttssVehicleDataSourceFactory.create()
         }
 }
