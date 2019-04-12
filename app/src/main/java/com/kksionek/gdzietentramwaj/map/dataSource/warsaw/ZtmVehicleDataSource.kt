@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.repository.VehicleData
+import io.reactivex.Observable
 import io.reactivex.Single
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -11,19 +12,31 @@ class ZtmVehicleDataSource(
     private val ztmVehicleInterface: ZtmVehicleInterface
 ) : VehicleDataSource {
 
-    override fun buses(): Single<List<VehicleData>> =
-        ztmVehicleInterface.buses()
-            .filterOutOutdated()
-            .map { list ->
-                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
-            }
+    override fun vehicles(): Single<List<VehicleData>> =
+        Observable.mergeDelayError(
+            ztmVehicleInterface.buses()
+                .filterOutOutdated()
+                .flatMapObservable { Observable.fromIterable(it) },
+            ztmVehicleInterface.trams()
+                .filterOutOutdated()
+                .flatMapObservable { Observable.fromIterable(it) }
+        )
+            .map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
+            .toList()
 
-    override fun trams(): Single<List<VehicleData>> =
-        ztmVehicleInterface.trams()
-            .filterOutOutdated()
-            .map { list ->
-                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
-            }
+//    override fun buses(): Single<List<VehicleData>> =
+//        ztmVehicleInterface.buses()
+//            .filterOutOutdated()
+//            .map { list ->
+//                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
+//            }
+//
+//    override fun trams(): Single<List<VehicleData>> =
+//        ztmVehicleInterface.trams()
+//            .filterOutOutdated()
+//            .map { list ->
+//                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
+//            }
 
     private fun Single<ZtmVehicleResponse>.filterOutOutdated() =
         map { result ->
