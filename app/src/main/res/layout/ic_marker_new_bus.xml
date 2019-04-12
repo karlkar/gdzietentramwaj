@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/ic_new_bus">
+    android:background="@drawable/ic_new_bus"
+    android:minWidth="40dp">
 
     <!-- 10 sp as minimum -->
     <TextView
