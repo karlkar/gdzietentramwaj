@@ -29,20 +29,4 @@ class TtssVehicleDataSource(
 
         )
             .toList()
-
-//    override fun buses(): Single<List<VehicleData>> = ttssBusInterface
-//        .buses()
-//        .map { response ->
-//            response.vehicles
-//                .filter { !it.isDeleted }
-//                .map { it.toVehicleData(response.lastUpdate.toString()) }
-//        }
-//
-//    override fun trams(): Single<List<VehicleData>> = ttssTramInterface
-//        .trams()
-//        .map { response ->
-//            response.vehicles
-//                .filter { !it.isDeleted }
-//                .map { it.toVehicleData(response.lastUpdate.toString()) }
-//        }
 }

@@ -33,20 +33,6 @@ class ZtmVehicleDataSource(
             }
             .toList()
 
-//    override fun buses(): Single<List<VehicleData>> =
-//        ztmVehicleInterface.buses()
-//            .filterOutOutdated()
-//            .map { list ->
-//                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
-//            }
-//
-//    override fun trams(): Single<List<VehicleData>> =
-//        ztmVehicleInterface.trams()
-//            .filterOutOutdated()
-//            .map { list ->
-//                list.map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
-//            }
-
     private fun Single<ZtmVehicleResponse>.filterOutOutdated() =
         map { result ->
             val refDate = Calendar.getInstance()
