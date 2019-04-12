@@ -43,6 +43,7 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
 import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
 import com.kksionek.gdzietentramwaj.makeExhaustive
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showErrorToast
@@ -133,6 +134,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private val difficultiesObserver = Observer<UiState<List<DifficultiesEntity>>> {
+        if (!this::map.isInitialized) return@Observer
+        val offset = if (viewModel.difficulties.value != null) {
+            resources.getDimensionPixelOffset(R.dimen.map_zoom_offset)
+        } else {
+            0
+        }
+        map.setPadding(0, 0, 0, offset)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -190,6 +201,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel.tramData.observe(this, tramDataObserver)
         viewModel.lastLocation.observe(this, lastLocationObserver)
         viewModel.favoriteView.observe(this, favoriteModeObserver)
+        viewModel.difficulties.observe(this, difficultiesObserver)
 
         map_switch_type_imagebutton.setOnClickListener {
             viewModel.onSwitchMapTypeButtonClicked()
@@ -210,11 +222,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun setSwitchButtonMargin() {
         @DimenRes
-        val marginForMapSwitchButton: Int = if (this::map.isInitialized && map.isMyLocationEnabled) {
-            R.dimen.map_layer_margin_big
-        } else {
-            R.dimen.map_layer_margin_small
-        }
+        val marginForMapSwitchButton: Int =
+            if (this::map.isInitialized && map.isMyLocationEnabled) {
+                R.dimen.map_layer_margin_big
+            } else {
+                R.dimen.map_layer_margin_small
+            }
         map_switch_type_imagebutton.layoutParams =
             (map_switch_type_imagebutton.layoutParams as ViewGroup.MarginLayoutParams).apply {
                 topMargin = resources.getDimensionPixelOffset(marginForMapSwitchButton)
@@ -492,7 +505,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                 anchor(0.5f, 0.8f)
                             }
                         }
-                    ).apply { tag = FollowedTramData(tramMarker.id, title, snippet, tramMarker.finalPosition) }
+                    ).apply {
+                        tag = FollowedTramData(
+                            tramMarker.id,
+                            title,
+                            snippet,
+                            tramMarker.finalPosition
+                        )
+                    }
                 }
                 if (tramMarker.polyline == null) {
                     val newPoints = polylineGenerator.generatePolylinePoints(
