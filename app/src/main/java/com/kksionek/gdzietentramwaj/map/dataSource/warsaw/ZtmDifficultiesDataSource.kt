@@ -28,11 +28,11 @@ class ZtmDifficultiesDataSource(
                                     .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
                                     .toList()
                             }
-                            val period = matchResult.groupValues[3]
+//                            val period = matchResult.groupValues[3]
                             val msg = matchResult.groupValues[4]
                             val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
                                 .replace("&amp;", "&") + "&i=$id"
-                            DifficultiesEntity(iconList, period, msg, link)
+                            DifficultiesEntity(iconList, msg, link)
                         }
                         .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
                         .toList()
