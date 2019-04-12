@@ -28,7 +28,7 @@ class ZtmDifficultiesDataSource(
                                     .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
                                     .toList()
                             }
-//                            val period = matchResult.groupValues[3]
+                            val period = matchResult.groupValues[3]
                             val msg = matchResult.groupValues[4]
                             val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
                                 .replace("&amp;", "&") + "&i=$id"
@@ -42,7 +42,7 @@ class ZtmDifficultiesDataSource(
     companion object {
 
         private val pattern =
-            "<tr.*?id=\"komunikat_(.*?)_.*?(<img src=\".*?\".*?)okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
+            "<tr.*?id=\"komunikat_(.*?)_.*?(<img src=\".*?\".*?)?okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
         private val singleIconPattern = "<img src=\"(.*?)\"".toRegex()
     }
 }
