@@ -31,18 +31,22 @@ data class TtssVehicle(
 //    ścieżka?
 //    @SerializedName("path")
 //    val path: List<Path>
-)
+) {
+    val line
+        get() = name.split(" ")[0]
 
-fun TtssVehicle.line() = name.split(" ")[0]
-fun TtssVehicle.latLng() = LatLng(latitude.toDouble() / 3600000.0, longitude.toDouble() / 3600000.0)
-fun TtssVehicle.isTram() = name.length < 3
+    val latLng
+        get() = LatLng(latitude.toDouble() / 3600000.0, longitude.toDouble() / 3600000.0)
+
+    fun isTram() = line.length < 3
+}
 
 fun TtssVehicle.toVehicleData(time: String) =
     VehicleData(
         id,
         time,
-        latLng(),
-        line(),
+        latLng,
+        line,
         isTram(),
         null
     )
