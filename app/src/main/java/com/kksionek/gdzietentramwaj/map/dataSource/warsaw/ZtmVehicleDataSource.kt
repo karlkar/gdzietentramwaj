@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
-import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 import io.reactivex.Observable
 import io.reactivex.Single
 import java.text.SimpleDateFormat
@@ -21,7 +21,16 @@ class ZtmVehicleDataSource(
                 .filterOutOutdated()
                 .flatMapObservable { Observable.fromIterable(it) }
         )
-            .map { VehicleData(it.id, it.time, it.latLng, it.firstLine, it.brigade) }
+            .map {
+                VehicleData(
+                    it.id,
+                    it.time,
+                    it.latLng,
+                    it.firstLine,
+                    it.isTram(),
+                    it.brigade
+                )
+            }
             .toList()
 
 //    override fun buses(): Single<List<VehicleData>> =

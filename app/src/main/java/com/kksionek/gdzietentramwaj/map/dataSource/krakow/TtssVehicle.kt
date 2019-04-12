@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
-import com.kksionek.gdzietentramwaj.map.repository.VehicleData
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 
 data class TtssVehicle(
     @SerializedName("isDeleted")
@@ -35,11 +35,14 @@ data class TtssVehicle(
 
 fun TtssVehicle.line() = name.split(" ")[0]
 fun TtssVehicle.latLng() = LatLng(latitude.toDouble() / 3600000.0, longitude.toDouble() / 3600000.0)
+fun TtssVehicle.isTram() = name.length < 3 //TODO Check it
 
-fun TtssVehicle.toVehicleData(time: String) = VehicleData(
-    id,
-    time,
-    latLng(),
-    line(),
-    null
-)
+fun TtssVehicle.toVehicleData(time: String) =
+    VehicleData(
+        id,
+        time,
+        latLng(),
+        line(),
+        isTram(),
+        null
+    )

@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
-import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 import io.reactivex.Single
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -13,11 +13,13 @@ class MpkVehicleDataSource(
 
     override fun vehicles(): Single<List<VehicleData>> =
         mpkVehicleInterface.buses()
-            .map {
+            .map { mpkVehicle ->
                 val refDate = Calendar.getInstance()
                     .apply { add(Calendar.MINUTE, -2) }
                     .let { dateFormat.format(it.time) }
-                it.result.records.filter { refDate <= it.timestamp }
+                mpkVehicle.result.records
+                    .filter { it.line != "None" }
+                    .filter { refDate <= it.timestamp }
             }
             .map { list ->
                 list.map {
@@ -26,6 +28,7 @@ class MpkVehicleDataSource(
                         it.timestamp,
                         it.latLng,
                         it.line,
+                        it.isTram(),
                         it.brigade
                     )
                 }

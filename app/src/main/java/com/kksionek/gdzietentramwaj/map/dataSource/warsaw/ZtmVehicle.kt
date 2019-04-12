@@ -20,4 +20,6 @@ data class ZtmVehicle(
 
     val latLng: LatLng
         get() = LatLng(lat, lng)
+
+    fun isTram(): Boolean = firstLine.length < 3
 }

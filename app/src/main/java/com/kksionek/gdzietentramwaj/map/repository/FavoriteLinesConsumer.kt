@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.map.repository
 
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import io.reactivex.functions.Consumer
 import javax.inject.Inject
 

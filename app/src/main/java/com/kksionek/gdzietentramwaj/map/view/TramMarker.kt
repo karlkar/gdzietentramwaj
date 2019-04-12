@@ -16,8 +16,8 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
-import com.kksionek.gdzietentramwaj.map.repository.VehicleData
 
 
 class TramMarker(tramData: VehicleData) {
@@ -30,6 +30,8 @@ class TramMarker(tramData: VehicleData) {
     val id = tramData.id
 
     val brigade = tramData.brigade
+
+    val isTram = tramData.isTram
 
     private var _marker: Marker? = null
     var marker: Marker?
@@ -80,12 +82,14 @@ class TramMarker(tramData: VehicleData) {
 
         fun getBitmap(
             line: String,
+            isTram: Boolean,
             context: Context,
             iconSettingsProvider: IconSettingsProvider
         ): BitmapDescriptor {
             val descriptor = bitmapCache[line]
             return if (descriptor == null) {
-                val bitmap = createBitmap(context, line, iconSettingsProvider.isOldIconSetEnabled())
+                val bitmap =
+                    createBitmap(context, line, isTram, iconSettingsProvider.isOldIconSetEnabled())
                 val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
                 bitmapCache.put(line, bitmapDescriptor)
                 bitmapDescriptor
@@ -97,10 +101,10 @@ class TramMarker(tramData: VehicleData) {
         private fun createBitmap(
             context: Context,
             line: String,
+            isTram: Boolean,
             isOldIconEnabled: Boolean
         ): Bitmap? {
             val textColor = getTextColor(line)
-            val isTram = checkIfIsTram(line)
             val layoutRes = getTramIcon(isOldIconEnabled, isTram)
             val view = LayoutInflater.from(context).inflate(layoutRes, null)
 
@@ -137,8 +141,6 @@ class TramMarker(tramData: VehicleData) {
             } else {
                 if (isTram) R.layout.ic_marker_new_tram else R.layout.ic_marker_new_bus
             }
-
-        private fun checkIfIsTram(line: String) = line.length < 3
 
         fun clearCache() {
             bitmapCache.evictAll()

@@ -312,7 +312,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             moveCamera(
                 CameraUpdateFactory.newLatLngZoom(cameraStartPosition, cameraStartZoom)
             )
-            setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
+            if (viewModel.difficulties.value != null) {
+                setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
+            }
             activity?.let {
                 setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
@@ -481,6 +483,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             icon(
                                 TramMarker.getBitmap(
                                     tramMarker.tramLine,
+                                    tramMarker.isTram,
                                     context,
                                     viewModel.iconSettingsProvider
                                 )

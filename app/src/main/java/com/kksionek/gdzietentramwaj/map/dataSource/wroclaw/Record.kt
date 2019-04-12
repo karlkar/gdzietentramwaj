@@ -24,4 +24,6 @@ data class Record(
 
     val latLng: LatLng
         get() = LatLng(latitude, longitude)
+
+    fun isTram(): Boolean = line.length < 3 && !(line.length == 1 && line.matches("[A-Z]".toRegex()))
 }
