@@ -50,7 +50,8 @@ class AppModule(private val application: TramApplication) {
             .addMigrations(
                 MyDatabase.MIGRATION_1_2,
                 MyDatabase.MIGRATION_2_3,
-                MyDatabase.MIGRATION_3_4
+                MyDatabase.MIGRATION_3_4,
+                MyDatabase.MIGRATION_4_5
             )
             .build()
     }

@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [FavoriteTram::class], version = 4)
+@Database(entities = [FavoriteTram::class], version = 5)
 abstract class MyDatabase : RoomDatabase() {
 
     abstract fun tramDao(): TramDao
@@ -33,6 +33,15 @@ abstract class MyDatabase : RoomDatabase() {
             override fun migrate(supportSQLiteDatabase: SupportSQLiteDatabase) {
                 supportSQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `tmp` (`isFavorite` INTEGER NOT NULL, `lineId` TEXT NOT NULL, PRIMARY KEY(`lineId`))")
                 supportSQLiteDatabase.execSQL("INSERT INTO `tmp` (`lineId`, `isFavorite`) SELECT `mLineId`, `mFavorite` FROM `FavoriteTram`")
+                supportSQLiteDatabase.execSQL("DROP TABLE `FavoriteTram`")
+                supportSQLiteDatabase.execSQL("ALTER TABLE `tmp` RENAME TO `FavoriteTram`")
+            }
+        }
+
+        val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+            override fun migrate(supportSQLiteDatabase: SupportSQLiteDatabase) {
+                supportSQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `tmp` (`isFavorite` INTEGER NOT NULL, `lineId` TEXT NOT NULL, `cityId` INTEGER NOT NULL, PRIMARY KEY(`lineId`))")
+                supportSQLiteDatabase.execSQL("INSERT INTO `tmp` (`lineId`, `isFavorite`, `cityId`) SELECT `lineId`, `isFavorite`, 1 FROM `FavoriteTram`")
                 supportSQLiteDatabase.execSQL("DROP TABLE `FavoriteTram`")
                 supportSQLiteDatabase.execSQL("ALTER TABLE `tmp` RENAME TO `FavoriteTram`")
             }

@@ -73,7 +73,7 @@ class DifficultiesBottomSheet(
         }
 
         imagebutton_difficulties_refresh_button.setOnClickListener {
-            viewModel.forceReloadDifficulties()
+            viewModel.subscribeToDifficulties()
         }
 
         viewModel.difficulties.observe(lifecycleOwner, difficultiesObserver)

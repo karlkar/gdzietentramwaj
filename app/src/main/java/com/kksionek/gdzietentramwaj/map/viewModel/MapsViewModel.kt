@@ -89,6 +89,8 @@ class MapsViewModel @Inject constructor(
     private val compositeDisposable = CompositeDisposable()
     private var tramFetchingDisposable: Disposable? = null
     private var difficultiesDisposable: Disposable? = null
+    private var favoriteDisposable: Disposable? = null
+    // TODO: Group disposables related to city change
 
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
@@ -110,12 +112,14 @@ class MapsViewModel @Inject constructor(
             mapInitialZoom = defaultZoom
         }
 
-        observeFavoriteTrams()
-        forceReloadDifficulties()
+        subscribeToFavoriteTrams()
+        subscribeToDifficulties()
     }
 
-    private fun observeFavoriteTrams() {
-        compositeDisposable.add(tramRepository.favoriteTrams
+    private fun subscribeToFavoriteTrams() {
+        val city = selectedCity
+        favoriteDisposable?.dispose()
+        favoriteDisposable = tramRepository.getFavoriteTrams(city)
             .subscribeOn(Schedulers.io())
             .onErrorResumeNext { throwable: Throwable ->
                 Log.e(TAG, "Failed getting all the favorites from the database", throwable)
@@ -130,11 +134,10 @@ class MapsViewModel @Inject constructor(
                     favoriteTrams = it ?: emptyList()
                 }
             }
-        )
     }
 
     // This one has to be called when the map is ready to use
-    fun forceReloadLastLocation() {
+    fun subscribeToLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
             .onErrorReturnItem(selectedCity.latLng.toLocation())
             .subscribe { location ->
@@ -145,7 +148,7 @@ class MapsViewModel @Inject constructor(
             })
     }
 
-    private fun startFetchingTrams() {
+    private fun subscribeToVehicles() {
         tramFetchingDisposable?.dispose()
         tramFetchingDisposable = tramRepository.dataStream(selectedCity)
             .subscribeOn(Schedulers.io())
@@ -267,7 +270,7 @@ class MapsViewModel @Inject constructor(
         tramRepository.forceReload()
     }
 
-    fun forceReloadDifficulties() {
+    fun subscribeToDifficulties() {
         val city = selectedCity
         difficultiesDisposable?.dispose()
         if (!difficultiesRepository.supportsDifficulties(city)) {
@@ -304,16 +307,21 @@ class MapsViewModel @Inject constructor(
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
     fun onResume() {
-        forceReloadDifficulties()
-        startFetchingTrams()
+        subscribeToFavoriteTrams()
+        subscribeToDifficulties()
+        subscribeToVehicles()
     }
 
     fun onPause() {
+        favoriteDisposable?.dispose()
+        difficultiesDisposable?.dispose()
         stopFetchingTrams()
     }
 
     override fun onCleared() {
         stopFetchingTrams()
+        favoriteDisposable?.dispose()
+        difficultiesDisposable?.dispose()
         compositeDisposable.clear()
         super.onCleared()
     }

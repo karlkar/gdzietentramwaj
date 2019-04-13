@@ -1,12 +1,15 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
+import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import io.reactivex.functions.Consumer
-import javax.inject.Inject
 
-class FavoriteLinesConsumer @Inject constructor(private val mTramDao: TramDao) :
+class FavoriteLinesConsumer(
+    private val tramDao: TramDao,
+    private val selectedCity: Cities
+) :
     Consumer<List<VehicleData>> {
     private val savedLines = mutableSetOf<String>()
 
@@ -17,7 +20,7 @@ class FavoriteLinesConsumer @Inject constructor(private val mTramDao: TramDao) :
             .toSet()
             .filter { it !in savedLines }
             .forEach {
-                mTramDao.save(FavoriteTram(it, false))
+                tramDao.save(FavoriteTram(it, false, selectedCity.id))
                 savedLines.add(it)
             }
     }

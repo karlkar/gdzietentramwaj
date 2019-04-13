@@ -391,7 +391,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }.makeExhaustive
         })
 
-        viewModel.forceReloadLastLocation()
+        viewModel.subscribeToLastLocation()
     }
 
     private fun showFollowedView(marker: FollowedTramData) {
@@ -440,7 +440,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         grantResults: IntArray
     ) {
         if (this::map.isInitialized) {
-            viewModel.forceReloadLastLocation()
+            viewModel.subscribeToLastLocation()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }

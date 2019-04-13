@@ -19,18 +19,19 @@ private const val MAX_RETRIES = 3
 
 class TramRepository @Inject constructor(
     private val tramDao: TramDao,
-    private val vehicleDataSourceFactory: VehicleDataSourceFactory,
-    private val favoriteRepositoryAdder: FavoriteLinesConsumer
+    private val vehicleDataSourceFactory: VehicleDataSourceFactory
 ) {
     private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
     private var selectedCity: Cities = Cities.WARSAW
     private lateinit var vehicleDataSource: VehicleDataSource
+    private lateinit var favoriteRepositoryAdder: FavoriteLinesConsumer
 
     fun dataStream(city: Cities): Flowable<NetworkOperationResult<List<VehicleData>>> {
         if (selectedCity != city || !this::vehicleDataSource.isInitialized) {
             selectedCity = city
             vehicleDataSource = vehicleDataSourceFactory.create(selectedCity)
+            favoriteRepositoryAdder = FavoriteLinesConsumer(tramDao, selectedCity)
         }
         return dataTrigger.toFlowable(BackpressureStrategy.DROP)
             .startWith(Unit)
@@ -61,8 +62,7 @@ class TramRepository @Inject constructor(
             }
     }
 
-    val favoriteTrams: Flowable<List<String>>
-        get() = tramDao.getFavoriteTrams()
+    fun getFavoriteTrams(city: Cities): Flowable<List<String>> = tramDao.getFavoriteTrams(city.id)
 
     fun forceReload() {
         dataTrigger.onNext(Unit)
