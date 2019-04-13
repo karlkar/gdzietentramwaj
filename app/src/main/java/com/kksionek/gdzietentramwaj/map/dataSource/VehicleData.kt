@@ -7,5 +7,6 @@ data class VehicleData(
     val position: LatLng,
     val line: String,
     val isTram: Boolean,
-    val brigade: String?
+    val brigade: String? = null,
+    val prevPosition: LatLng? = null
 )

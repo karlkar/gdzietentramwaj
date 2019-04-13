@@ -19,7 +19,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 
-
 class TramMarker(tramData: VehicleData) {
 
     val tramLine: String = tramData.line
@@ -49,8 +48,8 @@ class TramMarker(tramData: VehicleData) {
             _polyline = polyline
         }
 
-    private var _prevPosition: LatLng? = null
-    val prevPosition: LatLng?
+    private var _prevPosition: LatLng? = tramData.prevPosition
+    val prevPosition: LatLng
         get() = _prevPosition ?: finalPosition
 
     @UiThread

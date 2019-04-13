@@ -25,7 +25,7 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
             for (tramMarker in immutableList) {
                 marker = tramMarker.marker ?: continue
                 polyline = tramMarker.polyline ?: continue
-                prevPosition = tramMarker.prevPosition ?: continue
+                prevPosition = tramMarker.prevPosition
                 if (prevPosition == tramMarker.finalPosition) {
                     continue
                 }

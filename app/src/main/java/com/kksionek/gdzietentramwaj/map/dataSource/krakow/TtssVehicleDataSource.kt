@@ -32,8 +32,7 @@ class TtssVehicleDataSource(
                             it.id,
                             it.latLng,
                             it.line,
-                            it.isTram(),
-                            null
+                            it.isTram()
                         )
                     }
             }
