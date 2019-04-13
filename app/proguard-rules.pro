@@ -30,5 +30,5 @@
 ###################
 
 ###### ShareActionProvider
--keep class android.support.v7.widget.ShareActionProvider { *; }
+-keep class androidx.appcompat.widget.ShareActionProvider { *; }
 ###################
