@@ -26,6 +26,9 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
                 marker = tramMarker.marker ?: continue
                 polyline = tramMarker.polyline ?: continue
                 prevPosition = tramMarker.prevPosition ?: continue
+                if (prevPosition == tramMarker.finalPosition) {
+                    continue
+                }
                 intermediatePos = SphericalUtil.interpolate(
                     prevPosition,
                     tramMarker.finalPosition,
