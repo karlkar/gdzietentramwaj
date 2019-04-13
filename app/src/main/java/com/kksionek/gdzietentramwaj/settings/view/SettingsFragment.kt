@@ -138,13 +138,14 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             }
         }
 
+        val sortedCities = Cities.values().sortedBy { it.name }
         settings_city_spinner.apply {
             adapter = ArrayAdapter(
                 view.context,
                 android.R.layout.simple_spinner_dropdown_item,
-                Cities.values().map { getString(it.humanReadableName) }
+                sortedCities.map { getString(it.humanReadableName) }
             )
-            setSelection(Cities.values().indexOf(viewModel.city))
+            setSelection(sortedCities.indexOf(viewModel.city))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                 }
@@ -155,7 +156,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                     position: Int,
                     id: Long
                 ) {
-                    viewModel.city = Cities.values()[position]
+                    viewModel.city = sortedCities[position]
                 }
             }
         }
