@@ -164,7 +164,7 @@ class MapsViewModel @Inject constructor(
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
         allTrams = operationResult.data
-            .map { allKnownTrams[it.id]?.apply { updatePosition(it.latLng) } ?: TramMarker(it) }
+            .map { allKnownTrams[it.id]?.apply { updatePosition(it.position) } ?: TramMarker(it) }
         allKnownTrams = allTrams.associateBy { it.id }
 
         showOrZoom(animate = true, newData = true)

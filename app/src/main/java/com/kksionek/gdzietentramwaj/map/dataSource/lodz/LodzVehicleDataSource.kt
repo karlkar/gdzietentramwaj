@@ -22,9 +22,9 @@ class LodzVehicleDataSource(
                     } else {
                         VehicleData(
                             id = items[0],
-                            latLng = LatLng(items[10].toDouble(), items[9].toDouble()),
+                            position = LatLng(items[10].toDouble(), items[9].toDouble()),
                             // prevPosition = LatLng(items[12].toDouble(), items[11].toDouble)
-                            firstLine = items[2].trim(),
+                            line = items[2].trim(),
                             isTram = items[23].trim() == "T",
                             brigade = items[3]
                         )

@@ -4,8 +4,8 @@ import com.google.android.gms.maps.model.LatLng
 
 data class VehicleData(
     val id: String,
-    val latLng: LatLng,
-    val firstLine: String,
+    val position: LatLng,
+    val line: String,
     val isTram: Boolean,
     val brigade: String?
 )

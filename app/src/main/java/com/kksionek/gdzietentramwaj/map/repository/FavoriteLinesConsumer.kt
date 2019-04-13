@@ -13,7 +13,7 @@ class FavoriteLinesConsumer @Inject constructor(private val mTramDao: TramDao) :
     @Throws(Exception::class)
     override fun accept(tramDataMap: List<VehicleData>) {
         tramDataMap
-            .map { it.firstLine }
+            .map { it.line }
             .toSet()
             .filter { it !in savedLines }
             .forEach {

@@ -22,9 +22,9 @@ import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 
 class TramMarker(tramData: VehicleData) {
 
-    val tramLine: String = tramData.firstLine
+    val tramLine: String = tramData.line
 
-    var finalPosition: LatLng = tramData.latLng
+    var finalPosition: LatLng = tramData.position
         private set
 
     val id = tramData.id
