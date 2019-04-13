@@ -22,7 +22,6 @@ class LodzVehicleDataSource(
                     } else {
                         VehicleData(
                             id = items[0],
-                            time = "",
                             latLng = LatLng(items[10].toDouble(), items[9].toDouble()),
                             // prevPosition = LatLng(items[12].toDouble(), items[11].toDouble)
                             firstLine = items[2].trim(),

@@ -24,7 +24,6 @@ class ZtmVehicleDataSource(
             .map {
                 VehicleData(
                     it.id,
-                    it.time,
                     it.latLng,
                     it.firstLine,
                     it.isTram(),

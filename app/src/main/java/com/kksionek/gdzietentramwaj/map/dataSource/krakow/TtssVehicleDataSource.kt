@@ -4,6 +4,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.SingleTransformer
 
 class TtssVehicleDataSource(
     private val ttssTramInterface: TtssTramInterface,
@@ -13,20 +14,28 @@ class TtssVehicleDataSource(
     override fun vehicles(): Single<List<VehicleData>> =
         Observable.mergeDelayError(
             ttssBusInterface.buses()
-                .map { response ->
-                    response.vehicles
-                        .filter { !it.isDeleted }
-                        .map { it.toVehicleData(response.lastUpdate.toString()) }
-                }
+                .compose(transformer)
                 .flatMapObservable { Observable.fromIterable(it) },
             ttssTramInterface.trams()
-                .map { response ->
-                    response.vehicles
-                        .filter { !it.isDeleted }
-                        .map { it.toVehicleData(response.lastUpdate.toString()) }
-                }
+                .compose(transformer)
                 .flatMapObservable { Observable.fromIterable(it) }
 
-        )
-            .toList()
+        ).toList()
+
+    private val transformer: SingleTransformer<TtssVehicleResponse, List<VehicleData>> =
+        SingleTransformer { upstream ->
+            upstream.map { response ->
+                response.vehicles
+                    .filter { !it.isDeleted }
+                    .map {
+                        VehicleData(
+                            it.id,
+                            it.latLng,
+                            it.line,
+                            it.isTram(),
+                            null
+                        )
+                    }
+            }
+        }
 }

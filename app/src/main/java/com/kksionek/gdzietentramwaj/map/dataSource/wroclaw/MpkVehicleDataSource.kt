@@ -25,7 +25,6 @@ class MpkVehicleDataSource(
                 list.map {
                     VehicleData(
                         it.id.toString(),
-                        it.timestamp,
                         it.latLng,
                         it.line,
                         it.isTram(),
