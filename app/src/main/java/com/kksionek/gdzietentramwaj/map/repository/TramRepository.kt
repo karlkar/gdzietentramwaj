@@ -9,6 +9,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSourceFactory
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -62,7 +63,12 @@ class TramRepository @Inject constructor(
             }
     }
 
-    fun getFavoriteTrams(city: Cities): Flowable<List<String>> = tramDao.getFavoriteTrams(city.id)
+    fun getFavoriteVehicleLines(city: Cities): Single<List<String>> =
+        tramDao.getAllVehicles(city.id)
+            .distinctUntilChanged()
+            .map { list -> list.filter { it.isFavorite } }
+            .map { list -> list.map { it.lineId } }
+            .first(emptyList())
 
     fun forceReload() {
         dataTrigger.onNext(Unit)

@@ -9,7 +9,6 @@ import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteTramRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -29,6 +28,7 @@ class FavoriteLinesViewModel @Inject constructor(
 
     private val selectedCity: Cities = mapSettingsProvider.getCity()
 
+    // TODO view is not notified about success nor failure
     init {
         compositeDisposable.add(favoriteTramRepository.getAllTrams(selectedCity)
             .subscribeOn(Schedulers.io())
@@ -46,9 +46,7 @@ class FavoriteLinesViewModel @Inject constructor(
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
         compositeDisposable.add(
-            Completable.fromCallable {
-                favoriteTramRepository.setTramFavorite(selectedCity, lineId, favorite)
-            }
+            favoriteTramRepository.setTramFavorite(selectedCity, lineId, favorite)
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     {

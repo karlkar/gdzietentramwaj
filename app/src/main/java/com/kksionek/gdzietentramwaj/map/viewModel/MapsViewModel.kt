@@ -29,11 +29,11 @@ import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
 import com.kksionek.gdzietentramwaj.toLatLng
-import com.kksionek.gdzietentramwaj.toLocation
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -87,10 +87,6 @@ class MapsViewModel @Inject constructor(
     }
 
     private val compositeDisposable = CompositeDisposable()
-    private var tramFetchingDisposable: Disposable? = null
-    private var difficultiesDisposable: Disposable? = null
-    private var favoriteDisposable: Disposable? = null
-    // TODO: Group disposables related to city change
 
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
@@ -111,46 +107,44 @@ class MapsViewModel @Inject constructor(
             mapInitialPosition = defaultLocation
             mapInitialZoom = defaultZoom
         }
-
-        subscribeToFavoriteTrams()
-        subscribeToDifficulties()
     }
 
     private fun subscribeToFavoriteTrams() {
         val city = selectedCity
-        favoriteDisposable?.dispose()
-        favoriteDisposable = tramRepository.getFavoriteTrams(city)
+        compositeDisposable.add(tramRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
-            .onErrorResumeNext { throwable: Throwable ->
+            .onErrorReturn { throwable: Throwable ->
                 Log.e(TAG, "Failed getting all the favorites from the database", throwable)
                 crashReportingService.reportCrash(
                     throwable,
                     "Failed getting the favorite data from database"
                 )
-                Flowable.empty<List<String>>()
+                emptyList()
             }
-            .subscribe {
-                favoriteLock.write {
-                    favoriteTrams = it ?: emptyList()
-                }
-            }
+            .subscribe(
+                Consumer {
+                    favoriteLock.write {
+                        favoriteTrams = it
+                    }
+                })
+        )
     }
 
     // This one has to be called when the map is ready to use
     fun subscribeToLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
-            .onErrorReturnItem(selectedCity.latLng.toLocation())
+            .toObservable()
+            .onErrorResumeNext { it: Throwable -> Observable.empty() }
             .subscribe { location ->
                 if (!mapSettingsManager.isStartLocationEnabled()) {
                     _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
                 }
                 _lastLocation.postValue(location)
             })
-    }
+    } // TODO Move map to center of city when city changed and user's location access is not permitted
 
     private fun subscribeToVehicles() {
-        tramFetchingDisposable?.dispose()
-        tramFetchingDisposable = tramRepository.dataStream(selectedCity)
+        compositeDisposable.add(tramRepository.dataStream(selectedCity)
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -162,7 +156,7 @@ class MapsViewModel @Inject constructor(
                     is NetworkOperationResult.InProgress ->
                         _tramData.postValue(UiState.InProgress())
                 }.makeExhaustive
-            }
+            })
     }
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
@@ -255,10 +249,6 @@ class MapsViewModel @Inject constructor(
         !(favoriteView.value ?: false) || line in favoriteTrams
     }
 
-    private fun stopFetchingTrams() {
-        tramFetchingDisposable?.dispose()
-    }
-
     fun toggleFavorite() {
         val favoriteViewOn = !(favoriteView.value ?: return)
         mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
@@ -272,12 +262,11 @@ class MapsViewModel @Inject constructor(
 
     fun subscribeToDifficulties() {
         val city = selectedCity
-        difficultiesDisposable?.dispose()
         if (!difficultiesRepository.supportsDifficulties(city)) {
             _difficulties.postValue(null)
             return
         }
-        difficultiesDisposable = difficultiesRepository.getDifficulties(city)
+        compositeDisposable.add(difficultiesRepository.getDifficulties(city)
             .map { result ->
                 when (result) {
                     is NetworkOperationResult.Success -> UiState.Success(result.data)
@@ -294,7 +283,7 @@ class MapsViewModel @Inject constructor(
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
             }
-            .subscribe { _difficulties.postValue(it) }
+            .subscribe { _difficulties.postValue(it) })
     }
 
     fun onSwitchMapTypeButtonClicked() {
@@ -313,15 +302,10 @@ class MapsViewModel @Inject constructor(
     }
 
     fun onPause() {
-        favoriteDisposable?.dispose()
-        difficultiesDisposable?.dispose()
-        stopFetchingTrams()
+        compositeDisposable.clear()
     }
 
     override fun onCleared() {
-        stopFetchingTrams()
-        favoriteDisposable?.dispose()
-        difficultiesDisposable?.dispose()
         compositeDisposable.clear()
         super.onCleared()
     }

@@ -10,16 +10,13 @@ import io.reactivex.Flowable
 interface TramDao {
 
     @Query("SELECT * FROM favoriteTram WHERE cityId = :cityId")
-    fun getAllFavTrams(cityId: Int): Flowable<List<FavoriteTram>>
-
-    @Query("SELECT lineId FROM favoriteTram WHERE isFavorite = 1 AND cityId = :cityId")
-    fun getFavoriteTrams(cityId: Int): Flowable<List<String>>
+    fun getAllVehicles(cityId: Int): Flowable<List<FavoriteTram>>
 
     @Insert(onConflict = IGNORE)
     fun save(tramData: FavoriteTram)
 
     @Insert(onConflict = IGNORE)
-    fun save(tramDataList: List<FavoriteTram>)
+    fun save(vehicleDataList: List<FavoriteTram>)
 
     @Query("UPDATE favoriteTram SET isFavorite = :favorite WHERE lineId = :lineId AND cityId = :cityId")
     fun setFavorite(cityId: Int, lineId: String, favorite: Boolean)
