@@ -5,5 +5,6 @@
         <domain includeSubdomains="true">www.ttss.krakow.pl</domain>
         <domain includeSubdomains="true">91.223.13.70</domain>
         <domain includeSubdomains="true">rozklady.lodz.pl</domain>
+        <domain includeSubdomains="true">mpk.wroc.pl</domain>
     </domain-config>
 </network-security-config>
