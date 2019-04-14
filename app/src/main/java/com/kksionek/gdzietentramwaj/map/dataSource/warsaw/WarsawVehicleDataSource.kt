@@ -8,16 +8,16 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class ZtmVehicleDataSource(
-    private val ztmVehicleInterface: ZtmVehicleInterface
+class WarsawVehicleDataSource(
+    private val warsawVehicleInterface: WarsawVehicleInterface
 ) : VehicleDataSource {
 
     override fun vehicles(): Single<List<VehicleData>> =
         Observable.mergeDelayError(
-            ztmVehicleInterface.buses()
+            warsawVehicleInterface.buses()
                 .filterOutOutdated()
                 .flatMapObservable { Observable.fromIterable(it) },
-            ztmVehicleInterface.trams()
+            warsawVehicleInterface.trams()
                 .filterOutOutdated()
                 .flatMapObservable { Observable.fromIterable(it) }
         )
@@ -32,7 +32,7 @@ class ZtmVehicleDataSource(
             }
             .toList()
 
-    private fun Single<ZtmVehicleResponse>.filterOutOutdated() =
+    private fun Single<WarsawVehicleResponse>.filterOutOutdated() =
         map { result ->
             val refDate = Calendar.getInstance()
                 .apply { add(Calendar.MINUTE, -2) }

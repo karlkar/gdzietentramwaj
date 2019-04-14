@@ -3,7 +3,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 
-data class ZtmVehicle(
+data class WarsawVehicle(
     @SerializedName("Time")
     val time: String,
     @SerializedName("Lat")

@@ -6,14 +6,14 @@ import javax.inject.Inject
 
 private const val BASE_URL = "https://www.ztm.waw.pl/"
 
-class ZtmDifficultiesDataSourceFactory @Inject constructor(
+class WarsawDifficultiesDataSourceFactory @Inject constructor(
     private val retrofitBuilder: Retrofit.Builder
 ) {
     fun create(): DifficultiesDataSource {
         val ztmDifficultiesInterface = retrofitBuilder
             .baseUrl(BASE_URL)
             .build()
-            .create(ZtmDifficultiesInterface::class.java)
-        return ZtmDifficultiesDataSource(ztmDifficultiesInterface)
+            .create(WarsawDifficultiesInterface::class.java)
+        return WarsawDifficultiesDataSource(ztmDifficultiesInterface)
     }
 }

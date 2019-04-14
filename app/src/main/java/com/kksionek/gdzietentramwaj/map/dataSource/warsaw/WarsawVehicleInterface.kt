@@ -10,13 +10,13 @@ const val TYPE_TRAM = 2
 const val APIKEY = "***REMOVED***"
 
 // https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=f2e5503e-927d-4ad3-9500-4ab9e55deb59&apikey=***REMOVED***&type=2
-interface ZtmVehicleInterface {
+interface WarsawVehicleInterface {
 
     @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=$ID&apikey=$APIKEY&type=$TYPE_BUS")
-    fun buses(): Single<ZtmVehicleResponse>
+    fun buses(): Single<WarsawVehicleResponse>
 
     @Headers("Cache-Control: no-cache")
     @GET("/api/action/busestrams_get/?resource_id=$ID&apikey=$APIKEY&type=$TYPE_TRAM")
-    fun trams(): Single<ZtmVehicleResponse>
+    fun trams(): Single<WarsawVehicleResponse>
 }

@@ -5,14 +5,14 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
-class ZtmDifficultiesDataSource(
-    private val ztmDifficultiesInterface: ZtmDifficultiesInterface
+class WarsawDifficultiesDataSource(
+    private val warsawDifficultiesInterface: WarsawDifficultiesInterface
 ) : DifficultiesDataSource {
 
     override fun isAvailable(): Boolean = true
 
     override fun getDifficulties(): Single<List<DifficultiesEntity>> =
-        ztmDifficultiesInterface.getDifficulties()
+        warsawDifficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
                 if (result.isEmpty()) {
