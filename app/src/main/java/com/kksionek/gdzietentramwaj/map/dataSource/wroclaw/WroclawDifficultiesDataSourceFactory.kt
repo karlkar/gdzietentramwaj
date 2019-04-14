@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 private const val BASE_URL = "http://mpk.wroc.pl"
 
-class MpkDifficultiesDataSourceFactory @Inject constructor(
+class WroclawDifficultiesDataSourceFactory @Inject constructor(
     private val retrofitBuilder: Retrofit.Builder,
     private val crashReportingService: CrashReportingService
 ) {
@@ -16,7 +16,7 @@ class MpkDifficultiesDataSourceFactory @Inject constructor(
         val mpkDifficultiesInterface = retrofitBuilder
             .baseUrl(BASE_URL)
             .build()
-            .create(MpkDifficultiesInterface::class.java)
-        return MpkDifficultiesDataSource(mpkDifficultiesInterface, crashReportingService)
+            .create(WroclawDifficultiesInterface::class.java)
+        return WroclawDifficultiesDataSource(mpkDifficultiesInterface, crashReportingService)
     }
 }

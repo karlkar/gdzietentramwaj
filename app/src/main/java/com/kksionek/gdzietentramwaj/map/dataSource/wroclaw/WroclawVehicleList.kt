@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
 import com.google.gson.annotations.SerializedName
 
-data class MpkVehicleList(
+data class WroclawVehicleList(
 //    @SerializedName("resource_id")
 //    val resourceId: String,
 //    @SerializedName("fields")

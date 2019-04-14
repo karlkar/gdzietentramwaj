@@ -10,8 +10,8 @@ import java.util.Calendar.MILLISECOND
 import java.util.Calendar.MINUTE
 import java.util.Calendar.SECOND
 
-class MpkDifficultiesDataSource(
-    private val mpkDifficultiesInterface: MpkDifficultiesInterface,
+class WroclawDifficultiesDataSource(
+    private val wroclawDifficultiesInterface: WroclawDifficultiesInterface,
     private val crashReportingService: CrashReportingService
 ) : DifficultiesDataSource {
 
@@ -25,7 +25,7 @@ class MpkDifficultiesDataSource(
             set(MILLISECOND, 0)
         }
         val today = cal.time
-        return mpkDifficultiesInterface.getDifficulties()
+        return wroclawDifficultiesInterface.getDifficulties()
             .map { result ->
                 pattern.findAll(result)
                     .map { matchResult ->

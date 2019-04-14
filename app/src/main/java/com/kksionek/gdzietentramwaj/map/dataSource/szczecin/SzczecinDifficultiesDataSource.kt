@@ -6,7 +6,7 @@ import io.reactivex.Single
 
 class SzczecinDifficultiesDataSource: DifficultiesDataSource {
 
-    override fun isAvailable(): Boolean = false // TODO Check if it can be implemented
+    override fun isAvailable(): Boolean = false
 
     override fun getDifficulties(): Single<List<DifficultiesEntity>> = Single.never()
 }

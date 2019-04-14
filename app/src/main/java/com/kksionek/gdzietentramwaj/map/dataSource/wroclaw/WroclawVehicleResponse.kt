@@ -2,11 +2,11 @@ package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
 import com.google.gson.annotations.SerializedName
 
-data class MpkVehicleResponse(
+data class WroclawVehicleResponse(
 //    @SerializedName("help")
 //    val help: String,
 //    @SerializedName("success")
 //    val success: Boolean,
     @SerializedName("result")
-    val result: MpkVehicleList
+    val result: WroclawVehicleList
 )

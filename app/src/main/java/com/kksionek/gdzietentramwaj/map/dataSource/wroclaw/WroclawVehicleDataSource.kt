@@ -7,12 +7,12 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class MpkVehicleDataSource(
-    private val mpkVehicleInterface: MpkVehicleInterface
+class WroclawVehicleDataSource(
+    private val wroclawVehicleInterface: WroclawVehicleInterface
 ) : VehicleDataSource {
 
     override fun vehicles(): Single<List<VehicleData>> =
-        mpkVehicleInterface.buses()
+        wroclawVehicleInterface.buses()
             .map { mpkVehicle ->
                 val refDate = Calendar.getInstance()
                     .apply { add(Calendar.MINUTE, -2) }
