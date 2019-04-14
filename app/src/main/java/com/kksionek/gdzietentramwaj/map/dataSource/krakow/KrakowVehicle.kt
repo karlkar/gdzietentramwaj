@@ -3,7 +3,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 
-data class TtssVehicle(
+data class KrakowVehicle(
     @SerializedName("isDeleted")
     val isDeleted: Boolean = false,
     @SerializedName("id")

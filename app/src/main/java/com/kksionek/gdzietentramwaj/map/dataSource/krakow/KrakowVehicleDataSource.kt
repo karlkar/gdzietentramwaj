@@ -6,23 +6,23 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 
-class TtssVehicleDataSource(
-    private val ttssTramInterface: TtssTramInterface,
-    private val ttssBusInterface: TtssBusInterface
+class KrakowVehicleDataSource(
+    private val krakowTramInterface: KrakowTramInterface,
+    private val krakowBusInterface: KrakowBusInterface
 ) : VehicleDataSource {
 
     override fun vehicles(): Single<List<VehicleData>> =
         Observable.mergeDelayError(
-            ttssBusInterface.buses()
+            krakowBusInterface.buses()
                 .compose(transformer)
                 .flatMapObservable { Observable.fromIterable(it) },
-            ttssTramInterface.trams()
+            krakowTramInterface.trams()
                 .compose(transformer)
                 .flatMapObservable { Observable.fromIterable(it) }
 
         ).toList()
 
-    private val transformer: SingleTransformer<TtssVehicleResponse, List<VehicleData>> =
+    private val transformer: SingleTransformer<KrakowVehicleResponse, List<VehicleData>> =
         SingleTransformer { upstream ->
             upstream.map { response ->
                 response.vehicles
