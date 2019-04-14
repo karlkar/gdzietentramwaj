@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -46,6 +47,7 @@ import kotlin.properties.Delegates
 private const val MAX_VISIBLE_MARKERS = 50
 
 class MapsViewModel @Inject constructor(
+    private val context: Context,
     private val tramRepository: TramRepository,
     private val locationRepository: LocationRepository,
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,
@@ -91,8 +93,7 @@ class MapsViewModel @Inject constructor(
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
 
-    private val selectedCity: Cities
-        get() = mapSettingsManager.getCity()
+    private var selectedCity: Cities = mapSettingsManager.getCity()
 
     val mapInitialPosition: LatLng
     val mapInitialZoom: Float
@@ -107,6 +108,10 @@ class MapsViewModel @Inject constructor(
             mapInitialPosition = defaultLocation
             mapInitialZoom = defaultZoom
         }
+    }
+
+    private fun refreshSelectedCity() {
+        selectedCity = mapSettingsManager.getCity()
     }
 
     private fun subscribeToFavoriteTrams() {
@@ -141,7 +146,7 @@ class MapsViewModel @Inject constructor(
                 }
                 _lastLocation.postValue(location)
             })
-    } // TODO Move map to center of city when city changed and user's location access is not permitted
+    }
 
     private fun subscribeToVehicles() {
         compositeDisposable.add(tramRepository.dataStream(selectedCity)
@@ -295,10 +300,19 @@ class MapsViewModel @Inject constructor(
 
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
-    fun onResume() {
+    fun onResume(isLocationPermissionGranted: Boolean) {
+        if (checkIfCityChanged() && !isLocationPermissionGranted) {
+            _mapControls.postValue(MapControls.MoveTo(selectedCity.latLng))
+        }
         subscribeToFavoriteTrams()
         subscribeToDifficulties()
         subscribeToVehicles()
+    }
+
+    private fun checkIfCityChanged(): Boolean {
+        val prevCity = selectedCity
+        refreshSelectedCity()
+        return selectedCity != prevCity
     }
 
     fun onPause() {

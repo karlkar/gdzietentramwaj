@@ -290,7 +290,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        viewModel.onResume()
+        viewModel.onResume(
+            ContextCompat.checkSelfPermission(
+                activity!!,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
         if (this::map.isInitialized) {
             map.isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
         }
