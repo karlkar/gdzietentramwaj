@@ -7,6 +7,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.lodz.LodzVehicleDataSourceFac
 import com.kksionek.gdzietentramwaj.map.dataSource.szczecin.SzczecinVehicleDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawVehicleDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.wroclaw.WroclawVehicleDataSourceFactory
+import com.kksionek.gdzietentramwaj.map.dataSource.zielonagora.ZielonaGoraVehicleDataSourceFactory
 import javax.inject.Inject
 
 class VehicleDataSourceFactory @Inject constructor(
@@ -15,7 +16,8 @@ class VehicleDataSourceFactory @Inject constructor(
     private val wroclawVehicleDataSourceFactory: WroclawVehicleDataSourceFactory,
     private val lodzVehicleDataSourceFactory: LodzVehicleDataSourceFactory,
     private val szczecinVehicleDataSourceFactory: SzczecinVehicleDataSourceFactory,
-    private val bielskoVehicleDataSourceFactory: BielskoVehicleDataSourceFactory
+    private val bielskoVehicleDataSourceFactory: BielskoVehicleDataSourceFactory,
+    private val zielonaGoraVehicleDataSourceFactory: ZielonaGoraVehicleDataSourceFactory
 ) {
 
     fun create(city: Cities): VehicleDataSource =
@@ -26,5 +28,6 @@ class VehicleDataSourceFactory @Inject constructor(
             Cities.LODZ -> lodzVehicleDataSourceFactory.create()
             Cities.SZCZECIN -> szczecinVehicleDataSourceFactory.create()
             Cities.BIELSKO -> bielskoVehicleDataSourceFactory.create()
+            Cities.ZIELONA -> zielonaGoraVehicleDataSourceFactory.create()
         }
 }

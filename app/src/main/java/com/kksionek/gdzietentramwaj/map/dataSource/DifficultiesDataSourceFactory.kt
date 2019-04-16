@@ -7,6 +7,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.lodz.LodzDifficultiesDataSour
 import com.kksionek.gdzietentramwaj.map.dataSource.szczecin.SzczecinDifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawDifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.wroclaw.WroclawDifficultiesDataSourceFactory
+import com.kksionek.gdzietentramwaj.map.dataSource.zielonagora.ZielonaGoraDifficultiesDataSourceFactory
 import javax.inject.Inject
 
 class DifficultiesDataSourceFactory @Inject constructor(
@@ -15,7 +16,8 @@ class DifficultiesDataSourceFactory @Inject constructor(
     private val wroclawDifficultiesDataSourceFactory: WroclawDifficultiesDataSourceFactory,
     private val lodzDifficultiesDataSourceFactory: LodzDifficultiesDataSourceFactory,
     private val szczecinDifficultiesDataSourceFactory: SzczecinDifficultiesDataSourceFactory,
-    private val bielskoDifficultiesDataSourceFactory: BielskoDifficultiesDataSourceFactory
+    private val bielskoDifficultiesDataSourceFactory: BielskoDifficultiesDataSourceFactory,
+    private val zielonaGoraDifficultiesDataSourceFactory: ZielonaGoraDifficultiesDataSourceFactory
 ) {
 
     fun create(city: Cities): DifficultiesDataSource =
@@ -26,5 +28,6 @@ class DifficultiesDataSourceFactory @Inject constructor(
             Cities.LODZ -> lodzDifficultiesDataSourceFactory.create()
             Cities.SZCZECIN -> szczecinDifficultiesDataSourceFactory.create()
             Cities.BIELSKO -> bielskoDifficultiesDataSourceFactory.create()
+            Cities.ZIELONA -> zielonaGoraDifficultiesDataSourceFactory.create()
         }
 }

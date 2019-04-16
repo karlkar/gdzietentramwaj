@@ -139,7 +139,7 @@ class MapsViewModel @Inject constructor(
     fun subscribeToLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
             .toObservable()
-            .onErrorResumeNext { it: Throwable -> Observable.empty() }
+            .onErrorResumeNext { _: Throwable -> Observable.empty() }
             .subscribe { location ->
                 if (!mapSettingsManager.isStartLocationEnabled()) {
                     _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
