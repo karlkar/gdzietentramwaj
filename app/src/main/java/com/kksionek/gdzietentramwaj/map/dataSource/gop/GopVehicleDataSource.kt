@@ -15,7 +15,7 @@ class GopVehicleDataSource(
             .map { result ->
                 val buses = busPattern.findAll(result)
                     .map { it.groupValues[1] }
-                    .map { pattern.findAll(it)
+                    .map { matchResult -> pattern.findAll(matchResult)
                         .map { it.groupValues[1] }
                         .filter { it.isNotEmpty() }
                         .map { it.toInt() }
@@ -23,7 +23,7 @@ class GopVehicleDataSource(
                     .first()
                 val trams = tramPattern.findAll(result)
                     .map { it.groupValues[1] }
-                    .map { pattern.findAll(it)
+                    .map { matchResult -> pattern.findAll(matchResult)
                         .map { it.groupValues[1] }
                         .filter { it.isNotEmpty() }
                         .map { it.toInt() }
