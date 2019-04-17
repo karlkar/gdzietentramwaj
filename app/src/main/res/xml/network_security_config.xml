@@ -7,5 +7,6 @@
         <domain includeSubdomains="true">rozklady.lodz.pl</domain>
         <domain includeSubdomains="true">mpk.wroc.pl</domain>
         <domain includeSubdomains="true">traveller.mzk.zgora.pl</domain>
+        <domain includeSubdomains="true">sdip.metropoliaztm.pl</domain>
     </domain-config>
 </network-security-config>

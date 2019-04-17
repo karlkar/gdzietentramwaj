@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource
 
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.bielsko.BielskoDifficultiesDataSourceFactory
+import com.kksionek.gdzietentramwaj.map.dataSource.gop.GopDifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.krakow.KrakowDifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.lodz.LodzDifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.szczecin.SzczecinDifficultiesDataSourceFactory
@@ -17,7 +18,8 @@ class DifficultiesDataSourceFactory @Inject constructor(
     private val lodzDifficultiesDataSourceFactory: LodzDifficultiesDataSourceFactory,
     private val szczecinDifficultiesDataSourceFactory: SzczecinDifficultiesDataSourceFactory,
     private val bielskoDifficultiesDataSourceFactory: BielskoDifficultiesDataSourceFactory,
-    private val zielonaGoraDifficultiesDataSourceFactory: ZielonaGoraDifficultiesDataSourceFactory
+    private val zielonaGoraDifficultiesDataSourceFactory: ZielonaGoraDifficultiesDataSourceFactory,
+    private val gopDifficultiesDataSourceFactory: GopDifficultiesDataSourceFactory
 ) {
 
     fun create(city: Cities): DifficultiesDataSource =
@@ -29,5 +31,6 @@ class DifficultiesDataSourceFactory @Inject constructor(
             Cities.SZCZECIN -> szczecinDifficultiesDataSourceFactory.create()
             Cities.BIELSKO -> bielskoDifficultiesDataSourceFactory.create()
             Cities.ZIELONA -> zielonaGoraDifficultiesDataSourceFactory.create()
+            Cities.GOP -> gopDifficultiesDataSourceFactory.create()
         }
 }
