@@ -203,6 +203,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel.favoriteView.observe(this, favoriteModeObserver)
         viewModel.difficulties.observe(this, difficultiesObserver)
 
+        setSwitchButtonMargin()
         map_switch_type_imagebutton.setOnClickListener {
             viewModel.onSwitchMapTypeButtonClicked()
         }
