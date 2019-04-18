@@ -15,7 +15,7 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
@@ -81,8 +81,8 @@ class MapsViewModel @Inject constructor(
     private val _lastLocation = MutableLiveData<Location>()
     val lastLocation: LiveData<Location> = _lastLocation
 
-    private val _difficulties = MutableLiveData<UiState<List<DifficultiesEntity>>>()
-    val difficulties: LiveData<UiState<List<DifficultiesEntity>>> = _difficulties
+    private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
+    val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
 
     var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, _ ->
         showOrZoom(false)
@@ -267,10 +267,6 @@ class MapsViewModel @Inject constructor(
 
     fun subscribeToDifficulties() {
         val city = selectedCity
-        if (!difficultiesRepository.supportsDifficulties(city)) {
-            _difficulties.postValue(null)
-            return
-        }
         compositeDisposable.add(difficultiesRepository.getDifficulties(city)
             .map { result ->
                 when (result) {
@@ -283,12 +279,14 @@ class MapsViewModel @Inject constructor(
                                 "Failed to reload difficulties"
                             )
                         }
-                        UiState.Error<List<DifficultiesEntity>>(R.string.error_failed_to_reload_difficulties)
+                        UiState.Error<DifficultiesState>(R.string.error_failed_to_reload_difficulties)
                     }
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
             }
-            .subscribe { _difficulties.postValue(it) })
+            .subscribe {
+                _difficulties.postValue(it)
+            })
     }
 
     fun onSwitchMapTypeButtonClicked() {

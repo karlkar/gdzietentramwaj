@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
@@ -9,16 +10,14 @@ class WarsawDifficultiesDataSource(
     private val warsawDifficultiesInterface: WarsawDifficultiesInterface
 ) : DifficultiesDataSource {
 
-    override fun isAvailable(): Boolean = true
-
-    override fun getDifficulties(): Single<List<DifficultiesEntity>> =
+    override fun getDifficulties(): Single<DifficultiesState> =
         warsawDifficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
                 if (result.isEmpty()) {
-                    emptyList()
+                    DifficultiesState(true, emptyList())
                 } else {
-                    pattern.findAll(result)
+                    val difficultiesList = pattern.findAll(result)
                         .map { matchResult ->
                             val id = matchResult.groupValues[1]
                             val iconList: List<String>
@@ -36,6 +35,7 @@ class WarsawDifficultiesDataSource(
                         }
                         .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
                         .toList()
+                    DifficultiesState(true, difficultiesList)
                 }
             }
 

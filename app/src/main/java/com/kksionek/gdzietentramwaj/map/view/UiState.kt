@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import androidx.annotation.StringRes
 
-sealed class UiState<T> {
+sealed class UiState<out T> {
 
     class InProgress<T> : UiState<T>()
 

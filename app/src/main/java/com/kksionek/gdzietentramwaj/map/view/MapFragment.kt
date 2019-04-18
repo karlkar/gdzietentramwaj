@@ -43,7 +43,7 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
 import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showErrorToast
@@ -134,12 +134,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private val difficultiesObserver = Observer<UiState<List<DifficultiesEntity>>> {
+    private val difficultiesObserver = Observer<UiState<DifficultiesState>> {
         if (!this::map.isInitialized) return@Observer
-        val offset = if (viewModel.difficulties.value != null) {
-            resources.getDimensionPixelOffset(R.dimen.map_zoom_offset)
-        } else {
+        val uiState = viewModel.difficulties.value
+        val offset = if (uiState is UiState.Success && !uiState.data.isSupported) {
             0
+        } else {
+            resources.getDimensionPixelOffset(R.dimen.map_zoom_offset)
         }
         map.setPadding(0, 0, 0, offset)
     }

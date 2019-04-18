@@ -1,12 +1,11 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.zielonagora
 
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import io.reactivex.Single
 
 class ZielonaGoraDifficultiesDataSource : DifficultiesDataSource {
 
-    override fun isAvailable(): Boolean = false // TODO Check if can be implemented
-
-    override fun getDifficulties(): Single<List<DifficultiesEntity>> = Single.never()
+    override fun getDifficulties(): Single<DifficultiesState> =
+        Single.just(DifficultiesState(false, emptyList())) // TODO Check if can be implemented
 }

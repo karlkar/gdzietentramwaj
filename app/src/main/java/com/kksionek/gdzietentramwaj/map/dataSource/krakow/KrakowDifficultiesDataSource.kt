@@ -2,23 +2,23 @@ package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 class KrakowDifficultiesDataSource(
     private val krakowDifficultiesInterface: KrakowDifficultiesInterface
 ) : DifficultiesDataSource {
-    override fun isAvailable(): Boolean = true
 
-    override fun getDifficulties(): Single<List<DifficultiesEntity>> =
+    override fun getDifficulties(): Single<DifficultiesState> =
         krakowDifficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
                 if (result.isEmpty()) {
-                    emptyList()
+                    DifficultiesState(true, emptyList())
                 } else {
                     val findResult = newsBarPattern.find(result)
-                    findResult?.groupValues?.get(1)?.let {
+                    val difficultiesList = findResult?.groupValues?.get(1)?.let {
                         pattern.findAll(it)
                             .map { matchResult ->
                                 val link = "http://mpk.krakow.pl" + matchResult.groupValues[1]
@@ -32,6 +32,7 @@ class KrakowDifficultiesDataSource(
                             .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
                             .toList()
                     }
+                    DifficultiesState(true, difficultiesList ?: emptyList())
                 }
             }
 

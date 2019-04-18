@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
@@ -31,22 +31,26 @@ class DifficultiesBottomSheet(
     3. Badge count for difficulties
      */
     private val difficultiesObserver =
-        Observer { difficulties: UiState<List<DifficultiesEntity>>? ->
+        Observer { difficulties: UiState<DifficultiesState>? ->
             when (difficulties) {
                 is UiState.Success -> {
-                    containerView.visibility = View.VISIBLE
-                    stopDifficultiesLoading()
-                    if (difficulties.data.isEmpty()) {
-                        textview_difficulties_message.text =
-                            context.getText(R.string.difficulties_bottom_sheet_no_items)
-                        recyclerview_difficulties_difficulties.visibility = View.GONE
-                        textview_difficulties_message.visibility = View.VISIBLE
+                    if (difficulties.data.isSupported) {
+                        containerView.visibility = View.VISIBLE
+                        stopDifficultiesLoading()
+                        if (difficulties.data.difficultiesEntities.isEmpty()) {
+                            textview_difficulties_message.text =
+                                context.getText(R.string.difficulties_bottom_sheet_no_items)
+                            recyclerview_difficulties_difficulties.visibility = View.GONE
+                            textview_difficulties_message.visibility = View.VISIBLE
+                        } else {
+                            textview_difficulties_message.visibility = View.GONE
+                            recyclerview_difficulties_difficulties.visibility = View.VISIBLE
+                            (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                                difficulties.data.difficultiesEntities
+                            )
+                        }
                     } else {
-                        textview_difficulties_message.visibility = View.GONE
-                        recyclerview_difficulties_difficulties.visibility = View.VISIBLE
-                        (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                            difficulties.data
-                        )
+                        containerView.visibility = View.GONE
                     }
                 }
                 is UiState.Error -> {
@@ -61,9 +65,7 @@ class DifficultiesBottomSheet(
                     containerView.visibility = View.VISIBLE
                     startDifficultiesLoading()
                 }
-                null -> {
-                    containerView.visibility = View.GONE
-                }
+                null -> {}
             }.makeExhaustive
         }
 

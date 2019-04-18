@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import io.reactivex.Single
 import java.util.Calendar
 import java.util.Calendar.HOUR_OF_DAY
@@ -15,9 +16,7 @@ class WroclawDifficultiesDataSource(
     private val crashReportingService: CrashReportingService
 ) : DifficultiesDataSource {
 
-    override fun isAvailable(): Boolean = true
-
-    override fun getDifficulties(): Single<List<DifficultiesEntity>> {
+    override fun getDifficulties(): Single<DifficultiesState> {
         val cal = Calendar.getInstance().apply {
             set(HOUR_OF_DAY, 0)
             set(MINUTE, 0)
@@ -27,7 +26,7 @@ class WroclawDifficultiesDataSource(
         val today = cal.time
         return wroclawDifficultiesInterface.getDifficulties()
             .map { result ->
-                pattern.findAll(result)
+                val difficultiesList = pattern.findAll(result)
                     .map { matchResult ->
                         val range: DateRange
                         val singleDate =
@@ -58,6 +57,7 @@ class WroclawDifficultiesDataSource(
                     .takeWhile { it.first.isInRange(today) }
                     .map { it.second }
                     .toList()
+                DifficultiesState(true, difficultiesList)
             }
     }
 
