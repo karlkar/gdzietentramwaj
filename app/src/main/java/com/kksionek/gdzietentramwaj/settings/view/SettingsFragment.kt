@@ -156,7 +156,20 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                     position: Int,
                     id: Long
                 ) {
-                    viewModel.city = sortedCities[position]
+                    val selectedCity = sortedCities[position]
+                    viewModel.city = selectedCity
+                    settings_city_description.text = getString(
+                        when (selectedCity) {
+                            Cities.WARSAW -> R.string.city_warsaw_description
+                            Cities.KRAKOW -> R.string.city_krakow_description
+                            Cities.WROCLAW -> R.string.city_wroclaw_description
+                            Cities.LODZ -> R.string.city_lodz_description
+                            Cities.SZCZECIN -> R.string.city_szczecin_description
+                            Cities.BIELSKO -> R.string.city_bielsko_description
+                            Cities.ZIELONA -> R.string.city_zielona_description
+                            Cities.GOP -> R.string.city_gop_description
+                        }
+                    )
                 }
             }
         }

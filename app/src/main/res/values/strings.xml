@@ -10,15 +10,15 @@
     <string name="toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
     <string name="about_app">O aplikacji</string>
     <string name="error_internet">Sprawdź swoje połączenie z internetem.</string>
-    <string name="error_ztm">Wystąpił błąd po stronie ZTM. Musimy poczekać, aż go naprawią :(</string>
+    <string name="error_ztm">Wystąpił błąd po stronie dostawcy danych.</string>
     <string name="position_update_sucessful">Aktualizacja pozycji pojazdów</string>
     <string name="rate_app">Oceń aplikację</string>
-    <string name="none_position_is_up_to_date">Na serwerze ZTM nie ma informacji o aktualnej pozycji pojazdów.</string>
+    <string name="none_position_is_up_to_date">Na serwerze dostawcy danych nie ma informacji o pozycji pojazdów.</string>
     <string name="remove_ads">Usuń reklamy</string>
     <string name="menu_item_main_share">Udostępnij</string>
     <string name="debug_error_message">%1$s: %2$s</string>
     <string name="error_failed_to_reload_difficulties">Nie udało się załadować utrudnień</string>
-    <string name="difficulties_bottom_sheet_no_items">Brak utrudnień&#8230; A przynajmniej tak twierdzi ZTM ;)</string>
+    <string name="difficulties_bottom_sheet_no_items">Brak informacji o utrudnieniach</string>
     <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
     <string name="settings">Ustawienia</string>
     <string name="settings_icon_set_title">Zestaw ikon</string>
@@ -44,9 +44,9 @@
     <string name="marker_info_brigade_unknown">Brygada nieznana</string>
     <string name="info_window_follow_text">Kliknij tu, aby zacząć śledzenie</string>
     <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
-    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl&lt;br&gt;&lt;br&gt;Autor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.&lt;br&gt;&lt;br&gt;Jeśli aplikacja Ci się podoba oceń ją w &lt;a href="http://play.google.com/store/apps/details?id=%1$s"&gt;sklepie Google Play!&lt;/a&gt;</string>
     <string name="map_followed_cancel">Anuluj</string>
     <string name="settings_city_title">Wybierz swoje miasto</string>
+
     <string name="warsaw">Warszawa</string>
     <string name="krakow">Kraków</string>
     <string name="wroclaw">Wrocław</string>
@@ -55,4 +55,17 @@
     <string name="bielsko">Bielsko-Biała</string>
     <string name="zielona_gora">Zielona Góra</string>
     <string name="gop">GOP</string>
+
+    <string name="city_warsaw_description">Dane na temat pozycji pojazdów są udostępniane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl</string>
+    <string name="city_krakow_description">Dane na temat pozycji pojazdów są udostępniane przez Zarzad Infrastruktury Komunalnej i Transportu w Krakowie.</string>
+    <string name="city_wroclaw_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Wrocław.</string>
+    <string name="city_lodz_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Łódź.</string>
+    <string name="city_szczecin_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Dróg i Transportu Miejskiego w Szczecinie.</string>
+    <string name="city_bielsko_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Bielsko-Biała.</string>
+    <string name="city_zielona_description">Dane na temat pozycji pojazdów są udostępniane przez Miejski Zakład Komunikacji w Zielonej Górze.</string>
+    <string name="city_gop_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Transportu Metropolitalnego.</string>
+
+    <string name="settings_author_disclaimer">Autor aplikacji "Gdzie Ten Tramwaj?" nie ponosi odpowiedzialności za dokładność, ani kompletność danych, jak i na dostępność serwerów.</string>
+
+    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl&lt;br&gt;&lt;br&gt;Autor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.&lt;br&gt;&lt;br&gt;Jeśli aplikacja Ci się podoba oceń ją w &lt;a href="http://play.google.com/store/apps/details?id=%1$s"&gt;sklepie Google Play!&lt;/a&gt;</string>
 </resources>
