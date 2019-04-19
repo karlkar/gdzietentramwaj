@@ -3,12 +3,10 @@
     <string name="adMobAppId">ca-app-pub-9982327151344679~9129163343</string>
     <string name="banner_ad_unit_id">ca-app-pub-9982327151344679/1605896548</string>
     <string name="adMobTestDeviceS7Edge">FF6E13B0E9E671F99C2D803B882C5002</string>
-    <string name="action_menu_info">O aplikacji</string>
     <string name="refresh">Odśwież</string>
     <string name="settings_favorite_lines_set_button">Wybierz ulubione linie</string>
     <string name="fav_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
     <string name="toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
-    <string name="about_app">O aplikacji</string>
     <string name="error_internet">Sprawdź swoje połączenie z internetem.</string>
     <string name="error_ztm">Wystąpił błąd po stronie dostawcy danych.</string>
     <string name="position_update_sucessful">Aktualizacja pozycji pojazdów</string>
@@ -41,10 +39,10 @@
     <string name="destination_chooseStartLocation_title">Wybierz lokalizację początkową</string>
     <string name="marker_info_line">Linia %1$s</string>
     <string name="marker_info_brigade">Brygada %1$s</string>
-    <string name="marker_info_brigade_unknown">Brygada nieznana</string>
     <string name="info_window_follow_text">Kliknij tu, aby zacząć śledzenie</string>
     <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
     <string name="map_followed_cancel">Anuluj</string>
+    <string name="settings_start_location_choose_button">Ustaw jako lokalizację początkową</string>
     <string name="settings_city_title">Wybierz swoje miasto</string>
 
     <string name="warsaw">Warszawa</string>
@@ -66,6 +64,4 @@
     <string name="city_gop_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Transportu Metropolitalnego.</string>
 
     <string name="settings_author_disclaimer">Autor aplikacji "Gdzie Ten Tramwaj?" nie ponosi odpowiedzialności za dokładność, ani kompletność danych, jak i na dostępność serwerów.</string>
-
-    <string name="disclaimer">Dane wykorzystywane w aplikacji są dostarczane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl&lt;br&gt;&lt;br&gt;Autor aplikacji nie ma wpływu na działanie serwerów udostępniających położenie pojazdów, ani na kompletność czy też dokładność dostarczanych przez nie danych.&lt;br&gt;&lt;br&gt;Jeśli aplikacja Ci się podoba oceń ją w &lt;a href="http://play.google.com/store/apps/details?id=%1$s"&gt;sklepie Google Play!&lt;/a&gt;</string>
 </resources>

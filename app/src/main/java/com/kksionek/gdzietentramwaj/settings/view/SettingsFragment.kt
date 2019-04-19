@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -46,6 +47,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

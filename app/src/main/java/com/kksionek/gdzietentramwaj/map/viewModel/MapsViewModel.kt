@@ -136,6 +136,7 @@ class MapsViewModel @Inject constructor(
     }
 
     // This one has to be called when the map is ready to use
+    @Suppress("RedundantLambdaArrow")
     fun subscribeToLastLocation() {
         compositeDisposable.add(locationRepository.lastKnownLocation
             .toObservable()
@@ -226,12 +227,15 @@ class MapsViewModel @Inject constructor(
             .filter { isMarkerLineVisible(it.tramLine) }
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
 
-        if (onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS) {
-            postMarkers(onlyVisibleTrams, animate, newData)
-        } else if (mapSettingsManager.isAutoZoomEnabled()) {
-            _mapControls.postValue(MapControls.ZoomIn)
-        } else {
-            _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
+        when {
+            onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS ->
+                _tramData.postValue(
+                    UiState.Success(BusTramLoading(onlyVisibleTrams, animate, newData))
+                )
+            mapSettingsManager.isAutoZoomEnabled() ->
+                _mapControls.postValue(MapControls.ZoomIn)
+            else ->
+                _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
         }
 
         val followed = followedVehicle
@@ -240,14 +244,6 @@ class MapsViewModel @Inject constructor(
                 _mapControls.postValue(MapControls.MoveTo(tramMarker.finalPosition, true))
             }
         }
-    }
-
-    private fun postMarkers(
-        visibleTrams: List<TramMarker>,
-        animate: Boolean,
-        newData: Boolean = false
-    ) {
-        _tramData.postValue(UiState.Success(BusTramLoading(visibleTrams, animate, newData)))
     }
 
     private fun isMarkerLineVisible(line: String): Boolean = favoriteLock.read {

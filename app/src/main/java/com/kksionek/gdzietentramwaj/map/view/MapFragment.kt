@@ -40,7 +40,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
-import com.kksionek.gdzietentramwaj.main.view.AboutDialogProvider
 import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
@@ -75,7 +74,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
 
-    private var aboutDialogProvider: AboutDialogProvider? = null
     private var locationChangeListener: LocationChangeListener? = null
 
     @Inject
@@ -162,16 +160,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         isOldIconSetEnabled = viewModel.iconSettingsProvider.isOldIconSetEnabled()
 
-        aboutDialogProvider = activity as? AboutDialogProvider
-            ?: throw IllegalArgumentException("Activity should implement AboutDialogProvider interface")
-
         locationChangeListener = activity as? LocationChangeListener
             ?: throw IllegalArgumentException("Activity should implement LocationChangeListener interface")
-    }
-
-    override fun onDetach() {
-        aboutDialogProvider = null
-        super.onDetach()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -274,7 +264,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_info -> aboutDialogProvider?.showAboutAppDialog()
             R.id.menu_item_refresh -> viewModel.forceReloadTrams()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
@@ -488,7 +477,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        for (i in 0..(tramMarkerList.size - 1)) {
+        for (i in 0 until tramMarkerList.size) {
             val tramMarker = tramMarkerList[i]
             if (diffResult.convertNewPositionToOld(i) == DiffUtil.DiffResult.NO_POSITION) {
                 if (tramMarker.marker == null) {

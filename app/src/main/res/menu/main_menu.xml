@@ -30,9 +30,4 @@
         android:id="@+id/menu_item_rate"
         android:title="@string/rate_app"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/menu_item_info"
-        android:title="@string/action_menu_info"
-        app:showAsAction="never" />
 </menu>
