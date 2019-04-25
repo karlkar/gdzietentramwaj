@@ -1,11 +1,11 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.lodz
 
+import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 class LodzDifficultiesDataSourceFactory @Inject constructor(
-    private val retrofitBuilder: Retrofit.Builder
+    private val interfaceBuilder: InterfaceBuilder
 ) {
 
     fun create(): DifficultiesDataSource = LodzDifficultiesDataSource()

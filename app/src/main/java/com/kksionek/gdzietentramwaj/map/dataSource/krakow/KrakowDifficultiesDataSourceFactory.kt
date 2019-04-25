@@ -1,19 +1,17 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 
+import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 private const val BASE_URL = "http://mpk.krakow.pl"
 
 class KrakowDifficultiesDataSourceFactory @Inject constructor(
-    private val retrofitBuilder: Retrofit.Builder
+    private val interfaceBuilder: InterfaceBuilder
 ) {
     fun create(): DifficultiesDataSource {
-        val ttssDifficultiesInterface = retrofitBuilder
-            .baseUrl(BASE_URL)
-            .build()
-            .create(KrakowDifficultiesInterface::class.java)
+        val ttssDifficultiesInterface =
+            interfaceBuilder.create(BASE_URL, KrakowDifficultiesInterface::class)
         return KrakowDifficultiesDataSource(ttssDifficultiesInterface)
     }
 }

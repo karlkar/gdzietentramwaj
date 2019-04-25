@@ -1,20 +1,18 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.bielsko
 
+import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 private const val BASE_URL = "https://rozklady.bielsko.pl/"
 
 class BielskoVehicleDataSourceFactory @Inject constructor(
-    private val retrofitBuilder: Retrofit.Builder
+    private val interfaceBuilder: InterfaceBuilder
 ) {
 
     fun create(): VehicleDataSource {
-        val bielskoVehicleInterface = retrofitBuilder
-            .baseUrl(BASE_URL)
-            .build()
-            .create(BielskoVehicleInterface::class.java)
+        val bielskoVehicleInterface =
+            interfaceBuilder.create(BASE_URL, BielskoVehicleInterface::class)
         return BielskoVehicleDataSource(bielskoVehicleInterface)
     }
 }

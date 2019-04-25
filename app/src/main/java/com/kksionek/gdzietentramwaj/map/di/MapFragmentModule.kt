@@ -1,6 +1,8 @@
 package com.kksionek.gdzietentramwaj.map.di
 
 import androidx.lifecycle.ViewModel
+import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
+import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
@@ -30,15 +32,18 @@ class MapFragmentModule {
 
     @Singleton
     @Provides
-    internal fun provideRetrofitBuilder( // TODO Change to some class like interfaceBuilder
+    internal fun provideInterfaceBuilder(
         okHttpClient: OkHttpClient,
         rxAdapter: CallAdapter.Factory
-    ): Retrofit.Builder = Retrofit.Builder()
-        .addConverterFactory(ScalarsConverterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(okHttpClient)
-        .addCallAdapterFactory(rxAdapter)
-    
+    ): InterfaceBuilder {
+        val retrofitBuilder = Retrofit.Builder()
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .addCallAdapterFactory(rxAdapter)
+        return InterfaceBuilderImpl(retrofitBuilder)
+    }
+
     @Singleton
     @Provides
     internal fun provideIconSettingsProvider(
