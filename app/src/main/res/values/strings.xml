@@ -18,12 +18,13 @@
     <string name="error_failed_to_reload_difficulties">Nie udało się załadować utrudnień</string>
     <string name="difficulties_bottom_sheet_no_items">Brak informacji o utrudnieniach</string>
     <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
+    <string name="map_auto_zoom_disabled_message">Przybliż mapę, aby zobaczyć wszystkie pojazdy.</string>
+    <string name="map_change_map_type">Zmień typ mapy</string>
+
     <string name="settings">Ustawienia</string>
     <string name="settings_icon_set_title">Zestaw ikon</string>
     <string name="settings_icon_set_old_option">Stare ikony</string>
     <string name="settings_icon_set_new_option">Nowe ikony</string>
-    <string name="map_auto_zoom_disabled_message">Przybliż mapę, aby zobaczyć wszystkie pojazdy.</string>
-    <string name="map_change_map_type">Zmień typ mapy</string>
     <string name="settings_auto_map_zooming_check">Automatyczne przybliżanie mapy</string>
     <string name="settings_auto_map_zooming_description">Gdy oddalasz mapę może się zdarzyć, że powinno na niej być widać bardzo dużo pojazdów. Niestety dla niektórych telefonów jest to za dużo i żeby uniknąć problemów ze stabilnością aplikacji musiałem wprowadzić limit widocznych pojazdów. Przy włączonym automatycznym przybliżaniu mapa będzie się przybliżała tak, żeby móc wyświetlić tyle ile się da.</string>
     <string name="settings_start_location_check">Ustawienie początkowej lokalizacji</string>
@@ -31,19 +32,24 @@
     <string name="settings_brigade_showing_title">Pokazuj numer brygady</string>
     <string name="settings_brigade_showing_description">Gdy ta opcja jest włączona, po kliknięciu na ikonę pojazdu na mapie pojawi się okienko z numerem brygady</string>
     <string name="settings_traffic_showing_title">Pokazuj informacje o natężeniu ruchu</string>
-    <string name="string_favorite_lines_description">Możesz wybrać linie, które najczęściej obserwujesz. Dzięki temu będziesz mógł włączyć na mapie widok tylko ulubionych pojazdów. Mapa będzie wtedy bardziej przejrzysta. Widok ulubionych możesz włączyć klikając na ikonkę gwiazdki w widoku mapy.</string>
     <string name="settings_favorite_lines_title">Ulubione linie</string>
     <string name="settings_remove_ads_title">Usuń reklamy</string>
     <string name="settings_remove_ads_description">Jeśli masz dość reklam w aplikacji zapraszam do zainstalowania jej płatnej wersji - \"Gdzie Ten Tramwaj? Pro\".\nJedyna różnica między aplikacjami to to, że w wersji darmowej są reklamy, w wersji płatnej ich nie ma.</string>
-    <string name="destination_favorite_title">Ulubione linie</string>
-    <string name="destination_chooseStartLocation_title">Wybierz lokalizację początkową</string>
-    <string name="marker_info_line">Linia %1$s</string>
-    <string name="marker_info_brigade">Brygada %1$s</string>
-    <string name="info_window_follow_text">Kliknij tu, aby zacząć śledzenie</string>
-    <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
-    <string name="map_followed_cancel">Anuluj</string>
     <string name="settings_start_location_choose_button">Ustaw jako lokalizację początkową</string>
     <string name="settings_city_title">Wybierz swoje miasto</string>
+
+    <string name="string_favorite_lines_description">Możesz wybrać linie, które najczęściej obserwujesz. Dzięki temu będziesz mógł włączyć na mapie widok tylko ulubionych pojazdów. Mapa będzie wtedy bardziej przejrzysta. Widok ulubionych możesz włączyć klikając na ikonkę gwiazdki w widoku mapy.</string>
+
+    <string name="destination_favorite_title">Ulubione linie</string>
+    <string name="destination_chooseStartLocation_title">Wybierz lokalizację początkową</string>
+
+    <string name="marker_info_line">Linia %1$s</string>
+    <string name="marker_info_brigade">Brygada %1$s</string>
+
+    <string name="info_window_follow_text">Kliknij tu, aby zacząć śledzenie</string>
+
+    <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
+    <string name="map_followed_cancel">Anuluj</string>
 
     <string name="warsaw">Warszawa</string>
     <string name="krakow">Kraków</string>
@@ -64,4 +70,11 @@
     <string name="city_gop_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Transportu Metropolitalnego.</string>
 
     <string name="settings_author_disclaimer">Autor aplikacji "Gdzie Ten Tramwaj?" nie ponosi odpowiedzialności za dokładność, ani kompletność danych, jak i na dostępność serwerów.</string>
+
+    <string name="onboarding_welcome">Witaj w aplikacji Gdzie Ten Tramwaj!</string>
+    <string name="onboarding_lets_start">To pierwsze uruchomienie aplikacji, więc musimy przejść przez konfigurację!</string>
+    <string name="onboarding_location_description">Na początek zdecyduj, czy chcesz, aby aplikacja korzystała z Twojej lokalizacji. Jeśli się na to zgodzisz, będziesz mógł w łatwy sposób przesuwać mapę do swojej lokalizacji.</string>
+    <string name="onboarding_allow_location">Zezwól na dostęp do lokalizacji</string>
+    <string name="onboarding_city_chooser">Musisz też wybrać miasto, którego pojazdy chcesz obserwować. Możesz to później zmienić w ustawieniach.</string>
+    <string name="onboarding_start">ROZPOCZNIJ</string>
 </resources>

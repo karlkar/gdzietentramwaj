@@ -136,13 +136,13 @@ class SettingsRepositoryImpl(context: Context) :
 
     override fun getCity(): Cities =
         sharedPreferences
-            .getInt(PREF_CITY, 0)
+            .getInt(PREF_CITY, 1)
             .let { Cities.ofValue(it) }
 
     override fun setCity(city: Cities) {
         sharedPreferences
             .edit()
-            .putInt(PREF_CITY, city.ordinal)
+            .putInt(PREF_CITY, city.id)
             .apply()
     }
 

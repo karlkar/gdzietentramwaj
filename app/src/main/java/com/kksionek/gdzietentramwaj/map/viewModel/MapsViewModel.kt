@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
-import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -47,7 +46,6 @@ import kotlin.properties.Delegates
 private const val MAX_VISIBLE_MARKERS = 50
 
 class MapsViewModel @Inject constructor(
-    private val context: Context,
     private val tramRepository: TramRepository,
     private val locationRepository: LocationRepository,
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,

@@ -25,6 +25,6 @@ enum class Cities(val id: Int, val latLng: LatLng, @StringRes val humanReadableN
     // `id` is a field that has to be stable as it is used in favorite trams saving
 
     companion object {
-        fun ofValue(code: Int) = values().firstOrNull { it.ordinal == code } ?: WARSAW
+        fun ofValue(code: Int) = values().firstOrNull { it.id == code } ?: WARSAW
     }
 }

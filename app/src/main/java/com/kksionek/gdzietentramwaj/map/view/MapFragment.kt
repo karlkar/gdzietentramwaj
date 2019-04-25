@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -8,7 +9,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -41,6 +41,7 @@ import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
+import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
@@ -52,12 +53,11 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
-private const val MY_PERMISSIONS_REQUEST_LOCATION = 1234
-
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private lateinit var viewModel: MapsViewModel
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var mapsViewModel: MapsViewModel
 
     private lateinit var menuItemFavoriteSwitch: MenuItem
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
@@ -115,12 +115,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }.makeExhaustive
         }
 
-    @Suppress("MissingPermission")
     private val lastLocationObserver = Observer { location: Location? ->
         location?.let {
             locationChangeListener?.onLocationChanged(it)
             if (this::map.isInitialized) {
-                map.isMyLocationEnabled = checkLocationPermission(false)
+                @Suppress("MissingPermission")
+                map.isMyLocationEnabled = mainViewModel.locationPermission.value ?: false
                 setSwitchButtonMargin()
             }
         }
@@ -134,7 +134,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val difficultiesObserver = Observer<UiState<DifficultiesState>> {
         if (!this::map.isInitialized) return@Observer
-        val uiState = viewModel.difficulties.value
+        val uiState = mapsViewModel.difficulties.value
         val offset = if (uiState is UiState.Success && !uiState.data.isSupported) {
             0
         } else {
@@ -155,10 +155,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (context.applicationContext as TramApplication).appComponent.inject(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
-            .get(MapsViewModel::class.java)
+        mainViewModel =
+            ViewModelProviders.of(activity!!, viewModelFactory)[MainViewModel::class.java]
+        mapsViewModel =
+            ViewModelProviders.of(this, viewModelFactory)[MapsViewModel::class.java]
 
-        isOldIconSetEnabled = viewModel.iconSettingsProvider.isOldIconSetEnabled()
+        isOldIconSetEnabled = mapsViewModel.iconSettingsProvider.isOldIconSetEnabled()
 
         locationChangeListener = activity as? LocationChangeListener
             ?: throw IllegalArgumentException("Activity should implement LocationChangeListener interface")
@@ -167,7 +169,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val followedTramData = viewModel.followedVehicle
+        val followedTramData = mapsViewModel.followedVehicle
         if (followedTramData == null) {
             map_followed_constraintlayout.apply {
                 post {
@@ -180,7 +182,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         map_followed_cancel_button.setOnClickListener {
-            viewModel.followedVehicle = null
+            mapsViewModel.followedVehicle = null
             hideFollowedView()
         }
 
@@ -189,27 +191,25 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 ?.getMapAsync(this)
         }
 
-        viewModel.tramData.observe(this, tramDataObserver)
-        viewModel.lastLocation.observe(this, lastLocationObserver)
-        viewModel.favoriteView.observe(this, favoriteModeObserver)
-        viewModel.difficulties.observe(this, difficultiesObserver)
+        mapsViewModel.tramData.observe(this, tramDataObserver)
+        mapsViewModel.lastLocation.observe(this, lastLocationObserver)
+        mapsViewModel.favoriteView.observe(this, favoriteModeObserver)
+        mapsViewModel.difficulties.observe(this, difficultiesObserver)
 
         setSwitchButtonMargin()
         map_switch_type_imagebutton.setOnClickListener {
-            viewModel.onSwitchMapTypeButtonClicked()
+            mapsViewModel.onSwitchMapTypeButtonClicked()
         }
 
         difficultiesBottomSheet = DifficultiesBottomSheet(
             constraintlayout_bottomsheet_rootview,
             view.context,
             this,
-            viewModel,
+            mapsViewModel,
             imageLoader
         )
 
         vehicleInfoWindowAdapter = VehicleInfoWindowAdapter(view.context)
-
-        checkLocationPermission(true)
     }
 
     private fun setSwitchButtonMargin() {
@@ -231,7 +231,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         menu.findItem(R.id.menu_item_refresh)?.also {
             context?.let { context ->
                 menuItemRefresh = MenuItemRefreshCtrl(context, it)
-                if (viewModel.tramData.value is UiState.InProgress) {
+                if (mapsViewModel.tramData.value is UiState.InProgress) {
                     menuItemRefresh?.startAnimation()
                 }
             }
@@ -244,7 +244,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         shareActionProvider.setShareIntent(shareIntent)
 
         menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-        setFavoriteButtonIcon(viewModel.favoriteView.value ?: false)
+        setFavoriteButtonIcon(mapsViewModel.favoriteView.value ?: false)
         return super.onCreateOptionsMenu(menu, menuInflater)
     }
 
@@ -264,7 +264,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_refresh -> viewModel.forceReloadTrams()
+            R.id.menu_item_refresh -> mapsViewModel.forceReloadTrams()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
                 val handler = Handler()
@@ -273,7 +273,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     100
                 )
             }
-            R.id.menu_item_favorite_switch -> viewModel.toggleFavorite()
+            R.id.menu_item_favorite_switch -> mapsViewModel.toggleFavorite()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -281,19 +281,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        viewModel.onResume(
+        mapsViewModel.onResume(
             ContextCompat.checkSelfPermission(
                 activity!!,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         )
         if (this::map.isInitialized) {
-            map.isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
+            map.isTrafficEnabled = mapsViewModel.mapSettingsManager.isTrafficShowingEnabled()
         }
     }
 
     override fun onPause() {
-        viewModel.onPause()
+        mapsViewModel.onPause()
         super.onPause()
     }
 
@@ -315,13 +315,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        val cameraStartPosition = viewModel.mapInitialPosition
-        val cameraStartZoom = viewModel.mapInitialZoom
+        val cameraStartPosition = mapsViewModel.mapInitialPosition
+        val cameraStartZoom = mapsViewModel.mapInitialZoom
         map.apply {
             moveCamera(
                 CameraUpdateFactory.newLatLngZoom(cameraStartPosition, cameraStartZoom)
             )
-            if (viewModel.difficulties.value != null) {
+            if (mapsViewModel.difficulties.value != null) {
                 setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
             }
             activity?.let {
@@ -338,33 +338,34 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
             isBuildingsEnabled = false
             isIndoorEnabled = false
-            isTrafficEnabled = viewModel.mapSettingsManager.isTrafficShowingEnabled()
-            isMyLocationEnabled = checkLocationPermission(false)
+            isTrafficEnabled = mapsViewModel.mapSettingsManager.isTrafficShowingEnabled()
+            @SuppressLint("MissingPermission")
+            isMyLocationEnabled = mainViewModel.locationPermission.value ?: false
             setSwitchButtonMargin()
-            mapType = viewModel.getMapType().googleCode
+            mapType = mapsViewModel.getMapType().googleCode
 
             setInfoWindowAdapter(vehicleInfoWindowAdapter)
 
             setOnMarkerClickListener {
-                if (viewModel.mapSettingsManager.isBrigadeShowingEnabled()) {
+                if (mapsViewModel.mapSettingsManager.isBrigadeShowingEnabled()) {
                     it.showInfoWindow()
                 }
                 return@setOnMarkerClickListener true
             }
             setOnInfoWindowClickListener {
                 val followedTramData = it.tag as FollowedTramData
-                viewModel.followedVehicle = followedTramData
+                mapsViewModel.followedVehicle = followedTramData
                 showFollowedView(followedTramData)
                 it.hideInfoWindow()
             }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
             setOnCameraIdleListener {
-                viewModel.visibleRegion = projection.visibleRegion.latLngBounds
+                mapsViewModel.visibleRegion = projection.visibleRegion.latLngBounds
                 cameraMoveInProgress.set(false)
             }
         }
 
-        viewModel.mapControls.observe(this, Observer {
+        mapsViewModel.mapControls.observe(this, Observer {
             val context = context ?: return@Observer
             when (it) {
                 is MapControls.ZoomIn ->
@@ -387,7 +388,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }.makeExhaustive
         })
 
-        viewModel.subscribeToLastLocation()
+        mapsViewModel.subscribeToLastLocation()
     }
 
     private fun showFollowedView(marker: FollowedTramData) {
@@ -408,35 +409,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             .start()
     }
 
-    private fun checkLocationPermission(doRequest: Boolean): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true
-        }
-
-        val context = context ?: return false
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (doRequest) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    MY_PERMISSIONS_REQUEST_LOCATION
-                )
-            }
-            return false
-        }
-        return true
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         if (this::map.isInitialized) {
-            viewModel.subscribeToLastLocation()
+            mapsViewModel.subscribeToLastLocation()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -454,7 +433,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             tramPathAnimator.removeAllAnimatedMarkers()
         }
 
-        val currentOldIconEnabledSetting = viewModel.iconSettingsProvider.isOldIconSetEnabled()
+        val currentOldIconEnabledSetting = mapsViewModel.iconSettingsProvider.isOldIconSetEnabled()
         if (isOldIconSetEnabled != currentOldIconEnabledSetting) {
             TramMarker.clearCache()
             isOldIconSetEnabled = currentOldIconEnabledSetting
@@ -494,7 +473,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                     tramMarker.tramLine,
                                     tramMarker.isTram,
                                     context,
-                                    viewModel.iconSettingsProvider
+                                    mapsViewModel.iconSettingsProvider
                                 )
                             )
                             if (!currentOldIconEnabledSetting) {
