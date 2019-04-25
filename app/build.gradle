@@ -4,28 +4,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
-// Load keystore
-def keystorePropertiesFile = file("../../keystore.properties");
-def keystoreProperties = new Properties()
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-
 android {
-    signingConfigs {
-        release {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            v2SigningEnabled false
-        }
-    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.kksionek.gdzietentramwaj"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 40
-        versionName "1.40"
+        versionCode 41
+        versionName "1.41"
         resConfigs "pl"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -49,7 +35,6 @@ android {
             manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
     packagingOptions {
