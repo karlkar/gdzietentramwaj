@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -41,7 +42,11 @@ class MainActivity : AppCompatActivity(), LocationChangeListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setupActionBarWithNavController(findNavController(R.id.fragment_maps_content))
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.destination_onboarding, R.id.destination_map))
+        setupActionBarWithNavController(
+            findNavController(R.id.fragment_maps_content),
+            appBarConfiguration
+        )
 
         (application as TramApplication).appComponent.inject(this)
 

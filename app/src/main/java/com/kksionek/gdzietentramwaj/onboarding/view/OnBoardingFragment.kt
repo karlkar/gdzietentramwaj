@@ -45,8 +45,8 @@ class OnBoardingFragment : Fragment() {
         onBoardingViewModel =
             ViewModelProviders.of(this, viewModelFactory)[OnBoardingViewModel::class.java]
 
-        if (onBoardingViewModel.lastVersion > 40) {
-            findNavController().navigate(R.id.destination_map)
+        if (onBoardingViewModel.skipOnBoarding) {
+            findNavController().navigate(OnBoardingFragmentDirections.actionOnBoardingFragmentToDestinationMap())
         }
     }
 
@@ -111,8 +111,8 @@ class OnBoardingFragment : Fragment() {
 
         onboarding_start_button.setOnClickListener {
             findNavController().apply {
-                if (currentDestination?.id == R.id.onBoardingFragment) {
-                    navigate(R.id.action_onBoardingFragment_to_destination_map)
+                if (currentDestination?.id == R.id.destination_onboarding) {
+                    navigate(OnBoardingFragmentDirections.actionOnBoardingFragmentToDestinationMap())
                 }
             }
             onBoardingViewModel.updateLastVersion()

@@ -20,6 +20,9 @@ class OnBoardingViewModel @Inject constructor(
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
+    val skipOnBoarding: Boolean
+        get() = lastVersion >= FIRST_APP_VERSION_MULTICITY
+
     private val _nearestCity = MutableLiveData<Cities>().apply { value = null }
     val nearestCity: LiveData<Cities> = _nearestCity
 
@@ -27,9 +30,9 @@ class OnBoardingViewModel @Inject constructor(
         get() = mapSettingsManager.getCity()
         set(value) = mapSettingsManager.setCity(value)
 
-    var lastVersion: Int
+    private var lastVersion: Int
         get() = versionRepository.getPreviouslyLaunchedVersion()
-        private set(value) = versionRepository.saveLastLaunchedVersion(value)
+        set(value) = versionRepository.saveLastLaunchedVersion(value)
 
     fun updateLastVersion() {
         lastVersion = BuildConfig.VERSION_CODE
@@ -54,5 +57,9 @@ class OnBoardingViewModel @Inject constructor(
     override fun onCleared() {
         compositeDisposable.clear()
         super.onCleared()
+    }
+
+    companion object {
+        const val FIRST_APP_VERSION_MULTICITY = 41
     }
 }

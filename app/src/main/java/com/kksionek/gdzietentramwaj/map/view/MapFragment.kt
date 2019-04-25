@@ -269,7 +269,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             R.id.menu_item_settings -> {
                 val handler = Handler()
                 handler.postDelayed(
-                    { findNavController().navigate(R.id.action_nav_graph_to_settingsFragment) },
+                    { findNavController().navigate(R.id.action_destinationMap_to_settingsFragment) },
                     100
                 )
             }

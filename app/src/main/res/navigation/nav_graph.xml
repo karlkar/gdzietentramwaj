@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/onBoardingFragment">
+    app:startDestination="@id/destination_onboarding">
 
     <fragment
         android:id="@+id/destination_map"
@@ -11,13 +11,13 @@
         android:layout_height="match_parent"
         android:label="@string/app_name">
         <action
-            android:id="@+id/action_nav_graph_to_settingsFragment"
+            android:id="@+id/action_destinationMap_to_settingsFragment"
             app:destination="@id/destination_settings"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
+            app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@+id/destination_map" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -29,14 +29,15 @@
             app:destination="@id/destination_favorite"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
+            app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@+id/destination_settings" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_destination_settings_to_chooseStartLocationFragment"
             app:destination="@id/destination_chooseStartLocation"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
+            app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
@@ -50,18 +51,16 @@
         android:id="@+id/destination_chooseStartLocation"
         android:name="com.kksionek.gdzietentramwaj.settings.view.ChooseStartLocationFragment"
         android:label="@string/destination_chooseStartLocation_title" />
+
     <fragment
-        android:id="@+id/onBoardingFragment"
+        android:id="@+id/destination_onboarding"
         android:name="com.kksionek.gdzietentramwaj.onboarding.view.OnBoardingFragment"
         android:label="@string/app_name" >
         <action
             android:id="@+id/action_onBoardingFragment_to_destination_map"
             app:destination="@id/destination_map"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@+id/onBoardingFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 </navigation>
