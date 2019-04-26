@@ -66,8 +66,8 @@ androidExtensions {
 }
 
 dependencies {
-    def nav_version = "2.1.0-alpha01"
-    def daggerVersion = '2.16'
+    def nav_version = "2.1.0-alpha02"
+    def daggerVersion = '2.22'
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
