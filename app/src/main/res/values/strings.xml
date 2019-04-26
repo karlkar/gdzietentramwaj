@@ -1,82 +1,82 @@
 <resources>
-    <string name="app_name">Gdzie Ten Tramwaj?</string>
+    <string name="app_name">Where\'s that tram?</string>
     <string name="adMobAppId">ca-app-pub-9982327151344679~9129163343</string>
     <string name="banner_ad_unit_id">ca-app-pub-9982327151344679/1605896548</string>
     <string name="adMobTestDeviceS7Edge">FF6E13B0E9E671F99C2D803B882C5002</string>
 
-    <string name="map_menu_refresh">Odśwież</string>
-    <string name="map_menu_toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
-    <string name="map_menu_share">Udostępnij</string>
-    <string name="map_menu_rate_app">Oceń aplikację</string>
+    <string name="map_menu_refresh">Refresh</string>
+    <string name="map_menu_toggle_favorite_view">Toggle favorite view</string>
+    <string name="map_menu_share">Share</string>
+    <string name="map_menu_rate_app">Rate the app</string>
 
-    <string name="map_error_internet">Sprawdź swoje połączenie z internetem.</string>
-    <string name="map_error_ztm">Wystąpił błąd po stronie dostawcy danych.</string>
-    <string name="map_position_update_sucessful">Aktualizacja pozycji pojazdów</string>
-    <string name="map_none_position_is_up_to_date">Na serwerze dostawcy danych nie ma informacji o pozycji pojazdów.</string>
+    <string name="map_error_internet">Check your internet connection.</string>
+    <string name="map_error_ztm">Data provider has returned an error.</string>
+    <string name="map_position_update_sucessful">Vehicle positions updated</string>
+    <string name="map_none_position_is_up_to_date">Data provider has returned an empty list of vehicles.</string>
     <string name="map_debug_error_message">%1$s: %2$s</string>
-    <string name="map_auto_zoom_disabled_message">Przybliż mapę, aby zobaczyć wszystkie pojazdy.</string>
-    <string name="map_change_map_type">Zmień typ mapy</string>
+    <string name="map_auto_zoom_disabled_message">Zoom in to see all of the vehicles.</string>
+    <string name="map_change_map_type">Change map type</string>
 
-    <string name="difficulties_error_failed_to_reload_difficulties">Nie udało się załadować utrudnień</string>
-    <string name="difficulties_bottom_sheet_no_items">Brak informacji o utrudnieniach</string>
-    <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
+    <string name="difficulties_error_failed_to_reload_difficulties">Couldn\'t load difficulties</string>
+    <string name="difficulties_bottom_sheet_no_items">No info about difficulties</string>
+    <string name="difficulties_bottom_sheet_title">Difficulties</string>
 
-    <string name="settings">Ustawienia</string>
-    <string name="settings_icon_set_title">Zestaw ikon</string>
-    <string name="settings_icon_set_old_option">Stare ikony</string>
-    <string name="settings_icon_set_new_option">Nowe ikony</string>
-    <string name="settings_auto_map_zooming_check">Automatyczne przybliżanie mapy</string>
-    <string name="settings_auto_map_zooming_description">Gdy oddalasz mapę może się zdarzyć, że powinno na niej być widać bardzo dużo pojazdów. Niestety dla niektórych telefonów jest to za dużo i żeby uniknąć problemów ze stabilnością aplikacji musiałem wprowadzić limit widocznych pojazdów. Przy włączonym automatycznym przybliżaniu mapa będzie się przybliżała tak, żeby móc wyświetlić tyle ile się da.</string>
-    <string name="settings_start_location_check">Ustawienie początkowej lokalizacji</string>
-    <string name="settings_start_location_description">Możesz wybrać lokalizację, która będzie pokazywana tuż po uruchomieniu aplikacji</string>
-    <string name="settings_brigade_showing_title">Pokazuj numer brygady</string>
-    <string name="settings_brigade_showing_description">Gdy ta opcja jest włączona, po kliknięciu na ikonę pojazdu na mapie pojawi się okienko z numerem brygady</string>
-    <string name="settings_traffic_showing_title">Pokazuj informacje o natężeniu ruchu</string>
-    <string name="settings_favorite_lines_title">Ulubione linie</string>
-    <string name="settings_favorite_lines_set_button">Wybierz ulubione linie</string>
-    <string name="settings_remove_ads_title">Usuń reklamy</string>
-    <string name="settings_remove_ads_description">Jeśli masz dość reklam w aplikacji zapraszam do zainstalowania jej płatnej wersji - \"Gdzie Ten Tramwaj? Pro\".\nJedyna różnica między aplikacjami to to, że w wersji darmowej są reklamy, w wersji płatnej ich nie ma.</string>
-    <string name="settings_start_location_choose_button">Ustaw jako lokalizację początkową</string>
-    <string name="settings_city_title">Wybierz swoje miasto</string>
-    <string name="settings_favorite_lines_description">Możesz wybrać linie, które najczęściej obserwujesz. Dzięki temu będziesz mógł włączyć na mapie widok tylko ulubionych pojazdów. Mapa będzie wtedy bardziej przejrzysta. Widok ulubionych możesz włączyć klikając na ikonkę gwiazdki w widoku mapy.</string>
-    <string name="settings_author_disclaimer">Autor aplikacji "Gdzie Ten Tramwaj?" nie ponosi odpowiedzialności za dokładność, ani kompletność danych, jak i na dostępność serwerów.</string>
+    <string name="settings">Settings</string>
+    <string name="settings_icon_set_title">Icon set</string>
+    <string name="settings_icon_set_old_option">Old icons</string>
+    <string name="settings_icon_set_new_option">New icons</string>
+    <string name="settings_auto_map_zooming_check">Zoom in map automatically</string>
+    <string name="settings_auto_map_zooming_description">After zooming the map out, it can happen that many vehicles should be visible. Unfortunately for some devices it is too much and in order to avoid issues I had to introduce the limit of currently visible vehicles. If auto zooming in is enabled, the map will be zooming in so that the limit is not reached and all the vehicles in the area are displayed.</string>
+    <string name="settings_start_location_check">Set the start location</string>
+    <string name="settings_start_location_description">You can choose a localisation, which will be displayed after running the application.</string>
+    <string name="settings_brigade_showing_title">Show brigade details</string>
+    <string name="settings_brigade_showing_description">When this option is enabled, after clicking the vehicle marker the info window will show up with brigade details.</string>
+    <string name="settings_traffic_showing_title">Show traffic info</string>
+    <string name="settings_favorite_lines_title">Favorite lines</string>
+    <string name="settings_favorite_lines_set_button">Choose favorite lines</string>
+    <string name="settings_remove_ads_title">Remove ads</string>
+    <string name="settings_remove_ads_description">If you are done with the ads, you can buy the pro version - \"Where\'s that tram? Pro\".\nThe only difference between apps is that the free one contains the ads, whereas the paid one doesn\'t.</string>
+    <string name="settings_start_location_choose_button">Set as start location</string>
+    <string name="settings_city_title">Choose your city</string>
+    <string name="settings_favorite_lines_description">You can chooose lines that you are observing the most often. It will allow you to turn on the favorites view. It will make the map easier to read. You can turn on the favorites view by clicking the star icon on the map view.</string>
+    <string name="settings_author_disclaimer">Author has no responsibility for the accuracy, completeness, as well as data provider\'s servers availability.</string>
 
-    <string name="destination_favorite_title">Ulubione linie</string>
-    <string name="destination_chooseStartLocation_title">Wybierz lokalizację początkową</string>
+    <string name="destination_favorite_title">Favorite lines</string>
+    <string name="destination_chooseStartLocation_title">Choose start location</string>
 
-    <string name="marker_info_line">Linia %1$s</string>
-    <string name="marker_info_brigade">Brygada %1$s</string>
+    <string name="marker_info_line">Line %1$s</string>
+    <string name="marker_info_brigade">Brigade %1$s</string>
 
-    <string name="info_window_follow_text">Kliknij tu, aby zacząć śledzenie</string>
+    <string name="info_window_follow_text">Click here to follow</string>
 
-    <string name="map_followed_text">Śledzony pojazd\n%1$s %2$s</string>
-    <string name="map_followed_cancel">Anuluj</string>
+    <string name="map_followed_text">Followed vehicle\n%1$s %2$s</string>
+    <string name="map_followed_cancel">Cancel</string>
 
-    <string name="city_warsaw">Warszawa</string>
-    <string name="city_krakow">Kraków</string>
-    <string name="city_wroclaw">Wrocław</string>
-    <string name="city_lodz">Łódź</string>
+    <string name="city_warsaw">Warsaw</string>
+    <string name="city_krakow">Krakow</string>
+    <string name="city_wroclaw">Wroclaw</string>
+    <string name="city_lodz">Łodz</string>
     <string name="city_szczecin">Szczecin</string>
-    <string name="city_bielsko">Bielsko-Biała</string>
-    <string name="city_zielona_gora">Zielona Góra</string>
+    <string name="city_bielsko">Bielsko-Biala</string>
+    <string name="city_zielona_gora">Zielona Gora</string>
     <string name="city_gop">GOP</string>
-    <string name="city_warsaw_description">Dane na temat pozycji pojazdów są udostępniane przez Miasto Stołeczne Warszawa za pośrednictwem serwisu http://api.um.warszawa.pl</string>
-    <string name="city_krakow_description">Dane na temat pozycji pojazdów są udostępniane przez Zarzad Infrastruktury Komunalnej i Transportu w Krakowie.</string>
-    <string name="city_wroclaw_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Wrocław.</string>
-    <string name="city_lodz_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Łódź.</string>
-    <string name="city_szczecin_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Dróg i Transportu Miejskiego w Szczecinie.</string>
-    <string name="city_bielsko_description">Dane na temat pozycji pojazdów są udostępniane przez MPK Bielsko-Biała.</string>
-    <string name="city_zielona_description">Dane na temat pozycji pojazdów są udostępniane przez Miejski Zakład Komunikacji w Zielonej Górze.</string>
-    <string name="city_gop_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Transportu Metropolitalnego.</string>
+    <string name="city_warsaw_description">Data about the vehicles position are delivered by Miasto Stołeczne Warszawa via http://api.um.warszawa.pl</string>
+    <string name="city_krakow_description">Data about the vehicles position are delivered by Zarzad Infrastruktury Komunalnej i Transportu w Krakowie.</string>
+    <string name="city_wroclaw_description">Data about the vehicles position are delivered by MPK Wrocław.</string>
+    <string name="city_lodz_description">Data about the vehicles position are delivered by MPK Łódź.</string>
+    <string name="city_szczecin_description">Data about the vehicles position are delivered by Zarząd Dróg i Transportu Miejskiego w Szczecinie.</string>
+    <string name="city_bielsko_description">Data about the vehicles position are delivered by MPK Bielsko-Biała.</string>
+    <string name="city_zielona_description">Data about the vehicles position are delivered by Miejski Zakład Komunikacji w Zielonej Górze.</string>
+    <string name="city_gop_description">Data about the vehicles position are delivered by Zarząd Transportu Metropolitalnego.</string>
 
-    <string name="onboarding_welcome">Witaj w aplikacji Gdzie Ten Tramwaj!</string>
-    <string name="onboarding_lets_start">To pierwsze uruchomienie aplikacji, więc musimy przejść przez konfigurację!</string>
-    <string name="onboarding_location_description">Na początek zdecyduj, czy chcesz, aby aplikacja korzystała z Twojej lokalizacji. Jeśli się na to zgodzisz, będziesz mógł w łatwy sposób przesuwać mapę do swojej lokalizacji.</string>
-    <string name="onboarding_allow_location">Zezwól na dostęp do lokalizacji</string>
-    <string name="onboarding_city_chooser">Musisz też wybrać miasto, którego pojazdy chcesz obserwować. Możesz to później zmienić w ustawieniach.</string>
-    <string name="onboarding_start">ROZPOCZNIJ</string>
+    <string name="onboarding_welcome">Welcome to Where\'s that tram!</string>
+    <string name="onboarding_lets_start">It\'s the first launch, therefore we need to configure it!</string>
+    <string name="onboarding_location_description">First of all, you have to decide if you want to allow the app to know about your location. If you agree, you will be able to easily move the map to your current location.</string>
+    <string name="onboarding_allow_location">Allow to access location</string>
+    <string name="onboarding_city_chooser">You have to choose a city you want to observe. You can change it later in the settings.</string>
+    <string name="onboarding_start">START</string>
 
-    <string name="favorites_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
-    <string name="favorites_failed_to_load">Nie udało się załadować ulubionych linii</string>
-    <string name="favorites_retry_button">Spróbuj ponownie</string>
+    <string name="favorites_instruction">Click a line to add or remove it from the favorites.</string>
+    <string name="favorites_failed_to_load">Failed to load favorites</string>
+    <string name="favorites_retry_button">Retry</string>
 </resources>
