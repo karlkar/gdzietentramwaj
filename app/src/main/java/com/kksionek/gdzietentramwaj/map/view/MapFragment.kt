@@ -106,7 +106,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     menuItemRefresh?.endAnimation()
                     val tramMarkerList = uiState.data.data
                     if (uiState.data.newData) {
-                        showSuccessToast(getString(R.string.position_update_sucessful))
+                        showSuccessToast(getString(R.string.map_position_update_sucessful))
                     }
                     updateExistingMarkers(tramMarkerList, uiState.data.animate)
                 }

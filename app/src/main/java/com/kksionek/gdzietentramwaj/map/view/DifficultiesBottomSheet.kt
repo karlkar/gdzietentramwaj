@@ -31,13 +31,13 @@ class DifficultiesBottomSheet(
     3. Badge count for difficulties
      */
     private val difficultiesObserver =
-        Observer { difficulties: UiState<DifficultiesState>? ->
-            when (difficulties) {
+        Observer { uiState: UiState<DifficultiesState>? ->
+            when (uiState) {
                 is UiState.Success -> {
-                    if (difficulties.data.isSupported) {
+                    if (uiState.data.isSupported) {
                         containerView.visibility = View.VISIBLE
                         stopDifficultiesLoading()
-                        if (difficulties.data.difficultiesEntities.isEmpty()) {
+                        if (uiState.data.difficultiesEntities.isEmpty()) {
                             textview_difficulties_message.text =
                                 context.getText(R.string.difficulties_bottom_sheet_no_items)
                             recyclerview_difficulties_difficulties.visibility = View.GONE
@@ -46,7 +46,7 @@ class DifficultiesBottomSheet(
                             textview_difficulties_message.visibility = View.GONE
                             recyclerview_difficulties_difficulties.visibility = View.VISIBLE
                             (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                                difficulties.data.difficultiesEntities
+                                uiState.data.difficultiesEntities
                             )
                         }
                     } else {
@@ -56,7 +56,7 @@ class DifficultiesBottomSheet(
                 is UiState.Error -> {
                     containerView.visibility = View.VISIBLE
                     textview_difficulties_message.text =
-                        context.getText(R.string.error_failed_to_reload_difficulties)
+                        context.getString(uiState.message, uiState.args)
                     recyclerview_difficulties_difficulties.visibility = View.GONE
                     textview_difficulties_message.visibility = View.VISIBLE
                     stopDifficultiesLoading()

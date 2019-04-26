@@ -4,18 +4,18 @@
     <item
         android:id="@+id/menu_item_favorite_switch"
         android:icon="@drawable/fav_off"
-        android:title="@string/toggle_favorite_view"
+        android:title="@string/map_menu_toggle_favorite_view"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_item_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        android:title="@string/refresh"
+        android:title="@string/map_menu_refresh"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_item_share"
-        android:title="@string/menu_item_main_share"
+        android:title="@string/map_menu_share"
         app:showAsAction="ifRoom"
         app:actionProviderClass=
             "androidx.appcompat.widget.ShareActionProvider"/>
@@ -28,6 +28,6 @@
 
     <item
         android:id="@+id/menu_item_rate"
-        android:title="@string/rate_app"
+        android:title="@string/map_menu_rate_app"
         app:showAsAction="never" />
 </menu>

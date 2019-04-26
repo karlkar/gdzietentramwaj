@@ -173,13 +173,13 @@ class MapsViewModel @Inject constructor(
 
     private fun handleError(operationResult: NetworkOperationResult.Error<List<VehicleData>>) {
         val uiState: UiState.Error<BusTramLoading> = when (operationResult.throwable) {
-            NoTramsLoadedException -> UiState.Error(R.string.none_position_is_up_to_date)
-            is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.error_internet)
+            NoTramsLoadedException -> UiState.Error(R.string.map_none_position_is_up_to_date)
+            is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.map_error_internet)
             else -> {
                 if (operationResult.throwable is CompositeException
                     && operationResult.throwable.exceptions.all { it is HttpException }
                 ) {
-                    UiState.Error(R.string.error_internet)
+                    UiState.Error(R.string.map_error_internet)
                 } else {
                     if (operationResult.throwable !is JsonSyntaxException
                         && operationResult.throwable !is IllegalStateException
@@ -195,7 +195,7 @@ class MapsViewModel @Inject constructor(
                     if (BuildConfig.DEBUG) {
                         Log.e(TAG, "Exception", operationResult.throwable)
                         UiState.Error(
-                            R.string.debug_error_message,
+                            R.string.map_debug_error_message,
                             listOf(
                                 operationResult.throwable.javaClass.simpleName,
                                 operationResult.throwable.message
@@ -203,7 +203,7 @@ class MapsViewModel @Inject constructor(
                             )
                         )
                     } else {
-                        UiState.Error(R.string.error_ztm)
+                        UiState.Error(R.string.map_error_ztm)
                     }
                 }
             }
@@ -273,7 +273,7 @@ class MapsViewModel @Inject constructor(
                                 "Failed to reload difficulties"
                             )
                         }
-                        UiState.Error<DifficultiesState>(R.string.error_failed_to_reload_difficulties)
+                        UiState.Error<DifficultiesState>(R.string.difficulties_error_failed_to_reload_difficulties)
                     }
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
