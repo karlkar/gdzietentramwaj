@@ -4,12 +4,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteTramRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import io.reactivex.Flowable
+import com.kksionek.gdzietentramwaj.map.view.UiState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -22,24 +23,29 @@ class FavoriteLinesViewModel @Inject constructor(
 
     private val compositeDisposable = CompositeDisposable()
 
-    private var _favoriteTrams =
-        MutableLiveData<List<FavoriteTram>>().apply { postValue(emptyList()) }
-    val favoriteTrams: LiveData<List<FavoriteTram>> = _favoriteTrams
+    private var _favoriteTrams = MutableLiveData<UiState<List<FavoriteTram>>>()
+    val favoriteTrams: LiveData<UiState<List<FavoriteTram>>> = _favoriteTrams
 
     private val selectedCity: Cities = mapSettingsProvider.getCity()
 
-    // TODO view is not notified about success nor failure
     init {
+        forceReloadFavorites()
+    }
+
+    fun forceReloadFavorites() {
+        compositeDisposable.clear()
         compositeDisposable.add(favoriteTramRepository.getAllTrams(selectedCity)
             .subscribeOn(Schedulers.io())
-            .onErrorResumeNext { throwable: Throwable ->
-                Log.e(TAG, "Failed getting all the favorites from the database", throwable)
+            .map { UiState.Success(it) as UiState<List<FavoriteTram>> }
+            .onErrorReturn {
+                Log.e(TAG, "Failed getting all the favorites from the database", it)
                 crashReportingService.reportCrash(
-                    throwable,
+                    it,
                     "Failed getting all the favorites from the database"
                 )
-                Flowable.empty()
+                UiState.Error(R.string.favorites_failed_to_load)
             }
+            .startWith(UiState.InProgress())
             .subscribe { list -> _favoriteTrams.postValue(list) }
         )
     }

@@ -77,4 +77,7 @@
     <string name="onboarding_allow_location">Zezwól na dostęp do lokalizacji</string>
     <string name="onboarding_city_chooser">Musisz też wybrać miasto, którego pojazdy chcesz obserwować. Możesz to później zmienić w ustawieniach.</string>
     <string name="onboarding_start">ROZPOCZNIJ</string>
+
+    <string name="favorites_failed_to_load">Nie udało się załadować ulubionych linii</string>
+    <string name="favorites_retry_button">Spróbuj ponownie</string>
 </resources>
