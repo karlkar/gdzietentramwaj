@@ -110,6 +110,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val locationPermissionObserver = Observer<Boolean?> { permissionGranted ->
         permissionGranted?.let {
+            mapsViewModel.reloadLastLocation()
             if (this::map.isInitialized) {
                 @Suppress("MissingPermission")
                 map.isMyLocationEnabled = permissionGranted
@@ -395,17 +396,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             .setInterpolator(BounceInterpolator())
             .setDuration(1000L)
             .start()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (this::map.isInitialized) {
-            mapsViewModel.reloadLastLocation()
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     @UiThread

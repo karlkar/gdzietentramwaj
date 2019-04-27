@@ -37,6 +37,7 @@ import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.inject.Inject
 import kotlin.concurrent.read
@@ -139,8 +140,13 @@ class MapsViewModel @Inject constructor(
                         }
                     },
                     { throwable ->
-                        Log.e(TAG, "Failed to get last location", throwable)
-                        crashReportingService.reportCrash(throwable, "Failed to get last location")
+                        if (throwable !is ExecutionException || throwable.cause !is SecurityException) {
+                            Log.e(TAG, "Failed to get last location", throwable)
+                            crashReportingService.reportCrash(
+                                throwable,
+                                "Failed to get last location"
+                            )
+                        }
                     })
         )
     }

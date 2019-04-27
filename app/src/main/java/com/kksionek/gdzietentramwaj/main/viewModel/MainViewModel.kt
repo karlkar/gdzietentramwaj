@@ -5,21 +5,21 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
+import com.kksionek.gdzietentramwaj.toLocation
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
     private val context: Context,
     private val locationRepository: LocationRepository,
-    private val crashReportingService: CrashReportingService
+    private val mapSettingsProvider: MapSettingsProvider
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
@@ -49,14 +49,10 @@ class MainViewModel @Inject constructor(
     private fun subscribeToLastLocation() {
         compositeDisposable.add(
             locationRepository.lastKnownLocation
-                .subscribe(
-                    { location ->
-                        _lastLocation.postValue(location)
-                    },
-                    { throwable ->
-                        Log.e(TAG, "Failed to get last location", throwable)
-                        crashReportingService.reportCrash(throwable, "Failed to get last location")
-                    })
+                .onErrorReturnItem(mapSettingsProvider.getCity().latLng.toLocation())
+                .subscribe { location ->
+                    _lastLocation.postValue(location)
+                }
         )
     }
 
