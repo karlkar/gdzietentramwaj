@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 private const val MAX_RETRIES = 3
 
-class TramRepository @Inject constructor(
+class VehiclesRepository @Inject constructor(
     private val tramDao: TramDao,
     private val vehicleDataSourceFactory: VehicleDataSourceFactory
 ) {

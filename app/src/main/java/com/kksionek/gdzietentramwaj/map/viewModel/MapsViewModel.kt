@@ -24,7 +24,7 @@ import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
-import com.kksionek.gdzietentramwaj.map.repository.TramRepository
+import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
@@ -48,7 +48,7 @@ private const val MAX_VISIBLE_MARKERS = 50
 private const val CITY_CHANGE_CHECK_THRESHOLD = 25000.0
 
 class MapsViewModel @Inject constructor(
-    private val tramRepository: TramRepository,
+    private val vehiclesRepository: VehiclesRepository,
     private val locationRepository: LocationRepository,
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,
     private val difficultiesRepository: DifficultiesRepository,
@@ -160,7 +160,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun subscribeToFavoriteTrams(city: Cities) {
-        compositeDisposable.add(tramRepository.getFavoriteVehicleLines(city)
+        compositeDisposable.add(vehiclesRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable: Throwable ->
                 Log.e(TAG, "Failed getting all the favorites from the database", throwable)
@@ -203,7 +203,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun subscribeToVehicles(city: Cities) {
-        compositeDisposable.add(tramRepository.dataStream(city)
+        compositeDisposable.add(vehiclesRepository.dataStream(city)
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -304,7 +304,7 @@ class MapsViewModel @Inject constructor(
     }
 
     fun forceReloadTrams() {
-        tramRepository.forceReload()
+        vehiclesRepository.forceReload()
     }
 
     fun forceReloadDifficulties() {
