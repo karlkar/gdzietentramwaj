@@ -145,6 +145,14 @@ class MapsViewModel @Inject constructor(
         )
     }
 
+    private fun subscribeToAllData() {
+        compositeDisposable.clear()
+        val selectedCity = mapSettingsManager.getCity()
+        subscribeToFavoriteTrams(selectedCity)
+        subscribeToDifficulties(selectedCity)
+        subscribeToVehicles(selectedCity)
+    }
+
     private fun subscribeToFavoriteTrams(city: Cities) {
         compositeDisposable.add(tramRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
@@ -165,6 +173,29 @@ class MapsViewModel @Inject constructor(
         )
     }
 
+    private fun subscribeToDifficulties(city: Cities) {
+        compositeDisposable.add(difficultiesRepository.getDifficulties(city)
+            .map { result ->
+                when (result) {
+                    is NetworkOperationResult.Success -> UiState.Success(result.data)
+                    is NetworkOperationResult.Error -> {
+                        Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                        if (result.throwable !is HttpException) {
+                            crashReportingService.reportCrash(
+                                result.throwable,
+                                "Failed to reload difficulties"
+                            )
+                        }
+                        UiState.Error<DifficultiesState>(R.string.difficulties_error_failed_to_reload_difficulties)
+                    }
+                    is NetworkOperationResult.InProgress -> UiState.InProgress()
+                }
+            }
+            .subscribe {
+                _difficulties.postValue(it)
+            })
+    }
+
     private fun subscribeToVehicles(city: Cities) {
         compositeDisposable.add(tramRepository.dataStream(city)
             .subscribeOn(Schedulers.io())
@@ -180,6 +211,15 @@ class MapsViewModel @Inject constructor(
                 }.makeExhaustive
             })
     }
+
+    private fun Flowable<NetworkOperationResult<List<VehicleData>>>.transformEmptyListToError() =
+        map {
+            if (it is NetworkOperationResult.Success<List<VehicleData>> && it.data.isEmpty()) {
+                NetworkOperationResult.Error(NoTramsLoadedException)
+            } else {
+                it
+            }
+        }
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
         allTrams = operationResult.data
@@ -229,15 +269,6 @@ class MapsViewModel @Inject constructor(
         _tramData.postValue(uiState)
     }
 
-    private fun Flowable<NetworkOperationResult<List<VehicleData>>>.transformEmptyListToError() =
-        map {
-            if (it is NetworkOperationResult.Success<List<VehicleData>> && it.data.isEmpty()) {
-                NetworkOperationResult.Error(NoTramsLoadedException)
-            } else {
-                it
-            }
-        }
-
     private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
         val onlyVisibleTrams = allTrams
             .filter { isMarkerLineVisible(it.tramLine) }
@@ -266,13 +297,6 @@ class MapsViewModel @Inject constructor(
         !(favoriteView.value ?: false) || line in favoriteTrams
     }
 
-    fun toggleFavorite() {
-        val favoriteViewOn = !(favoriteView.value ?: return)
-        mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
-        favoriteView.value = favoriteViewOn
-        showOrZoom(false)
-    }
-
     fun forceReloadTrams() {
         tramRepository.forceReload()
     }
@@ -281,27 +305,11 @@ class MapsViewModel @Inject constructor(
         subscribeToDifficulties(mapSettingsManager.getCity())
     }
 
-    private fun subscribeToDifficulties(city: Cities) {
-        compositeDisposable.add(difficultiesRepository.getDifficulties(city)
-            .map { result ->
-                when (result) {
-                    is NetworkOperationResult.Success -> UiState.Success(result.data)
-                    is NetworkOperationResult.Error -> {
-                        Log.e(TAG, "Failed to reload difficulties", result.throwable)
-                        if (result.throwable !is HttpException) {
-                            crashReportingService.reportCrash(
-                                result.throwable,
-                                "Failed to reload difficulties"
-                            )
-                        }
-                        UiState.Error<DifficultiesState>(R.string.difficulties_error_failed_to_reload_difficulties)
-                    }
-                    is NetworkOperationResult.InProgress -> UiState.InProgress()
-                }
-            }
-            .subscribe {
-                _difficulties.postValue(it)
-            })
+    fun onToggleFavorite() {
+        val favoriteViewOn = !(favoriteView.value ?: return)
+        mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
+        favoriteView.value = favoriteViewOn
+        showOrZoom(false)
     }
 
     fun onSwitchMapTypeButtonClicked() {
@@ -317,14 +325,6 @@ class MapsViewModel @Inject constructor(
 
     fun onResume() {
         subscribeToAllData()
-    }
-
-    private fun subscribeToAllData() {
-        compositeDisposable.clear()
-        val selectedCity = mapSettingsManager.getCity()
-        subscribeToFavoriteTrams(selectedCity)
-        subscribeToDifficulties(selectedCity)
-        subscribeToVehicles(selectedCity)
     }
 
     fun onPause() {

@@ -266,7 +266,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     100
                 )
             }
-            R.id.menu_item_favorite_switch -> mapsViewModel.toggleFavorite()
+            R.id.menu_item_favorite_switch -> mapsViewModel.onToggleFavorite()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
