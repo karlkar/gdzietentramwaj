@@ -57,7 +57,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var menuItemFavoriteSwitch: MenuItem
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
 
-    private var isOldIconSetEnabled = false
+    private var displaysOldIcons = false
 
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
@@ -152,7 +152,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapsViewModel =
             ViewModelProviders.of(this, viewModelFactory)[MapsViewModel::class.java]
 
-        isOldIconSetEnabled = mapsViewModel.isOldIconSetEnabled()
+        displaysOldIcons = mapsViewModel.isOldIconSetEnabled
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -276,7 +276,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onResume()
         mapsViewModel.onResume()
         if (this::map.isInitialized) {
-            map.isTrafficEnabled = mapsViewModel.mapSettingsManager.isTrafficShowingEnabled()
+            map.isTrafficEnabled = mapsViewModel.isTrafficShowingEnabled
         }
     }
 
@@ -326,7 +326,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
             isBuildingsEnabled = false
             isIndoorEnabled = false
-            isTrafficEnabled = mapsViewModel.mapSettingsManager.isTrafficShowingEnabled()
+            isTrafficEnabled = mapsViewModel.isTrafficShowingEnabled
             @SuppressLint("MissingPermission")
             isMyLocationEnabled = mainViewModel.locationPermission.value ?: false
             setSwitchButtonMargin()
@@ -335,7 +335,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             setInfoWindowAdapter(vehicleInfoWindowAdapter)
 
             setOnMarkerClickListener {
-                if (mapsViewModel.mapSettingsManager.isBrigadeShowingEnabled()) {
+                if (mapsViewModel.isBrigadeShowingEnabled) {
                     it.showInfoWindow()
                 }
                 return@setOnMarkerClickListener true
@@ -421,10 +421,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             tramPathAnimator.removeAllAnimatedMarkers()
         }
 
-        val currentOldIconEnabledSetting = mapsViewModel.isOldIconSetEnabled()
-        if (isOldIconSetEnabled != currentOldIconEnabledSetting) {
+        val currentOldIconEnabledSetting = mapsViewModel.isOldIconSetEnabled
+        if (displaysOldIcons != currentOldIconEnabledSetting) {
             TramMarker.clearCache()
-            isOldIconSetEnabled = currentOldIconEnabledSetting
+            displaysOldIcons = currentOldIconEnabledSetting
             currentlyDisplayedTrams.forEach {
                 tramPathAnimator.removeMarker(it)
                 it.remove()
@@ -461,7 +461,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                     tramMarker.tramLine,
                                     tramMarker.isTram,
                                     context,
-                                    mapsViewModel.isOldIconSetEnabled()
+                                    mapsViewModel.isOldIconSetEnabled
                                 )
                             )
                             if (!currentOldIconEnabledSetting) {

@@ -53,7 +53,7 @@ class MapsViewModel @Inject constructor(
     private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService,
     private val iconSettingsProvider: IconSettingsProvider,
-    val mapSettingsManager: MapSettingsManager // TODO Should be private
+    private val mapSettingsManager: MapSettingsManager
 ) : ViewModel() {
 
     val favoriteView =
@@ -321,7 +321,14 @@ class MapsViewModel @Inject constructor(
 
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
-    fun isOldIconSetEnabled(): Boolean = iconSettingsProvider.isOldIconSetEnabled()
+    val isOldIconSetEnabled: Boolean
+        get() = iconSettingsProvider.isOldIconSetEnabled()
+
+    val isTrafficShowingEnabled: Boolean
+        get() = mapSettingsManager.isTrafficShowingEnabled()
+
+    val isBrigadeShowingEnabled: Boolean
+        get() = mapSettingsManager.isBrigadeShowingEnabled()
 
     fun onResume() {
         subscribeToAllData()
