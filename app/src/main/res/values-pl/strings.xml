@@ -19,7 +19,7 @@
 
     <string name="difficulties_error_failed_to_reload_difficulties">Nie udało się załadować utrudnień</string>
     <string name="difficulties_bottom_sheet_no_items">Brak informacji o utrudnieniach</string>
-    <string name="difficulties_bottom_sheet_title">Utrudnienia</string>
+    <string name="difficulties_bottom_sheet_title">Utrudnienia (%1$d)</string>
 
     <string name="settings">Ustawienia</string>
     <string name="settings_icon_set_title">Zestaw ikon</string>

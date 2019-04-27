@@ -6,12 +6,17 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
-import io.reactivex.Observable
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class DifficultiesRepository @Inject constructor(
     private val difficultiesDataSourceFactory: DifficultiesDataSourceFactory
 ) {
+    private val dataTrigger: PublishSubject<Unit> = PublishSubject.create()
 
     private var selectedCity: Cities = Cities.WARSAW
     private lateinit var difficultiesDataSource: DifficultiesDataSource
@@ -23,11 +28,23 @@ class DifficultiesRepository @Inject constructor(
         }
     }
 
-    fun getDifficulties(city: Cities): Observable<NetworkOperationResult<DifficultiesState>> {
+    fun dataStream(city: Cities): Flowable<NetworkOperationResult<DifficultiesState>> {
         selectCity(city)
-        return difficultiesDataSource.getDifficulties()
-            .toNetworkOperationResult()
-            .toObservable()
-            .startWith(NetworkOperationResult.InProgress())
+        return dataTrigger.toFlowable(BackpressureStrategy.DROP)
+            .startWith(Unit)
+            .switchMapDelayError {
+                Flowable.interval(0, 1, TimeUnit.MINUTES)
+                    .subscribeOn(Schedulers.io())
+                    .flatMap {
+                        difficultiesDataSource.getDifficulties()
+                            .toNetworkOperationResult()
+                            .toFlowable()
+                            .startWith(NetworkOperationResult.InProgress())
+                    }
+            }
+    }
+
+    fun forceReload() {
+        dataTrigger.onNext(Unit)
     }
 }

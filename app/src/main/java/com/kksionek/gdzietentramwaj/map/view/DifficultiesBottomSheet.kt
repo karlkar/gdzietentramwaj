@@ -26,9 +26,7 @@ class DifficultiesBottomSheet(
 
     /*
     TODO - Difficulties features
-    1. Auto refresh every x minutes
     2. Seen / unseen should look different
-    3. Badge count for difficulties
      */
     private val difficultiesObserver =
         Observer { uiState: UiState<DifficultiesState>? ->
@@ -37,6 +35,11 @@ class DifficultiesBottomSheet(
                     if (uiState.data.isSupported) {
                         containerView.visibility = View.VISIBLE
                         stopDifficultiesLoading()
+                        textview_difficulties_title.text =
+                            context.getString(
+                                R.string.difficulties_bottom_sheet_title,
+                                uiState.data.difficultiesEntities.size
+                            )
                         if (uiState.data.difficultiesEntities.isEmpty()) {
                             textview_difficulties_message.text =
                                 context.getText(R.string.difficulties_bottom_sheet_no_items)
@@ -55,6 +58,8 @@ class DifficultiesBottomSheet(
                 }
                 is UiState.Error -> {
                     containerView.visibility = View.VISIBLE
+                    textview_difficulties_title.text =
+                        context.getString(R.string.difficulties_bottom_sheet_title, 0)
                     textview_difficulties_message.text =
                         context.getString(uiState.message, uiState.args)
                     recyclerview_difficulties_difficulties.visibility = View.GONE
@@ -65,7 +70,8 @@ class DifficultiesBottomSheet(
                     containerView.visibility = View.VISIBLE
                     startDifficultiesLoading()
                 }
-                null -> {}
+                null -> {
+                }
             }.makeExhaustive
         }
 

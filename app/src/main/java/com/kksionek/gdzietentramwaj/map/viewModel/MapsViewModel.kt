@@ -180,7 +180,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun subscribeToDifficulties(city: Cities) {
-        compositeDisposable.add(difficultiesRepository.getDifficulties(city)
+        compositeDisposable.add(difficultiesRepository.dataStream(city)
             .map { result ->
                 when (result) {
                     is NetworkOperationResult.Success -> UiState.Success(result.data)
@@ -308,7 +308,7 @@ class MapsViewModel @Inject constructor(
     }
 
     fun forceReloadDifficulties() {
-        subscribeToDifficulties(mapSettingsManager.getCity())
+        difficultiesRepository.forceReload()
     }
 
     fun onToggleFavorite() {
