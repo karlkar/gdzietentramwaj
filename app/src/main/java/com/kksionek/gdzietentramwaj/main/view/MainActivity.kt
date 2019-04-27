@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -42,18 +41,14 @@ class MainActivity : AppCompatActivity(), LocationChangeListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.destination_onboarding, R.id.destination_map))
-        setupActionBarWithNavController(
-            findNavController(R.id.fragment_maps_content),
-            appBarConfiguration
-        )
+        setupActionBarWithNavController(findNavController(R.id.fragment_maps_content))
 
         (application as TramApplication).appComponent.inject(this)
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)[MainViewModel::class.java]
 
         if (viewModel.locationPermission.value == false) {
-            viewModel.requestLocationPermission.observe(this, Observer {
+            viewModel.locationPermissionRequestLiveData.observe(this, Observer {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     LOCATION_PERMISSION_REQUEST

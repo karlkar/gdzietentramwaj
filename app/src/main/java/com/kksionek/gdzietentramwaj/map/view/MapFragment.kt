@@ -1,13 +1,10 @@
 package com.kksionek.gdzietentramwaj.map.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -21,7 +18,6 @@ import android.view.animation.BounceInterpolator
 import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.ShareActionProvider
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuItemCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -115,12 +111,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }.makeExhaustive
         }
 
-    private val lastLocationObserver = Observer { location: Location? ->
-        location?.let {
-            locationChangeListener?.onLocationChanged(it)
+    private val locationPermissionObserver = Observer<Boolean?> { permissionGranted ->
+        permissionGranted?.let {
             if (this::map.isInitialized) {
                 @Suppress("MissingPermission")
-                map.isMyLocationEnabled = mainViewModel.locationPermission.value ?: false
+                map.isMyLocationEnabled = permissionGranted
                 setSwitchButtonMargin()
             }
         }
@@ -192,9 +187,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         mapsViewModel.tramData.observe(this, tramDataObserver)
-        mapsViewModel.lastLocation.observe(this, lastLocationObserver)
         mapsViewModel.favoriteView.observe(this, favoriteModeObserver)
         mapsViewModel.difficulties.observe(this, difficultiesObserver)
+        if (mainViewModel.locationPermission.value != true) {
+            mainViewModel.locationPermission.observe(this, locationPermissionObserver)
+        }
 
         setSwitchButtonMargin()
         map_switch_type_imagebutton.setOnClickListener {
@@ -210,6 +207,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         )
 
         vehicleInfoWindowAdapter = VehicleInfoWindowAdapter(view.context)
+
+        mainViewModel.requestLocationPermission()
     }
 
     private fun setSwitchButtonMargin() {
@@ -281,12 +280,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        mapsViewModel.onResume(
-            ContextCompat.checkSelfPermission(
-                activity!!,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        )
+        mapsViewModel.onResume()
         if (this::map.isInitialized) {
             map.isTrafficEnabled = mapsViewModel.mapSettingsManager.isTrafficShowingEnabled()
         }

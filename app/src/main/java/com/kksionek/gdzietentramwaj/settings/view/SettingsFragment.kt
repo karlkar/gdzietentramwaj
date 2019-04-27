@@ -159,7 +159,6 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
                     id: Long
                 ) {
                     val selectedCity = sortedCities[position]
-                    viewModel.city = selectedCity
                     settings_city_description.text = getString(
                         when (selectedCity) {
                             Cities.WARSAW -> R.string.city_warsaw_description

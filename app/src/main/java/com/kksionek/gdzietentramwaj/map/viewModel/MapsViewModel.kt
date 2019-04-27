@@ -8,11 +8,13 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
+import com.google.maps.android.SphericalUtil
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
+import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
@@ -44,6 +46,7 @@ import kotlin.concurrent.write
 import kotlin.properties.Delegates
 
 private const val MAX_VISIBLE_MARKERS = 50
+private const val CITY_CHANGE_CHECK_THRESHOLD = 25000.0
 
 class MapsViewModel @Inject constructor(
     private val tramRepository: TramRepository,
@@ -51,15 +54,12 @@ class MapsViewModel @Inject constructor(
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,
     private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService,
-    val iconSettingsProvider: IconSettingsProvider,
-    val mapSettingsManager: MapSettingsManager
+    val iconSettingsProvider: IconSettingsProvider, // TODO Should be private
+    val mapSettingsManager: MapSettingsManager // TODO Should be private
 ) : ViewModel() {
 
-    object NoTramsLoadedException : Throwable()
-
-    val favoriteView = MutableLiveData<Boolean>().apply {
-        value = mapsViewSettingsRepository.isFavoriteTramViewEnabled()
-    }
+    val favoriteView =
+        MutableLiveData<Boolean>().initWith(mapsViewSettingsRepository.isFavoriteTramViewEnabled())
 
     var followedVehicle: FollowedTramData? by Delegates.observable(null) { _, _: FollowedTramData?, value: FollowedTramData? ->
         value?.let {
@@ -82,8 +82,30 @@ class MapsViewModel @Inject constructor(
     private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
     val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
 
-    var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, _ ->
+    var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, newValue, _ ->
+        newValue?.let { latLngBounds ->
+            val nearestCity = getNearestCity(latLngBounds)
+            val selectedCity = mapSettingsManager.getCity()
+            if (selectedCity != nearestCity) {
+                mapSettingsManager.setCity(nearestCity)
+                subscribeToAllData()
+            }
+        }
+
         showOrZoom(false)
+    }
+
+    private fun getNearestCity(latLngBounds: LatLngBounds): Cities {
+        val currentCity = mapSettingsManager.getCity()
+        val distanceFromCurrentCity =
+            SphericalUtil.computeDistanceBetween(latLngBounds.center, currentCity.latLng)
+        return if (distanceFromCurrentCity <= CITY_CHANGE_CHECK_THRESHOLD) {
+            currentCity
+        } else {
+            Cities.values()
+                .minBy { SphericalUtil.computeDistanceBetween(it.latLng, latLngBounds.center) }
+                ?: Cities.WARSAW
+        }
     }
 
     private val compositeDisposable = CompositeDisposable()
@@ -91,13 +113,11 @@ class MapsViewModel @Inject constructor(
     private val favoriteLock = ReentrantReadWriteLock()
     private var favoriteTrams = emptyList<String>()
 
-    private var selectedCity: Cities = mapSettingsManager.getCity()
-
     val mapInitialPosition: LatLng
     val mapInitialZoom: Float
 
     init {
-        val defaultLocation = selectedCity.latLng
+        val defaultLocation = mapSettingsManager.getCity().latLng
         val defaultZoom = mapSettingsManager.getDefaultZoom()
         if (mapSettingsManager.isStartLocationEnabled()) {
             mapInitialPosition = mapSettingsManager.getStartLocationPosition() ?: defaultLocation
@@ -108,12 +128,7 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    private fun refreshSelectedCity() {
-        selectedCity = mapSettingsManager.getCity()
-    }
-
-    private fun subscribeToFavoriteTrams() {
-        val city = selectedCity
+    private fun subscribeToFavoriteTrams(city: Cities) {
         compositeDisposable.add(tramRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable: Throwable ->
@@ -147,8 +162,8 @@ class MapsViewModel @Inject constructor(
             })
     }
 
-    private fun subscribeToVehicles() {
-        compositeDisposable.add(tramRepository.dataStream(selectedCity)
+    private fun subscribeToVehicles(city: Cities) {
+        compositeDisposable.add(tramRepository.dataStream(city)
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -259,8 +274,11 @@ class MapsViewModel @Inject constructor(
         tramRepository.forceReload()
     }
 
-    fun subscribeToDifficulties() {
-        val city = selectedCity
+    fun forceReloadDifficulties() {
+        subscribeToDifficulties(mapSettingsManager.getCity())
+    }
+
+    private fun subscribeToDifficulties(city: Cities) {
         compositeDisposable.add(difficultiesRepository.getDifficulties(city)
             .map { result ->
                 when (result) {
@@ -292,19 +310,16 @@ class MapsViewModel @Inject constructor(
 
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
-    fun onResume(isLocationPermissionGranted: Boolean) {
-        if (checkIfCityChanged() && !isLocationPermissionGranted) {
-            _mapControls.postValue(MapControls.MoveTo(selectedCity.latLng))
-        }
-        subscribeToFavoriteTrams()
-        subscribeToDifficulties()
-        subscribeToVehicles()
+    fun onResume() {
+        subscribeToAllData()
     }
 
-    private fun checkIfCityChanged(): Boolean {
-        val prevCity = selectedCity
-        refreshSelectedCity()
-        return selectedCity != prevCity
+    private fun subscribeToAllData() {
+        compositeDisposable.clear()
+        val selectedCity = mapSettingsManager.getCity()
+        subscribeToFavoriteTrams(selectedCity)
+        subscribeToDifficulties(selectedCity)
+        subscribeToVehicles(selectedCity)
     }
 
     fun onPause() {

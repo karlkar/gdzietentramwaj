@@ -69,13 +69,6 @@
     <string name="city_zielona_description">Dane na temat pozycji pojazdów są udostępniane przez Miejski Zakład Komunikacji w Zielonej Górze.</string>
     <string name="city_gop_description">Dane na temat pozycji pojazdów są udostępniane przez Zarząd Transportu Metropolitalnego.</string>
 
-    <string name="onboarding_welcome">Witaj w aplikacji Gdzie Ten Tramwaj!</string>
-    <string name="onboarding_lets_start">To pierwsze uruchomienie aplikacji, więc musimy przejść przez konfigurację!</string>
-    <string name="onboarding_location_description">Na początek zdecyduj, czy chcesz, aby aplikacja korzystała z Twojej lokalizacji. Jeśli się na to zgodzisz, będziesz mógł w łatwy sposób przesuwać mapę do swojej lokalizacji.</string>
-    <string name="onboarding_allow_location">Zezwól na dostęp do lokalizacji</string>
-    <string name="onboarding_city_chooser">Musisz też wybrać miasto, którego pojazdy chcesz obserwować. Możesz to później zmienić w ustawieniach.</string>
-    <string name="onboarding_start">ROZPOCZNIJ</string>
-
     <string name="favorites_instruction">Kliknij na linię, aby ją dodać lub usunąć z ulubionych</string>
     <string name="favorites_failed_to_load">Nie udało się załadować ulubionych linii</string>
     <string name="favorites_retry_button">Spróbuj ponownie</string>

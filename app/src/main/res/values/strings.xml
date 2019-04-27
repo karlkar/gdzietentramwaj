@@ -37,7 +37,7 @@
     <string name="settings_remove_ads_title">Remove ads</string>
     <string name="settings_remove_ads_description">If you are done with the ads, you can buy the pro version - \"Where\'s that tram? Pro\".\nThe only difference between apps is that the free one contains the ads, whereas the paid one doesn\'t.</string>
     <string name="settings_start_location_choose_button">Set as start location</string>
-    <string name="settings_city_title">Choose your city</string>
+    <string name="settings_city_title">Supported cities</string>
     <string name="settings_favorite_lines_description">You can chooose lines that you are observing the most often. It will allow you to turn on the favorites view. It will make the map easier to read. You can turn on the favorites view by clicking the star icon on the map view.</string>
     <string name="settings_author_disclaimer">Author has no responsibility for the accuracy, completeness, as well as data provider\'s servers availability.</string>
 
@@ -68,13 +68,6 @@
     <string name="city_bielsko_description">Data about the vehicles position are delivered by MPK Bielsko-Biała.</string>
     <string name="city_zielona_description">Data about the vehicles position are delivered by Miejski Zakład Komunikacji w Zielonej Górze.</string>
     <string name="city_gop_description">Data about the vehicles position are delivered by Zarząd Transportu Metropolitalnego.</string>
-
-    <string name="onboarding_welcome">Welcome to Where\'s that tram!</string>
-    <string name="onboarding_lets_start">It\'s the first launch, therefore we need to configure it!</string>
-    <string name="onboarding_location_description">First of all, you have to decide if you want to allow the app to know about your location. If you agree, you will be able to easily move the map to your current location.</string>
-    <string name="onboarding_allow_location">Allow to access location</string>
-    <string name="onboarding_city_chooser">You have to choose a city you want to observe. You can change it later in the settings.</string>
-    <string name="onboarding_start">START</string>
 
     <string name="favorites_instruction">Click a line to add or remove it from the favorites.</string>
     <string name="favorites_failed_to_load">Failed to load favorites</string>
