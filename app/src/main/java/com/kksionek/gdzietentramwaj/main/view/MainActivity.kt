@@ -22,11 +22,7 @@ import javax.inject.Inject
 private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
 private const val LOCATION_PERMISSION_REQUEST = 3456
 
-interface LocationChangeListener {
-    fun onLocationChanged(location: Location)
-}
-
-class MainActivity : AppCompatActivity(), LocationChangeListener {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -34,7 +30,13 @@ class MainActivity : AppCompatActivity(), LocationChangeListener {
     @Inject
     internal lateinit var adProviderInterface: AdProviderInterface
 
-    private lateinit var viewModel: MainViewModel
+    private lateinit var mainViewModel: MainViewModel
+
+    private val lastLocationObserver = Observer { location: Location? ->
+        location?.let {
+            adProviderInterface.loadAd(applicationContext, it)
+        }
+    }
 
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,16 +47,17 @@ class MainActivity : AppCompatActivity(), LocationChangeListener {
 
         (application as TramApplication).appComponent.inject(this)
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)[MainViewModel::class.java]
+        mainViewModel = ViewModelProviders.of(this, viewModelFactory)[MainViewModel::class.java]
 
-        if (viewModel.locationPermission.value == false) {
-            viewModel.locationPermissionRequestLiveData.observe(this, Observer {
+        if (mainViewModel.locationPermission.value == false) {
+            mainViewModel.locationPermissionRequestLiveData.observe(this, Observer {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     LOCATION_PERMISSION_REQUEST
                 )
             })
         }
+        mainViewModel.lastLocation.observe(this, lastLocationObserver)
 
         adProviderInterface.initialize(this, getString(R.string.adMobAppId))
         adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
@@ -88,17 +91,13 @@ class MainActivity : AppCompatActivity(), LocationChangeListener {
         super.onPause()
     }
 
-    override fun onLocationChanged(location: Location) {
-        adProviderInterface.loadAd(applicationContext, location)
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        viewModel.updateLocationPermission(
+        mainViewModel.updateLocationPermission(
             requestCode == LOCATION_PERMISSION_REQUEST
                     && permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED

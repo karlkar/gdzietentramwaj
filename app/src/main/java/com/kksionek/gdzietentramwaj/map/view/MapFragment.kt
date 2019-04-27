@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -37,7 +36,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
-import com.kksionek.gdzietentramwaj.main.view.LocationChangeListener
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
@@ -70,8 +68,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
-
-    private var locationChangeListener: LocationChangeListener? = null
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -111,13 +107,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 }
             }.makeExhaustive
         }
-
-    // TODO: This one is used only to update ads, so move it to the MainActivity
-    private val lastLocationObserver = Observer { location: Location? ->
-        location?.let {
-            locationChangeListener?.onLocationChanged(it)
-        }
-    }
 
     private val locationPermissionObserver = Observer<Boolean?> { permissionGranted ->
         permissionGranted?.let {
@@ -164,9 +153,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             ViewModelProviders.of(this, viewModelFactory)[MapsViewModel::class.java]
 
         isOldIconSetEnabled = mapsViewModel.isOldIconSetEnabled()
-
-        locationChangeListener = activity as? LocationChangeListener
-            ?: throw IllegalArgumentException("Activity should implement LocationChangeListener interface")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -197,7 +183,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapsViewModel.tramData.observe(this, tramDataObserver)
         mapsViewModel.favoriteView.observe(this, favoriteModeObserver)
         mapsViewModel.difficulties.observe(this, difficultiesObserver)
-        mapsViewModel.lastLocation.observe(this, lastLocationObserver)
         if (mainViewModel.locationPermission.value != true) {
             mainViewModel.locationPermission.observe(this, locationPermissionObserver)
         }
@@ -391,7 +376,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }.makeExhaustive
         })
 
-        mapsViewModel.subscribeToLastLocation()
+        mapsViewModel.reloadLastLocation()
     }
 
     private fun showFollowedView(marker: FollowedTramData) {
@@ -418,7 +403,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         grantResults: IntArray
     ) {
         if (this::map.isInitialized) {
-            mapsViewModel.subscribeToLastLocation()
+            mapsViewModel.reloadLastLocation()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }

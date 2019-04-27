@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
-import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -32,7 +31,6 @@ import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
 import com.kksionek.gdzietentramwaj.toLatLng
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.functions.Consumer
@@ -75,9 +73,6 @@ class MapsViewModel @Inject constructor(
 
     private val _tramData = MutableLiveData<UiState<BusTramLoading>>()
     val tramData: LiveData<UiState<BusTramLoading>> = _tramData
-
-    private val _lastLocation = MutableLiveData<Location>()
-    val lastLocation: LiveData<Location> = _lastLocation
 
     private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
     val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
@@ -126,6 +121,28 @@ class MapsViewModel @Inject constructor(
             mapInitialPosition = defaultLocation
             mapInitialZoom = defaultZoom
         }
+
+        subscribeToLastLocation()
+    }
+
+    fun reloadLastLocation() {
+        subscribeToLastLocation()
+    }
+
+    private fun subscribeToLastLocation() {
+        compositeDisposable.add(
+            locationRepository.lastKnownLocation
+                .subscribe(
+                    { location ->
+                        if (!mapSettingsManager.isStartLocationEnabled()) {
+                            _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
+                        }
+                    },
+                    { throwable ->
+                        Log.e(TAG, "Failed to get last location", throwable)
+                        crashReportingService.reportCrash(throwable, "Failed to get last location")
+                    })
+        )
     }
 
     private fun subscribeToFavoriteTrams(city: Cities) {
@@ -146,20 +163,6 @@ class MapsViewModel @Inject constructor(
                     }
                 })
         )
-    }
-
-    // This one has to be called when the map is ready to use
-    @Suppress("RedundantLambdaArrow")
-    fun subscribeToLastLocation() {
-        compositeDisposable.add(locationRepository.lastKnownLocation
-            .toObservable()
-            .onErrorResumeNext { _: Throwable -> Observable.empty() }
-            .subscribe { location ->
-                if (!mapSettingsManager.isStartLocationEnabled()) {
-                    _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
-                }
-                _lastLocation.postValue(location)
-            })
     }
 
     private fun subscribeToVehicles(city: Cities) {
@@ -310,6 +313,8 @@ class MapsViewModel @Inject constructor(
 
     fun getMapType(): MapTypes = mapSettingsManager.getMapType()
 
+    fun isOldIconSetEnabled(): Boolean = iconSettingsProvider.isOldIconSetEnabled()
+
     fun onResume() {
         subscribeToAllData()
     }
@@ -330,8 +335,6 @@ class MapsViewModel @Inject constructor(
         compositeDisposable.clear()
         super.onCleared()
     }
-
-    fun isOldIconSetEnabled(): Boolean = iconSettingsProvider.isOldIconSetEnabled()
 
     companion object {
         const val TAG = "MapsViewModel"
