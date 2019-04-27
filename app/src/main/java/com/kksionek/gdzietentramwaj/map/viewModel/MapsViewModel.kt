@@ -54,7 +54,7 @@ class MapsViewModel @Inject constructor(
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,
     private val difficultiesRepository: DifficultiesRepository,
     private val crashReportingService: CrashReportingService,
-    val iconSettingsProvider: IconSettingsProvider, // TODO Should be private
+    private val iconSettingsProvider: IconSettingsProvider,
     val mapSettingsManager: MapSettingsManager // TODO Should be private
 ) : ViewModel() {
 
@@ -330,6 +330,8 @@ class MapsViewModel @Inject constructor(
         compositeDisposable.clear()
         super.onCleared()
     }
+
+    fun isOldIconSetEnabled(): Boolean = iconSettingsProvider.isOldIconSetEnabled()
 
     companion object {
         const val TAG = "MapsViewModel"

@@ -17,7 +17,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
-import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 
 class TramMarker(tramData: VehicleData) {
 
@@ -83,12 +82,12 @@ class TramMarker(tramData: VehicleData) {
             line: String,
             isTram: Boolean,
             context: Context,
-            iconSettingsProvider: IconSettingsProvider
+            isOldIconSetEnabled: Boolean
         ): BitmapDescriptor {
             val descriptor = bitmapCache[line]
             return if (descriptor == null) {
                 val bitmap =
-                    createBitmap(context, line, isTram, iconSettingsProvider.isOldIconSetEnabled())
+                    createBitmap(context, line, isTram, isOldIconSetEnabled)
                 val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
                 bitmapCache.put(line, bitmapDescriptor)
                 bitmapDescriptor
