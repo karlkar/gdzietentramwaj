@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">Gdzie Ten Tramwaj?</string>
-    <string name="adMobAppId">ca-app-pub-9982327151344679~9129163343</string>
-    <string name="banner_ad_unit_id">ca-app-pub-9982327151344679/1605896548</string>
-    <string name="adMobTestDeviceS7Edge">FF6E13B0E9E671F99C2D803B882C5002</string>
 
     <string name="map_menu_refresh">Odśwież</string>
     <string name="map_menu_toggle_favorite_view">Włącz/Wyłącz widok ulubionych</string>
