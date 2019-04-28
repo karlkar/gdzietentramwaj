@@ -24,10 +24,6 @@ class DifficultiesBottomSheet(
     imageLoader: ImageLoader
 ) : LayoutContainer {
 
-    /*
-    TODO - Difficulties features
-    2. Seen / unseen should look different
-     */
     private val difficultiesObserver =
         Observer { uiState: UiState<DifficultiesState>? ->
             when (uiState) {

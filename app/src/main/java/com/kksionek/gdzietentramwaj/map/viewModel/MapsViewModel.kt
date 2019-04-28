@@ -78,7 +78,7 @@ class MapsViewModel @Inject constructor(
     private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
     val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
 
-    var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, newValue, _ ->
+    var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, newValue ->
         newValue?.let { latLngBounds ->
             val nearestCity = getNearestCity(latLngBounds)
             val selectedCity = mapSettingsManager.getCity()

@@ -50,9 +50,8 @@ class SettingsViewModel @Inject constructor(
         get() = mapSettingsManager.isTrafficShowingEnabled()
         set(value) = mapSettingsManager.setTrafficShowingEnabled(value)
 
-    var city: Cities
+    val city: Cities
         get() = mapSettingsManager.getCity()
-        set(value) = mapSettingsManager.setCity(value)
 
     // As there is no "startFragmentForResult" I have to do a workaround
     var locationChooserFragmentClosedWithResult: Boolean = false
