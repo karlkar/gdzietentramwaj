@@ -29,7 +29,7 @@ class MainViewModel @Inject constructor(
     val locationPermission: LiveData<Boolean> = _locationPermission
 
     private fun isLocationPermissionGranted(context: Context): Boolean {
-        return Build.VERSION.SDK_INT <= Build.VERSION_CODES.M
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                 || ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
