@@ -15,7 +15,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
@@ -90,7 +89,7 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         }
 
         @Suppress("ConstantConditionIf")
-        if (BuildConfig.FLAVOR == "paid") {
+        if (true) { // TODO Consider showing it in free version
             settings_remove_ads_title.visibility = View.GONE
             settings_remove_ads_description.visibility = View.GONE
             settings_remove_ads_button.visibility = View.GONE
