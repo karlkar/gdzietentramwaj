@@ -73,7 +73,14 @@ class DifficultiesBottomSheet(
 
     init {
         recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter(imageLoader) {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.link)))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.link))
+            val chooser = Intent.createChooser(
+                intent,
+                context.getString(R.string.difficulties_bottom_sheet_link_title)
+            )
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(chooser)
+            }
         }
 
         imagebutton_difficulties_refresh_button.setOnClickListener {
