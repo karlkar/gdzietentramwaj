@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
+import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepository
+import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -55,4 +57,9 @@ class MapFragmentModule {
     internal fun provideMapSettingsProvider(
         settingsRepositoryImpl: SettingsRepositoryImpl
     ): MapSettingsProvider = settingsRepositoryImpl
+
+    @Singleton
+    @Provides
+    internal fun provideWarsawApikeyRepository(): WarsawApikeyRepository =
+        WarsawApikeyRepositoryImpl()
 }

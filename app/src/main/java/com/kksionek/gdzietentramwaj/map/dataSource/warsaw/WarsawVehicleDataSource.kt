@@ -9,28 +9,31 @@ import java.util.Calendar
 import java.util.Locale
 
 class WarsawVehicleDataSource(
-    private val warsawVehicleInterface: WarsawVehicleInterface
+    private val warsawVehicleInterface: WarsawVehicleInterface,
+    private val warsawApikeyRepository: WarsawApikeyRepository
 ) : VehicleDataSource {
 
     override fun vehicles(): Single<List<VehicleData>> =
-        Observable.mergeDelayError(
-            warsawVehicleInterface.buses()
-                .filterOutOutdated()
-                .flatMapObservable { Observable.fromIterable(it) },
-            warsawVehicleInterface.trams()
-                .filterOutOutdated()
-                .flatMapObservable { Observable.fromIterable(it) }
-        )
-            .map {
-                VehicleData(
-                    it.id,
-                    it.latLng,
-                    it.firstLine,
-                    it.isTram(),
-                    it.brigade
-                )
-            }
-            .toList()
+        warsawApikeyRepository.apikey.flatMap { apikey ->
+            Observable.mergeDelayError(
+                warsawVehicleInterface.buses(apikey)
+                    .filterOutOutdated()
+                    .flatMapObservable { Observable.fromIterable(it) },
+                warsawVehicleInterface.trams(apikey)
+                    .filterOutOutdated()
+                    .flatMapObservable { Observable.fromIterable(it) }
+            )
+                .map {
+                    VehicleData(
+                        it.id,
+                        it.latLng,
+                        it.firstLine,
+                        it.isTram(),
+                        it.brigade
+                    )
+                }
+                .toList()
+        }
 
     private fun Single<WarsawVehicleResponse>.filterOutOutdated() =
         map { result ->
