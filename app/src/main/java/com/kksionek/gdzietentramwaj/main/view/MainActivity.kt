@@ -99,6 +99,8 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         mainViewModel.updateLocationPermission(
             requestCode == LOCATION_PERMISSION_REQUEST
+                    && permissions.isNotEmpty()
+                    && grantResults.isNotEmpty()
                     && permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
         )
