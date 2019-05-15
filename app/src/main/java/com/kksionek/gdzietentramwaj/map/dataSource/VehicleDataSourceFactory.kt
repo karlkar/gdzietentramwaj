@@ -20,7 +20,6 @@ class VehicleDataSourceFactory @Inject constructor(
     private val bielskoVehicleDataSourceFactory: BielskoVehicleDataSourceFactory,
     private val zielonaGoraVehicleDataSourceFactory: ZielonaGoraVehicleDataSourceFactory,
     private val gopVehicleDataSourceFactory: GopVehicleDataSourceFactory
-    // TODO Add Rzeszow?
 ) {
 
     fun create(city: Cities): VehicleDataSource =
