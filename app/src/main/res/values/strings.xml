@@ -12,6 +12,7 @@
 
     <string name="map_error_internet">Check your internet connection.</string>
     <string name="map_error_ztm">Data provider has returned an error.</string>
+    <string name="map_error_no_favorites_visible">No favorite vehicles on current view.</string>
     <string name="map_position_update_sucessful">Vehicle positions updated</string>
     <string name="map_none_position_is_up_to_date">Data provider has returned an empty list of vehicles.</string>
     <string name="map_debug_error_message">%1$s: %2$s</string>
