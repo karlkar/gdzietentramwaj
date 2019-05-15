@@ -41,8 +41,7 @@ import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
-import com.kksionek.gdzietentramwaj.showErrorToast
-import com.kksionek.gdzietentramwaj.showSuccessToast
+import com.kksionek.gdzietentramwaj.showToast
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -93,13 +92,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 }
                 is UiState.Error -> {
                     menuItemRefresh?.endAnimation()
-                    showErrorToast(getString(uiState.message, *uiState.args.toTypedArray()))
+                    showToast(getString(uiState.message, *uiState.args.toTypedArray()), true)
                 }
                 is UiState.Success -> {
                     menuItemRefresh?.endAnimation()
                     val tramMarkerList = uiState.data.data
-                    if (uiState.data.newData) {
-                        showSuccessToast(getString(R.string.map_position_update_sucessful))
+                    if (mapsViewModel.favoriteView.value == true && uiState.data.data.isEmpty()) {
+                        showToast(getString(R.string.map_error_no_favorites_visible))
+                    } else if (uiState.data.newData) {
+                        showToast(getString(R.string.map_position_update_sucessful))
                     }
                     updateExistingMarkers(tramMarkerList, uiState.data.animate)
                 }
@@ -360,7 +361,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 is MapControls.ZoomIn ->
                     map.animateCamera(CameraUpdateFactory.zoomIn())
                 is MapControls.IgnoredZoomIn ->
-                    showSuccessToast(context.getString(it.data))
+                    showToast(context.getString(it.data))
                 is MapControls.MoveTo -> {
                     if (it.customAnimationDuration) {
                         map.animateCamera(

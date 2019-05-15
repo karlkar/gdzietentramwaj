@@ -8,6 +8,7 @@
 
     <string name="map_error_internet">Sprawdź swoje połączenie z internetem.</string>
     <string name="map_error_ztm">Wystąpił błąd po stronie dostawcy danych.</string>
+    <string name="map_error_no_favorites_visible">Na aktualnym widoku nie ma ulubionych pojazdów.</string>
     <string name="map_position_update_sucessful">Aktualizacja pozycji pojazdów</string>
     <string name="map_none_position_is_up_to_date">Na serwerze dostawcy danych nie ma informacji o pozycji pojazdów.</string>
     <string name="map_debug_error_message">%1$s: %2$s</string>
