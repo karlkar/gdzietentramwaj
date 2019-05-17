@@ -105,7 +105,11 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
         }
 
         settings_favorite_lines_button.setOnClickListener {
-            findNavController().navigate(R.id.destination_favorite)
+            findNavController().apply {
+                if (currentDestination?.id == R.id.destination_settings) {
+                    navigate(R.id.destination_favorite)
+                }
+            }
         }
 
         settings_auto_zoom_switch.isChecked = viewModel.autoZoomEnabled
@@ -187,7 +191,11 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
 
     private fun startChooseLocationFragmentForResult() {
         locationChooserFragmentStarted = true
-        findNavController().navigate(R.id.destination_chooseStartLocation)
+        findNavController().apply {
+            if (currentDestination?.id == R.id.destination_settings) {
+                navigate(R.id.destination_chooseStartLocation)
+            }
+        }
     }
 
     override fun handleOnBackPressed(): Boolean = findNavController().navigateUp()

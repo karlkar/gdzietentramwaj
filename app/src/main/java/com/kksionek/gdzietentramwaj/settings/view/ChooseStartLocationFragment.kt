@@ -57,7 +57,11 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
                 map.cameraPosition.let {
                     viewModel.saveStartLocation(it.target, it.zoom)
                     viewModel.locationChooserFragmentClosedWithResult = true
-                    findNavController().navigateUp()
+                    findNavController().apply {
+                        if (currentDestination?.id == R.id.destination_chooseStartLocation) {
+                            navigateUp()
+                        }
+                    }
                 }
             }
         }
