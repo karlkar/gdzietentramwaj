@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
+import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(
     private val iconSettingsManager: IconSettingsManager,
-    private val mapSettingsManager: MapSettingsManager
+    private val mapSettingsManager: MapSettingsManager,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
     var oldIconSetEnabled: Boolean
@@ -55,4 +57,7 @@ class SettingsViewModel @Inject constructor(
 
     // As there is no "startFragmentForResult" I have to do a workaround
     var locationChooserFragmentClosedWithResult: Boolean = false
+
+    val locationPermissionGranted: Boolean
+        get() = locationRepository.isLocationPermissionGranted()
 }

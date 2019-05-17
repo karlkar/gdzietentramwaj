@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -67,10 +68,13 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         val startLocationPosition = viewModel.startLocationPosition ?: WARSAW_LATLNG
         val startPositionZoom = viewModel.startLocationZoom ?: 15f
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocationPosition, startPositionZoom))
+        map.uiSettings.isZoomControlsEnabled = true
+        map.isMyLocationEnabled = viewModel.locationPermissionGranted
     }
 }
