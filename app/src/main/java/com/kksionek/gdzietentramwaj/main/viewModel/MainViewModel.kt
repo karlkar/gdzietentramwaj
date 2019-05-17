@@ -1,25 +1,33 @@
 package com.kksionek.gdzietentramwaj.main.viewModel
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.play.core.install.model.AppUpdateType
 import com.kksionek.gdzietentramwaj.initWith
+import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.toLocation
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
+
+private const val APP_UPDATE_AVAILABILIITY_REQUEST_CODE = 7890
 
 class MainViewModel @Inject constructor(
     private val context: Context,
     private val locationRepository: LocationRepository,
-    private val mapSettingsProvider: MapSettingsProvider
+    private val mapSettingsProvider: MapSettingsProvider,
+    private val appUpdateRepository: AppUpdateRepository
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
@@ -27,6 +35,9 @@ class MainViewModel @Inject constructor(
     private val _locationPermission =
         MutableLiveData<Boolean>().initWith(isLocationPermissionGranted(context))
     val locationPermission: LiveData<Boolean> = _locationPermission
+
+    private val _appUpdateAvailable = MutableLiveData<Boolean>().initWith(false)
+    val appUpdateAvailable: LiveData<Boolean> = _appUpdateAvailable
 
     private fun isLocationPermissionGranted(context: Context): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
@@ -44,6 +55,7 @@ class MainViewModel @Inject constructor(
 
     init {
         subscribeToLastLocation()
+        subscribeToAppUpdateAvailability()
     }
 
     private fun subscribeToLastLocation() {
@@ -56,6 +68,18 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    private fun subscribeToAppUpdateAvailability() {
+        compositeDisposable.add(
+            appUpdateRepository.isUpdateAvailable()
+                .doOnError { Log.e(TAG, "Couldn't check app update availability", it) }
+                .onErrorReturnItem(false)
+                .subscribeOn(Schedulers.io())
+                .subscribe { updateAvailability ->
+                    _appUpdateAvailable.postValue(updateAvailability)
+                }
+        )
+    }
+
     fun requestLocationPermission() {
         if (!isLocationPermissionGranted(context)) {
             _locationPermissionRequestLiveData.postValue(true)
@@ -64,6 +88,26 @@ class MainViewModel @Inject constructor(
 
     fun updateLocationPermission(granted: Boolean) {
         _locationPermission.postValue(granted)
+    }
+
+    fun startUpdateFlowForResult(activity: Activity) {
+        appUpdateRepository.startUpdateFlowForResult(
+            AppUpdateType.IMMEDIATE,
+            activity,
+            APP_UPDATE_AVAILABILIITY_REQUEST_CODE
+        )
+    }
+
+    fun onResume(activity: Activity) {
+        compositeDisposable.add(appUpdateRepository.isUpdateInProgress()
+            .doOnError { Log.e(TAG, "Couldn't check if update is in progress", it) }
+            .onErrorReturnItem(false)
+            .subscribeOn(Schedulers.io())
+            .subscribe { updateInProgress ->
+                if (updateInProgress) {
+                    startUpdateFlowForResult(activity)
+                }
+            })
     }
 
     override fun onCleared() {

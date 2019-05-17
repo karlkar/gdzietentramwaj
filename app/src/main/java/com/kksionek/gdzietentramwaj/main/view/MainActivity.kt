@@ -38,6 +38,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val appUpdateObserver = Observer { appUpdateAvailability: Boolean? ->
+        appUpdateAvailability?.let { it ->
+            if (it) {
+                mainViewModel.startUpdateFlowForResult(this)
+            }
+        }
+    }
+
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +66,8 @@ class MainActivity : AppCompatActivity() {
             })
         }
         mainViewModel.lastLocation.observe(this, lastLocationObserver)
+
+        mainViewModel.appUpdateAvailable.observe(this, appUpdateObserver)
 
         adProviderInterface.initialize(this, getString(R.string.adMobAppId))
         adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
@@ -84,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         adProviderInterface.resume()
+        mainViewModel.onResume(this)
     }
 
     override fun onPause() {

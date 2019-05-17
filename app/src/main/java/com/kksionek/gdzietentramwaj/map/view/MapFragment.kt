@@ -98,9 +98,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     menuItemRefresh?.endAnimation()
                     val tramMarkerList = uiState.data.data
                     if (mapsViewModel.favoriteView.value == true && uiState.data.data.isEmpty()) {
-                        showToast(getString(R.string.map_error_no_favorites_visible))
+                        showToast(R.string.map_error_no_favorites_visible)
                     } else if (uiState.data.newData) {
-                        showToast(getString(R.string.map_position_update_sucessful))
+                        showToast(R.string.map_position_update_sucessful)
                     }
                     updateExistingMarkers(tramMarkerList, uiState.data.animate)
                 }
@@ -356,12 +356,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         mapsViewModel.mapControls.observe(this, Observer {
-            val context = context ?: return@Observer
             when (it) {
                 is MapControls.ZoomIn ->
                     map.animateCamera(CameraUpdateFactory.zoomIn())
                 is MapControls.IgnoredZoomIn ->
-                    showToast(context.getString(it.data))
+                    showToast(it.data)
                 is MapControls.MoveTo -> {
                     if (it.customAnimationDuration) {
                         map.animateCamera(

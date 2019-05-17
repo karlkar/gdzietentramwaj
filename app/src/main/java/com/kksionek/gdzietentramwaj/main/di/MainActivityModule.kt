@@ -1,8 +1,11 @@
 package com.kksionek.gdzietentramwaj.main.di
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
+import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
+import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepositoryImpl
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -33,4 +36,9 @@ class MainActivityModule {
     @ActivityScope
     @Provides
     internal fun provideAdProvider(): AdProviderInterface = AdProvider()
+
+    @Singleton
+    @Provides
+    fun provideAppUpdateRepository(context: Context): AppUpdateRepository =
+        AppUpdateRepositoryImpl(context)
 }
