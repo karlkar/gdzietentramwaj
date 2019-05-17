@@ -6,6 +6,8 @@ import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepositoryImpl
+import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
+import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityCheckerImpl
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -41,4 +43,9 @@ class MainActivityModule {
     @Provides
     fun provideAppUpdateRepository(context: Context): AppUpdateRepository =
         AppUpdateRepositoryImpl(context)
+
+    @Singleton
+    @Provides
+    fun provideGoogleApiAvailabilityChecker(context: Context): GoogleApiAvailabilityChecker =
+        GoogleApiAvailabilityCheckerImpl(context)
 }

@@ -10,8 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
@@ -19,7 +17,6 @@ import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import javax.inject.Inject
 
-private const val MY_GOOGLE_API_AVAILABILITY_REQUEST = 2345
 private const val LOCATION_PERMISSION_REQUEST = 3456
 
 class MainActivity : AppCompatActivity() {
@@ -79,16 +76,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val result = googleApiAvailability.isGooglePlayServicesAvailable(this, 13400000)
-        if (result != ConnectionResult.SUCCESS) {
-            googleApiAvailability.getErrorDialog(
-                this, result,
-                MY_GOOGLE_API_AVAILABILITY_REQUEST
-            ) {
-                finish()
-            }.show()
-        }
+        mainViewModel.showGoogleApiUpdateNeededDialog(this) { finish() }
     }
 
     override fun onResume() {

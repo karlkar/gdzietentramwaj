@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import com.google.android.play.core.install.model.AppUpdateType
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
+import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.toLocation
@@ -21,13 +23,15 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
+private const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
 private const val APP_UPDATE_AVAILABILIITY_REQUEST_CODE = 7890
 
 class MainViewModel @Inject constructor(
     private val context: Context,
     private val locationRepository: LocationRepository,
     private val mapSettingsProvider: MapSettingsProvider,
-    private val appUpdateRepository: AppUpdateRepository
+    private val appUpdateRepository: AppUpdateRepository,
+    private val googleApiAvailabilityChecker: GoogleApiAvailabilityChecker
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
@@ -108,6 +112,14 @@ class MainViewModel @Inject constructor(
                     startUpdateFlowForResult(activity)
                 }
             })
+    }
+
+    fun showGoogleApiUpdateNeededDialog(activity: Activity, callback: ((DialogInterface) -> Unit)) {
+        googleApiAvailabilityChecker.showGoogleApiUpdateNeededDialog(
+            activity,
+            GOOGLE_API_AVAILABILITY_REQUEST_CODE,
+            callback
+        )
     }
 
     override fun onCleared() {
