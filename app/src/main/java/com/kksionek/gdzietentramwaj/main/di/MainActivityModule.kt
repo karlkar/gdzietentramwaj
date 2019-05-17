@@ -10,6 +10,8 @@ import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityCheckerImpl
 import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
+import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
+import com.kksionek.gdzietentramwaj.map.repository.LocationRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import com.kksionek.gdzietentramwaj.view.AdProvider
@@ -48,4 +50,9 @@ class MainActivityModule {
     @Provides
     fun provideGoogleApiAvailabilityChecker(context: Context): GoogleApiAvailabilityChecker =
         GoogleApiAvailabilityCheckerImpl(context)
+
+    @Singleton
+    @Provides
+    fun provideLocationRepository(context: Context): LocationRepository =
+        LocationRepositoryImpl(context)
 }

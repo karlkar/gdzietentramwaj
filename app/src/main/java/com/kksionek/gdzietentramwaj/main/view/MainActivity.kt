@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mainViewModel.updateLocationPermission(
+        mainViewModel.onRequestPermissionsResult(
             requestCode == LOCATION_PERMISSION_REQUEST
                     && permissions.isNotEmpty()
                     && grantResults.isNotEmpty()
