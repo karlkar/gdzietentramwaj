@@ -281,6 +281,10 @@ class MapsViewModel @Inject constructor(
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
 
         when {
+            onlyVisibleTrams.isEmpty() && favoriteView.value ?: false ->
+                _tramData.postValue(
+                    UiState.Error(R.string.map_error_no_favorites_visible)
+                )
             onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS ->
                 _tramData.postValue(
                     UiState.Success(BusTramLoading(onlyVisibleTrams, animate, newData))
