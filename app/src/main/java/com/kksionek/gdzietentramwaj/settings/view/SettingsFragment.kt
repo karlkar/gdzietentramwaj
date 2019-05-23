@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
@@ -23,7 +22,7 @@ import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_settings.*
 import javax.inject.Inject
 
-class SettingsFragment : Fragment(), OnBackPressedCallback {
+class SettingsFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -197,6 +196,4 @@ class SettingsFragment : Fragment(), OnBackPressedCallback {
             }
         }
     }
-
-    override fun handleOnBackPressed(): Boolean = findNavController().navigateUp()
 }

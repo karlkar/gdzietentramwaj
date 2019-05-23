@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kksionek.gdzietentramwaj.R
@@ -24,7 +22,7 @@ import javax.inject.Inject
 
 private const val COLUMN_COUNT = 7
 
-class FavoriteFragment : Fragment(), OnBackPressedCallback {
+class FavoriteFragment : Fragment() {
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -90,6 +88,4 @@ class FavoriteFragment : Fragment(), OnBackPressedCallback {
                 }.makeExhaustive
             })
     }
-
-    override fun handleOnBackPressed(): Boolean = findNavController().navigateUp()
 }
