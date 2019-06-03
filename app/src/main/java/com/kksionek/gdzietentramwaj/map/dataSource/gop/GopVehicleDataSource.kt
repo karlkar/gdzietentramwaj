@@ -10,29 +10,37 @@ class GopVehicleDataSource(
     private val gopVehicleInterface: GopVehicleInterface
 ) : VehicleDataSource {
 
+    private var routesSource = createResourcesSource()
+
+    private fun createResourcesSource(): Single<Map<Type, List<Int>>> = gopVehicleInterface.getRoutes()
+        .map { result ->
+            val buses = busPattern.findAll(result)
+                .map { it.groupValues[1] }
+                .map { matchResult -> pattern.findAll(matchResult)
+                    .map { it.groupValues[1] }
+                    .filter { it.isNotEmpty() }
+                    .map { it.toInt() }
+                    .toList() }
+                .first()
+            val trams = tramPattern.findAll(result)
+                .map { it.groupValues[1] }
+                .map { matchResult -> pattern.findAll(matchResult)
+                    .map { it.groupValues[1] }
+                    .filter { it.isNotEmpty() }
+                    .map { it.toInt() }
+                    .toList() }
+                .first()
+            return@map mapOf(
+                Type.BUS to buses,
+                Type.TRAM to trams
+            )
+        }.cache()
+
     override fun vehicles(): Single<List<VehicleData>> {
-        return gopVehicleInterface.getRoutes()
-            .map { result ->
-                val buses = busPattern.findAll(result)
-                    .map { it.groupValues[1] }
-                    .map { matchResult -> pattern.findAll(matchResult)
-                        .map { it.groupValues[1] }
-                        .filter { it.isNotEmpty() }
-                        .map { it.toInt() }
-                        .toList() }
-                    .first()
-                val trams = tramPattern.findAll(result)
-                    .map { it.groupValues[1] }
-                    .map { matchResult -> pattern.findAll(matchResult)
-                        .map { it.groupValues[1] }
-                        .filter { it.isNotEmpty() }
-                        .map { it.toInt() }
-                        .toList() }
-                    .first()
-                return@map mapOf(
-                    Type.BUS to buses,
-                    Type.TRAM to trams
-                )
+        return routesSource
+            .onErrorResumeNext {
+                routesSource = createResourcesSource()
+                routesSource
             }
             .flatMapObservable { map: Map<Type, List<Int>> ->
                 Observable.mergeDelayError(
