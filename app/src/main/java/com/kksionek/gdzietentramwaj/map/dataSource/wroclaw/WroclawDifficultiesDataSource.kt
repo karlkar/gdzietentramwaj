@@ -25,7 +25,7 @@ class WroclawDifficultiesDataSource(
         }
         val today = cal.time
         return wroclawDifficultiesInterface.getDifficulties()
-            .map { result ->
+            .map external@{ result ->
                 val difficultiesList = pattern.findAll(result)
                     .map { matchResult ->
                         val range: DateRange

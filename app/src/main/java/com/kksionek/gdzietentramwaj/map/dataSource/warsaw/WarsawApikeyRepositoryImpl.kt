@@ -12,8 +12,7 @@ class WarsawApikeyRepositoryImpl : WarsawApikeyRepository {
     private val firebaseRemoteConfig: Single<FirebaseRemoteConfig> =
         Single.fromCallable {
             FirebaseRemoteConfig.getInstance().apply {
-                Tasks.await(fetch())
-                activateFetched()
+                Tasks.await(fetch().continueWith { activate() })
             }
         }
 
