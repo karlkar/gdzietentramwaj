@@ -61,7 +61,7 @@ class MainViewModel @Inject constructor(
     private fun subscribeToAppUpdateAvailability() {
         compositeDisposable.add(
             appUpdateRepository.isUpdateAvailable()
-                .doOnError { Log.e(TAG, "Couldn't check app update availability", it) }
+                .doOnError { Log.w(TAG, "Couldn't check app update availability", it) }
                 .onErrorReturnItem(false)
                 .subscribeOn(Schedulers.io())
                 .subscribe { updateAvailability ->
@@ -90,7 +90,7 @@ class MainViewModel @Inject constructor(
 
     fun onResume(activity: Activity) {
         compositeDisposable.add(appUpdateRepository.isUpdateInProgress()
-            .doOnError { Log.e(TAG, "Couldn't check if update is in progress", it) }
+            .doOnError { Log.w(TAG, "Couldn't check if update is in progress", it) }
             .onErrorReturnItem(false)
             .subscribeOn(Schedulers.io())
             .subscribe { updateInProgress ->

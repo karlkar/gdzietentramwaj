@@ -26,12 +26,13 @@ class AppUpdateRepositoryImpl(
             }
     }
 
-    override fun isUpdateInProgress(): Single<Boolean> =
-        Single.fromCallable { Tasks.await(updateManager.appUpdateInfo) }
+    override fun isUpdateInProgress(): Single<Boolean> {
+        return Single.fromCallable { Tasks.await(updateManager.appUpdateInfo) }
             .doOnSuccess { appUpdateInfo = it }
             .map { updateInfo ->
                 updateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
             }
+    }
 
     override fun startUpdateFlowForResult(
         appUpdateType: Int,
