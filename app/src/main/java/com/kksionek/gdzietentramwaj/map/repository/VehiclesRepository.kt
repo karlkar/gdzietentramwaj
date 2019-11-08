@@ -2,10 +2,10 @@ package com.kksionek.gdzietentramwaj.map.repository
 
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
-import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSourceFactory
+import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable

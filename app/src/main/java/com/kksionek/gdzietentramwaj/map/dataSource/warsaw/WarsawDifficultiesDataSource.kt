@@ -1,48 +1,38 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.XmlDeserializer
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 class WarsawDifficultiesDataSource(
-    private val warsawDifficultiesInterface: WarsawDifficultiesInterface
+    private val warsawDifficultiesInterface: WarsawDifficultiesInterface,
+    private val xmlDeserializer: XmlDeserializer
 ) : DifficultiesDataSource {
 
-    override fun getDifficulties(): Single<DifficultiesState> =
-        warsawDifficultiesInterface.getDifficulties()
+    override fun getDifficulties(): Single<DifficultiesState> {
+        return warsawDifficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
                 if (result.isEmpty()) {
                     DifficultiesState(true, emptyList())
                 } else {
-                    val difficultiesList = pattern.findAll(result)
-                        .map { matchResult ->
-                            val id = matchResult.groupValues[1]
-                            val iconList: List<String>
-                            matchResult.groupValues[2].let { allIconsStr ->
-                                iconList = singleIconPattern.findAll(allIconsStr)
-                                    .map { it.groupValues[1] }
-                                    .map { it.replaceFirst(".", "https://www.ztm.waw.pl/") }
-                                    .toList()
-                            }
-//                            val period = matchResult.groupValues[3]
-                            val msg = matchResult.groupValues[4]
-                            val link = "https://www.ztm.waw.pl" + matchResult.groupValues[5]
-                                .replace("&amp;", "&") + "&i=$id"
-                            DifficultiesEntity(iconList, msg, link)
+                    val channel = xmlDeserializer.deserialize(result, WarsawDifficultyRss::class)
+                        .channel
+                        .items
+                        .map {
+                            DifficultiesEntity(
+                                null,
+                                it.title,
+                                it.link
+                            )
                         }
                         .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
-                        .toList()
-                    DifficultiesState(true, difficultiesList)
+
+                    DifficultiesState(true, channel)
                 }
             }
-
-    companion object {
-
-        private val pattern =
-            "<tr.*?id=\"komunikat_(.*?)_.*?(<img src=\".*?\".*?)?okres\">(.*?)<\\/span.*?zmiana\">(.*?)<span.*?href=\".(.*?)\"".toRegex()
-        private val singleIconPattern = "<img src=\"(.*?)\"".toRegex()
     }
 }

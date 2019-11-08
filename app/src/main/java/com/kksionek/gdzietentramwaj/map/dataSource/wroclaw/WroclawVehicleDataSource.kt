@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
 import java.text.SimpleDateFormat
 import java.util.Calendar

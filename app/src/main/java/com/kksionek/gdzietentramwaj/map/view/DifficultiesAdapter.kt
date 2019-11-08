@@ -10,7 +10,7 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
 import kotlinx.android.synthetic.main.item_difficulty.*
 
 class DifficultiesAdapter(

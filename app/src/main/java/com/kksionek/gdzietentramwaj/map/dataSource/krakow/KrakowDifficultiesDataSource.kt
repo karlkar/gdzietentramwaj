@@ -1,8 +1,8 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
@@ -27,12 +27,19 @@ class KrakowDifficultiesDataSource(
                                     .replace("<span class=\"data-gruba\">", "<b>")
                                     .replace("</span>", "</b><br/>")
                                     .replace("<br/> -", "<br/>")
-                                DifficultiesEntity(null, text, link)
+                                DifficultiesEntity(
+                                    null,
+                                    text,
+                                    link
+                                )
                             }
                             .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
                             .toList()
                     }
-                    DifficultiesState(true, difficultiesList ?: emptyList())
+                    DifficultiesState(
+                        true,
+                        difficultiesList ?: emptyList()
+                    )
                 }
             }
 

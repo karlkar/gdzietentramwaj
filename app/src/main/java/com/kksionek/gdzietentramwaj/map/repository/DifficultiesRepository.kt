@@ -3,8 +3,8 @@ package com.kksionek.gdzietentramwaj.map.repository
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSourceFactory
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
-import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.toNetworkOperationResult
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable

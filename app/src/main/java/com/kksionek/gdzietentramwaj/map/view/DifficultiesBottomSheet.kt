@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*

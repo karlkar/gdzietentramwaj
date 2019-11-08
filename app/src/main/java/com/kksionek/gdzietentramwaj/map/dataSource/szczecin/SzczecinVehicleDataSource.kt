@@ -1,8 +1,8 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.szczecin
 
 import com.google.android.gms.maps.model.LatLng
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
 
 class SzczecinVehicleDataSource(

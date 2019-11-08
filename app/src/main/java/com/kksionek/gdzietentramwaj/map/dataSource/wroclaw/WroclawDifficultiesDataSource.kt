@@ -2,8 +2,8 @@ package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesEntity
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import io.reactivex.Single
 import java.util.Calendar
 import java.util.Calendar.HOUR_OF_DAY
@@ -51,7 +51,11 @@ class WroclawDifficultiesDataSource(
                             return@map null
                         }
                         val title = titleAndLinkResult.groupValues[2]
-                        range to DifficultiesEntity(null, title, "http://mpk.wroc.pl$link")
+                        range to DifficultiesEntity(
+                            null,
+                            title,
+                            "http://mpk.wroc.pl$link"
+                        )
                     }
                     .filterNotNull()
                     .takeWhile { it.first.isInRange(today) }

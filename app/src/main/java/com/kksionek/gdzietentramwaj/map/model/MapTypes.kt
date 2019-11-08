@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.dataSource
+package com.kksionek.gdzietentramwaj.map.model
 
 import com.google.android.gms.maps.GoogleMap
 

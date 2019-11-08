@@ -15,10 +15,10 @@ import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesState
-import com.kksionek.gdzietentramwaj.map.dataSource.MapTypes
-import com.kksionek.gdzietentramwaj.map.dataSource.NetworkOperationResult
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.MapTypes
+import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository

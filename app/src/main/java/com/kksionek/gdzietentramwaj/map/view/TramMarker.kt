@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 
 class TramMarker(tramData: VehicleData) {
 

@@ -3,7 +3,7 @@ package com.kksionek.gdzietentramwaj.map.repository
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.functions.Consumer
 
 class FavoriteLinesConsumer(

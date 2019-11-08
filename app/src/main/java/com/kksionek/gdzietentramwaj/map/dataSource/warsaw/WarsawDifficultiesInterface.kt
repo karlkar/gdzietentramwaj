@@ -5,6 +5,6 @@ import retrofit2.http.GET
 
 interface WarsawDifficultiesInterface {
 
-    @GET("/getUtrudnienia.php")
+    @GET("/feed/?post_type=impediment")
     fun getDifficulties(): Single<String>
 }

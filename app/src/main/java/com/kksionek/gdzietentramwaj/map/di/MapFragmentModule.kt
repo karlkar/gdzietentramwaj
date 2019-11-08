@@ -6,6 +6,8 @@ import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepository
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepositoryImpl
+import com.kksionek.gdzietentramwaj.map.model.SimpleXmlDeserializer
+import com.kksionek.gdzietentramwaj.map.model.XmlDeserializer
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -15,6 +17,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
 import okhttp3.OkHttpClient
+import org.simpleframework.xml.core.Persister
 import retrofit2.CallAdapter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -62,4 +65,13 @@ class MapFragmentModule {
     @Provides
     internal fun provideWarsawApikeyRepository(): WarsawApikeyRepository =
         WarsawApikeyRepositoryImpl()
+
+    @Singleton
+    @Provides
+    fun providePersister(): Persister = Persister()
+
+    @Singleton
+    @Provides
+    internal fun provideXmlDeserializer(persister: Persister): XmlDeserializer =
+        SimpleXmlDeserializer(persister)
 }

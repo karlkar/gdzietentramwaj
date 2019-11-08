@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.krakow
 
-import com.kksionek.gdzietentramwaj.map.dataSource.VehicleData
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
+import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
