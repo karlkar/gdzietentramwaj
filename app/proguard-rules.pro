@@ -32,3 +32,24 @@
 ###### ShareActionProvider
 -keep class androidx.appcompat.widget.ShareActionProvider { *; }
 ###################
+
+# SimpleXML
+-keep interface org.simpleframework.xml.core.Label {
+   public *;
+}
+-keep class * implements org.simpleframework.xml.core.Label {
+   public *;
+}
+-keep interface org.simpleframework.xml.core.Parameter {
+   public *;
+}
+-keep class * implements org.simpleframework.xml.core.Parameter {
+   public *;
+}
+-keep interface org.simpleframework.xml.core.Extractor {
+   public *;
+}
+-keep class * implements org.simpleframework.xml.core.Extractor {
+   public *;
+}
+###################

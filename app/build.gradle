@@ -1,3 +1,5 @@
+//noinspection GradleDependency
+//noinspection GradleDependency
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -5,20 +7,20 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
 // Load keystore
-//def keystorePropertiesFile = file("../../keystore.properties");
-//def keystoreProperties = new Properties()
-//keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+def keystorePropertiesFile = file("../../keystore.properties");
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-//    signingConfigs {
-//        release {
-//            storeFile file(keystoreProperties['storeFile'])
-//            storePassword keystoreProperties['storePassword']
-//            keyAlias keystoreProperties['keyAlias']
-//            keyPassword keystoreProperties['keyPassword']
-//            v2SigningEnabled false
-//        }
-//    }
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            v2SigningEnabled false
+        }
+    }
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.kksionek.gdzietentramwaj"
@@ -45,7 +47,7 @@ android {
             manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
         }
     }
     packagingOptions {
@@ -82,10 +84,10 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0'
+    implementation 'androidx.exifinterface:exifinterface:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.media:media:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.google.android.material:material:1.0.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -112,9 +114,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     kapt 'androidx.lifecycle:lifecycle-common-java8:2.1.0'
-    implementation 'androidx.room:room-runtime:2.2.1'
-    implementation 'androidx.room:room-rxjava2:2.2.1'
-    kapt 'androidx.room:room-compiler:2.2.1'
+    implementation 'androidx.room:room-runtime:2.2.2'
+    implementation 'androidx.room:room-rxjava2:2.2.2'
+    kapt 'androidx.room:room-compiler:2.2.2'
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
@@ -125,7 +127,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.room:room-testing:2.2.1'
+    androidTestImplementation 'androidx.room:room-testing:2.2.2'
     androidTestImplementation 'androidx.test:runner:1.2.0'
 
     // DEBUG:
@@ -144,7 +146,11 @@ dependencies {
 
     implementation 'com.google.android.play:core:1.6.4'
 
-    implementation "org.simpleframework:simple-xml:2.7.1"
+    implementation("org.simpleframework:simple-xml:2.7.1") {
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

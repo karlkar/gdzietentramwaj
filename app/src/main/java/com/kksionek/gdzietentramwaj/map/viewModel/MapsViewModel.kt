@@ -141,7 +141,7 @@ class MapsViewModel @Inject constructor(
                     },
                     { throwable ->
                         if (throwable !is ExecutionException || throwable.cause !is SecurityException) {
-                            Log.e(TAG, "Failed to get last location", throwable)
+                            Log.w(TAG, "Failed to get last location", throwable)
                             crashReportingService.reportCrash(
                                 throwable,
                                 "Failed to get last location"
