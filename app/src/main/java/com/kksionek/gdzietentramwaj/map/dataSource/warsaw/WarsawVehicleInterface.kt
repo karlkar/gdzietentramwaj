@@ -9,7 +9,7 @@ const val ID = "f2e5503e-927d-4ad3-9500-4ab9e55deb59"
 const val TYPE_BUS = 1
 const val TYPE_TRAM = 2
 
-// https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=f2e5503e-927d-4ad3-9500-4ab9e55deb59&apikey=***REMOVED***&type=2
+// https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=f2e5503e-927d-4ad3-9500-4ab9e55deb59&apikey=API-KEY&type=2
 interface WarsawVehicleInterface {
 
     @Headers("Cache-Control: no-cache")

@@ -25,7 +25,11 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Build with Gradle
+        env:
+          ZTM_API_KEY: ${{ secrets.ZTM_API_KEY }}
         run: ./gradlew assembleDebug
 
       - name: Unit Tests
+        env:
+          ZTM_API_KEY: ${{ secrets.ZTM_API_KEY }}
         run: ./gradlew test
