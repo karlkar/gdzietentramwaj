@@ -2,11 +2,12 @@ package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.kksionek.gdzietentramwaj.BuildConfig
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 private const val REMOTE_CONFIG_WARSAW_API_KEY = "warsaw_api_key"
-private const val DEFAULT_API_KEY = "***REMOVED***"
+private const val DEFAULT_API_KEY = BuildConfig.ZTM_API_KEY
 
 class WarsawApikeyRepositoryImpl : WarsawApikeyRepository {
 
@@ -21,6 +22,6 @@ class WarsawApikeyRepositoryImpl : WarsawApikeyRepository {
         .subscribeOn(Schedulers.io())
         .map { it.getString(REMOTE_CONFIG_WARSAW_API_KEY) }
         .map { if (it.isEmpty()) DEFAULT_API_KEY else it }
-        .onErrorResumeNext { t: Throwable -> Single.just(DEFAULT_API_KEY) }
+        .onErrorResumeNext { Single.just(DEFAULT_API_KEY) }
         .cache()
 }
