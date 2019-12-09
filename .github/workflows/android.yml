@@ -25,9 +25,11 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Decrypt google-services files
+        env:
+          PASSWORD: ${{ GOOGLE_SERVICES_PASS }}
         run: |
-          gpg -d --batch --passphrase ${{ GOOGLE_SERVICES_PASS }} app/src/free/google-services.json.gpg > app/src/free/google-services.json
-          gpg -d --batch --passphrase ${{ GOOGLE_SERVICES_PASS }} app/src/paid/google-services.json.gpg > app/src/paid/google-services.json
+          gpg --quiet --batch --yes --decrypt --passphrase ${{ PASSWORD }} --output app/src/free/google-services.json app/src/free/google-services.json.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase ${{ PASSWORD }} --output app/src/paid/google-services.json app/src/paid/google-services.json.gpg
 
       - name: Build with Gradle
         env:
