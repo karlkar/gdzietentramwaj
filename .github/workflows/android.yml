@@ -24,6 +24,11 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle-
 
+      - name: Decrypt google-services files
+        run: |
+          gpg -d --batch --passphrase ${{ GOOGLE_SERVICES_PASS }} app/src/free/google-services.json.gpg > app/src/free/google-services.json
+          gpg -d --batch --passphrase ${{ GOOGLE_SERVICES_PASS }} app/src/paid/google-services.json.gpg > app/src/paid/google-services.json
+
       - name: Build with Gradle
         env:
           ZTM_API_KEY: ${{ secrets.ZTM_API_KEY }}
