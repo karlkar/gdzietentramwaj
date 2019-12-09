@@ -24,12 +24,15 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle-
 
+      - name: Install gpg
+        run: brew install gpg
+
       - name: Decrypt google-services files
         env:
-          PASSWORD: ${{ GOOGLE_SERVICES_PASS }}
+          PASSWORD: ${{ secrets.GOOGLE_SERVICES_PASS }}
         run: |
-          gpg --quiet --batch --yes --decrypt --passphrase ${{ PASSWORD }} --output app/src/free/google-services.json app/src/free/google-services.json.gpg
-          gpg --quiet --batch --yes --decrypt --passphrase ${{ PASSWORD }} --output app/src/paid/google-services.json app/src/paid/google-services.json.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase $PASSWORD --output app/src/free/google-services.json app/src/free/google-services.json.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase $PASSWORD --output app/src/paid/google-services.json app/src/paid/google-services.json.gpg
 
       - name: Build with Gradle
         env:
