@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -113,10 +114,6 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.room:room-testing:2.2.2'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-
     // DEBUG:
     //        implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
 
@@ -138,9 +135,10 @@ dependencies {
         exclude module: 'stax-api'
         exclude module: 'xpp3'
     }
-}
 
-apply plugin: 'com.google.gms.google-services'
-repositories {
-    mavenCentral()
+    testImplementation 'junit:junit:4.12'
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+
+    androidTestImplementation 'androidx.room:room-testing:2.2.2'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
 }

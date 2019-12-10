@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.base.di
 
 import android.content.Context
 import androidx.room.Room
+import com.crashlytics.android.Crashlytics
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -40,8 +41,17 @@ class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
-    internal fun provideCrashReportingService(): CrashReportingService =
-        if (BuildConfig.DEBUG) NoOpCrashReportingService() else CrashlyticsCrashReportingService()
+    internal fun provideCrashlyticsInstance(): Crashlytics = Crashlytics.getInstance()
+
+    @Singleton
+    @Provides
+    internal fun provideCrashReportingService(crashlytics: Crashlytics): CrashReportingService {
+        return if (BuildConfig.DEBUG) {
+            NoOpCrashReportingService()
+        } else {
+            CrashlyticsCrashReportingService(crashlytics.core)
+        }
+    }
 
     @Singleton
     @Provides
@@ -87,7 +97,8 @@ class AppModule(private val application: TramApplication) {
 
     @ActivityScope
     @Provides
-    internal fun provideSettingsRepository(context: Context): SettingsRepositoryImpl = SettingsRepositoryImpl(context)
+    internal fun provideSettingsRepository(context: Context): SettingsRepositoryImpl =
+        SettingsRepositoryImpl(context)
 
     @ActivityScope
     @Provides
