@@ -1,13 +1,15 @@
 package com.kksionek.gdzietentramwaj.base.crash
 
-import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.core.CrashlyticsCore
 
-class CrashlyticsCrashReportingService : CrashReportingService {
+class CrashlyticsCrashReportingService(
+    private val crashlyticsCoreInstance: CrashlyticsCore
+): CrashReportingService {
 
     override fun reportCrash(throwable: Throwable, message: String?) {
         message?.let {
-            Crashlytics.log(message)
+            crashlyticsCoreInstance.log(message)
         }
-        Crashlytics.logException(throwable)
+        crashlyticsCoreInstance.logException(throwable)
     }
 }

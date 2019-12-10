@@ -27,9 +27,4 @@ class TramApplication : MultiDexApplication() {
 
         RxJavaPlugins.setErrorHandler(rxJavaErrorHandler)
     }
-
-    companion object {
-
-        private const val TAG = "TramApplication"
-    }
 }
