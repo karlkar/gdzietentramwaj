@@ -15,6 +15,7 @@ import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
+import com.squareup.picasso.Picasso
 import dagger.Module
 import dagger.Provides
 import io.reactivex.functions.Consumer
@@ -83,9 +84,11 @@ class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
-    internal fun provideImageLoader(): ImageLoader {
-        return PicassoImageLoader()
-    }
+    internal fun providePicasso(): Picasso = Picasso.get()
+
+    @Singleton
+    @Provides
+    internal fun provideImageLoader(picasso: Picasso): ImageLoader = PicassoImageLoader(picasso)
 
     @Singleton
     @Provides

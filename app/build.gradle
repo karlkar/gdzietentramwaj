@@ -59,6 +59,9 @@ android {
             dimension "tier"
         }
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 androidExtensions {
