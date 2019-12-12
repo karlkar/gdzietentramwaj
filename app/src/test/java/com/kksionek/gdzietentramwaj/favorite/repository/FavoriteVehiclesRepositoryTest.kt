@@ -77,4 +77,14 @@ class FavoriteVehiclesRepositoryTest {
         // then
         observer.assertError(exception)
     }
+
+    @Test
+    fun `should save the favorite state of a vehicle when requested`() {
+        // when
+        val observer = tested.setVehicleFavorite(city, "500", true).test()
+
+        // then
+        observer.assertNoErrors()
+                .assertComplete()
+    }
 }

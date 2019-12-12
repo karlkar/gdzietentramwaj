@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.IGNORE
 import androidx.room.Query
+import io.reactivex.Completable
 import io.reactivex.Flowable
 
 @Dao
@@ -19,5 +20,5 @@ interface TramDao {
     fun save(vehicleDataList: List<FavoriteTram>)
 
     @Query("UPDATE favoriteTram SET isFavorite = :favorite WHERE lineId = :lineId AND cityId = :cityId")
-    fun setFavorite(cityId: Int, lineId: String, favorite: Boolean)
+    fun setFavorite(cityId: Int, lineId: String, favorite: Boolean): Completable
 }

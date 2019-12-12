@@ -52,7 +52,7 @@ class FavoriteLinesViewModel @Inject constructor(
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
         compositeDisposable.add(
-            favoriteVehiclesRepository.setTramFavorite(selectedCity, lineId, favorite)
+            favoriteVehiclesRepository.setVehicleFavorite(selectedCity, lineId, favorite)
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     {

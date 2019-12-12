@@ -14,6 +14,6 @@ class FavoriteVehiclesRepository @Inject constructor(
     fun getAllVehicles(city: Cities): Flowable<List<FavoriteTram>> =
         tramDao.getAllVehicles(city.id).distinctUntilChanged()
 
-    fun setTramFavorite(city: Cities, lineId: String, favorite: Boolean): Completable =
-        Completable.fromAction { tramDao.setFavorite(city.id, lineId, favorite) }
+    fun setVehicleFavorite(city: Cities, lineId: String, favorite: Boolean): Completable =
+        tramDao.setFavorite(city.id, lineId, favorite)
 }
