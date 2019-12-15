@@ -2,13 +2,11 @@ package com.kksionek.gdzietentramwaj.main.di
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
-import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
-import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepositoryImpl
-import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
-import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityCheckerImpl
-import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
+import com.kksionek.gdzietentramwaj.main.repository.*
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepositoryImpl
@@ -43,8 +41,13 @@ class MainActivityModule {
 
     @Singleton
     @Provides
-    fun provideAppUpdateRepository(context: Context): AppUpdateRepository =
-        AppUpdateRepositoryImpl(context)
+    internal fun provideAppUpdateManager(context: Context): AppUpdateManager =
+        AppUpdateManagerFactory.create(context)
+
+    @Singleton
+    @Provides
+    fun provideAppUpdateRepository(appUpdateManager: AppUpdateManager): AppUpdateRepository =
+        AppUpdateRepositoryImpl(appUpdateManager)
 
     @Singleton
     @Provides

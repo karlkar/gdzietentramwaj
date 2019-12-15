@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 
+// TODO: Implement AndroidTest? Only Robolectric examples on internet
 class GoogleApiAvailabilityCheckerImpl(
     private val context: Context
 ) : GoogleApiAvailabilityChecker {
