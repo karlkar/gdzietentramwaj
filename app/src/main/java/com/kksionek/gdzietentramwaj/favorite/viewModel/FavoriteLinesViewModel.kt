@@ -16,9 +16,9 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class FavoriteLinesViewModel @Inject constructor(
-        private val favoriteVehiclesRepository: FavoriteVehiclesRepository,
-        private val crashReportingService: CrashReportingService,
-        mapSettingsProvider: MapSettingsProvider
+    private val favoriteVehiclesRepository: FavoriteVehiclesRepository,
+    private val crashReportingService: CrashReportingService,
+    mapSettingsProvider: MapSettingsProvider
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
@@ -28,9 +28,7 @@ class FavoriteLinesViewModel @Inject constructor(
 
     private val selectedCity: Cities = mapSettingsProvider.getCity()
 
-    init {
-        forceReloadFavorites()
-    }
+    // TODO: forceReloadFavorites was called from init() maybe it was good? But then test should have before block with tested initialized from there
 
     fun forceReloadFavorites() {
         compositeDisposable.clear()
@@ -46,7 +44,7 @@ class FavoriteLinesViewModel @Inject constructor(
                 UiState.Error(R.string.favorites_failed_to_load)
             }
             .startWith(UiState.InProgress())
-            .subscribe { list -> _favoriteTrams.postValue(list) }
+            .subscribe { list -> _favoriteTrams.setValue(list) }
         )
     }
 

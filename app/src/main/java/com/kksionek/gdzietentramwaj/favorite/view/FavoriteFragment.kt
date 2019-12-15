@@ -41,6 +41,7 @@ class FavoriteFragment : Fragment() {
         (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
             ViewModelProviders.of(this, viewModelFactory)[FavoriteLinesViewModel::class.java]
+        viewModel.forceReloadFavorites()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
