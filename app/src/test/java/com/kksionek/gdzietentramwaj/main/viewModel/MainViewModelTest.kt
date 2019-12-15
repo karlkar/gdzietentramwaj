@@ -2,11 +2,9 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.RxImmediateSchedulerRule
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
-import com.kksionek.gdzietentramwaj.main.model.GttLocation
-import com.kksionek.gdzietentramwaj.main.model.Latitude
-import com.kksionek.gdzietentramwaj.main.model.Longitude
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
@@ -32,7 +30,7 @@ class MainViewModelTest {
     @JvmField
     val testSchedulerRule = RxImmediateSchedulerRule()
 
-    private val lastLocation = GttLocation(Latitude(1.0), Longitude(1.0))
+    private val lastLocation = LatLng(1.0, 1.0)
     private val selectedCity = Cities.WARSAW
     private val locationRepository: LocationRepository = mock {
         on { lastKnownLocation } doReturn Single.just(lastLocation)
@@ -77,7 +75,7 @@ class MainViewModelTest {
     @Test
     fun `should set last known location when request for last location successful`() {
         // given
-        val mockObserver: Observer<GttLocation> = mock()
+        val mockObserver: Observer<LatLng> = mock()
 
         // when
         initialize()
@@ -90,7 +88,7 @@ class MainViewModelTest {
     @Test
     fun `should set selected city's location when request for last location failed`() {
         // given
-        val mockObserver: Observer<GttLocation> = mock()
+        val mockObserver: Observer<LatLng> = mock()
         val error = IOException()
         whenever(locationRepository.lastKnownLocation).thenReturn(Single.error(error))
 
@@ -99,7 +97,7 @@ class MainViewModelTest {
         tested.lastLocation.observeForever(mockObserver)
 
         // then
-        (tested.lastLocation.value!!.latitude.value - selectedCity.latLng.latitude) `should be less or equal to` 0.00000001
-        (tested.lastLocation.value!!.longitude.value - selectedCity.latLng.longitude) `should be less or equal to` 0.00000001
+        (tested.lastLocation.value!!.latitude - selectedCity.latLng.latitude) `should be less or equal to` 0.00000001
+        (tested.lastLocation.value!!.longitude - selectedCity.latLng.longitude) `should be less or equal to` 0.00000001
     }
 }

@@ -14,7 +14,6 @@ import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.initWith
-import com.kksionek.gdzietentramwaj.main.model.toLatLng
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
@@ -131,7 +130,7 @@ class MapsViewModel @Inject constructor(
                 .subscribe(
                     { location ->
                         if (!mapSettingsManager.isStartLocationEnabled()) {
-                            _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
+                            _mapControls.postValue(MapControls.MoveTo(location))
                         }
                     },
                     { throwable ->

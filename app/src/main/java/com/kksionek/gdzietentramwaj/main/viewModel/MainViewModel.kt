@@ -6,14 +6,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.play.core.install.model.AppUpdateType
 import com.kksionek.gdzietentramwaj.initWith
-import com.kksionek.gdzietentramwaj.main.model.GttLocation
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import com.kksionek.gdzietentramwaj.toGTTLocation
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -40,8 +39,8 @@ class MainViewModel @Inject constructor(
     private val _appUpdateAvailable = MutableLiveData<Boolean>().initWith(false)
     val appUpdateAvailable: LiveData<Boolean> = _appUpdateAvailable
 
-    private val _lastLocation = MutableLiveData<GttLocation>()
-    val lastLocation: LiveData<GttLocation> = _lastLocation
+    private val _lastLocation = MutableLiveData<LatLng>()
+    val lastLocation: LiveData<LatLng> = _lastLocation
 
     init {
         subscribeToLastLocation()
@@ -51,7 +50,7 @@ class MainViewModel @Inject constructor(
     private fun subscribeToLastLocation() {
         compositeDisposable.add(
             locationRepository.lastKnownLocation
-                .onErrorReturnItem(mapSettingsProvider.getCity().latLng.toGTTLocation())
+                .onErrorReturnItem(mapSettingsProvider.getCity().latLng)
                 .subscribe { location ->
                     _lastLocation.postValue(location)
                 }
