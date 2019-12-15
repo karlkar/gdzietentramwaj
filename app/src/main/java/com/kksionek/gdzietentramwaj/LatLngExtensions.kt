@@ -1,9 +1,8 @@
 package com.kksionek.gdzietentramwaj
 
-import android.location.Location
 import com.google.android.gms.maps.model.LatLng
+import com.kksionek.gdzietentramwaj.main.model.GttLocation
+import com.kksionek.gdzietentramwaj.main.model.Latitude
+import com.kksionek.gdzietentramwaj.main.model.Longitude
 
-fun LatLng.toLocation(): Location = Location("").also {
-    it.longitude = longitude
-    it.latitude = latitude
-}
+fun LatLng.toGTTLocation(): GttLocation = GttLocation(Latitude(latitude), Longitude(longitude))
