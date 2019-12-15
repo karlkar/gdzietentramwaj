@@ -6,11 +6,13 @@ import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
-import com.kksionek.gdzietentramwaj.main.repository.*
+import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
+import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepositoryImpl
+import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
+import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityCheckerImpl
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepositoryImpl
-import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import com.kksionek.gdzietentramwaj.view.AdProvider
 import dagger.Binds
@@ -29,11 +31,6 @@ class MainActivityModule {
         @ViewModelKey(MainViewModel::class)
         fun bindMainViewModel(mainViewModel: MainViewModel): ViewModel
     }
-
-    @Singleton
-    @Provides
-    fun providesVersionRepository(settingsRepositoryImpl: SettingsRepositoryImpl): VersionRepository =
-        settingsRepositoryImpl
 
     @ActivityScope
     @Provides

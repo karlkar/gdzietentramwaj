@@ -5,12 +5,10 @@ import android.preference.PreferenceManager
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.getDouble
-import com.kksionek.gdzietentramwaj.main.repository.VersionRepository
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.putDouble
 
 private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
-private const val PREF_LAST_VERSION = "LAST_VERSION"
 private const val PREF_OLD_ICON_SET = "OLD_ICON_SET"
 private const val PREF_AUTO_ZOOM = "AUTO_ZOOM"
 private const val PREF_START_LOCATION = "START_LOCATION"
@@ -23,7 +21,7 @@ private const val PREF_MAP_TYPE = "MAP_TYPE"
 private const val PREF_CITY = "CITY"
 
 class SettingsRepositoryImpl(context: Context) :
-    MapsViewSettingsRepository, IconSettingsManager, VersionRepository, MapSettingsManager {
+    MapsViewSettingsRepository, IconSettingsManager, MapSettingsManager {
 
     private val sharedPreferences = PreferenceManager
         .getDefaultSharedPreferences(context)
@@ -35,16 +33,6 @@ class SettingsRepositoryImpl(context: Context) :
         sharedPreferences
             .edit()
             .putBoolean(PREF_FAVORITE_TRAM_VIEW, enabled)
-            .apply()
-    }
-
-    override fun getPreviouslyLaunchedVersion(): Int =
-        sharedPreferences.getInt(PREF_LAST_VERSION, 0)
-
-    override fun saveLastLaunchedVersion(version: Int) {
-        sharedPreferences
-            .edit()
-            .putInt(PREF_LAST_VERSION, version)
             .apply()
     }
 
