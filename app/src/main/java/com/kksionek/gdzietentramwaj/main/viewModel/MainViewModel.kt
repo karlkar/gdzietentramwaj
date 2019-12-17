@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 import android.app.Activity
 import android.content.DialogInterface
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,8 +18,10 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-private const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
-private const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
+@VisibleForTesting
+const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
+@VisibleForTesting
+const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
 
 class MainViewModel @Inject constructor(
     private val locationRepository: LocationRepository,

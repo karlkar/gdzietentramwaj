@@ -5,7 +5,9 @@ import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
 import io.reactivex.subjects.ReplaySubject
 import org.junit.Test
 import java.io.IOException
@@ -16,7 +18,7 @@ class FavoriteVehiclesRepositoryTest {
     private val vehicleResponseSubject = ReplaySubject.create<List<FavoriteTram>>()
     private val tramDao: TramDao = mock {
         on { getAllVehicles(city.id) } doReturn vehicleResponseSubject
-                .toFlowable(BackpressureStrategy.LATEST)
+            .toFlowable(BackpressureStrategy.LATEST)
     }
 
     private val tested = FavoriteVehiclesRepository(tramDao)
@@ -25,8 +27,8 @@ class FavoriteVehiclesRepositoryTest {
     fun `should return vehicles from the requested city when request is successful`() {
         // given
         val vehicles = listOf(
-                FavoriteTram("12", false, city.id),
-                FavoriteTram("500", true, city.id)
+            FavoriteTram("12", false, city.id),
+            FavoriteTram("500", true, city.id)
         )
         vehicleResponseSubject.onNext(vehicles)
 
@@ -35,21 +37,21 @@ class FavoriteVehiclesRepositoryTest {
 
         // then
         observer.assertNoErrors()
-                .assertValue(vehicles)
-                .assertNotComplete()
+            .assertValue(vehicles)
+            .assertNotComplete()
     }
 
     @Test
     fun `should skip duplicate emissions until list changes when getting the vehicles`() {
         // given
         val vehicles = listOf(
-                FavoriteTram("12", false, city.id),
-                FavoriteTram("500", true, city.id)
+            FavoriteTram("12", false, city.id),
+            FavoriteTram("500", true, city.id)
         )
         val vehicles2 = listOf(
-                FavoriteTram("12", false, city.id),
-                FavoriteTram("500", true, city.id),
-                FavoriteTram("501", false, city.id)
+            FavoriteTram("12", false, city.id),
+            FavoriteTram("500", true, city.id),
+            FavoriteTram("501", false, city.id)
         )
         vehicleResponseSubject.onNext(vehicles)
         vehicleResponseSubject.onNext(vehicles)
@@ -60,9 +62,9 @@ class FavoriteVehiclesRepositoryTest {
 
         // then
         observer.assertNoErrors()
-                .assertValueCount(2)
-                .assertValues(vehicles, vehicles2)
-                .assertNotComplete()
+            .assertValueCount(2)
+            .assertValues(vehicles, vehicles2)
+            .assertNotComplete()
     }
 
     @Test
@@ -80,11 +82,16 @@ class FavoriteVehiclesRepositoryTest {
 
     @Test
     fun `should save the favorite state of a vehicle when requested`() {
+        // given
+        val line = "500"
+        whenever(tramDao.setFavorite(city.id, line, true))
+            .thenReturn(Completable.complete())
+
         // when
-        val observer = tested.setVehicleFavorite(city, "500", true).test()
+        val observer = tested.setVehicleFavorite(city, line, true).test()
 
         // then
         observer.assertNoErrors()
-                .assertComplete()
+            .assertComplete()
     }
 }
