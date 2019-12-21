@@ -48,7 +48,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    flavorDimensions "tier"
+    flavorDimensions "tier", "store"
     productFlavors {
         paid {
             dimension "tier"
@@ -57,6 +57,20 @@ android {
         }
         free {
             dimension "tier"
+        }
+        google {
+            dimension "store"
+            buildConfigField "boolean", "FEATURE_PLAY_STORE", "true"
+        }
+        huawei {
+            dimension "store"
+            buildConfigField "boolean", "FEATURE_PLAY_STORE", "false"
+        }
+    }
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        if (names.contains("paid") && names.contains("huawei")) {
+            setIgnore(true)
         }
     }
 }
