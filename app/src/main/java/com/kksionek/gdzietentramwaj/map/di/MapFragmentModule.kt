@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.di
 
 import androidx.lifecycle.ViewModel
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
@@ -63,8 +64,13 @@ class MapFragmentModule {
 
     @Singleton
     @Provides
-    internal fun provideWarsawApikeyRepository(): WarsawApikeyRepository =
-        WarsawApikeyRepositoryImpl()
+    internal fun provideFirebaseRemoteConfig(): FirebaseRemoteConfig =
+        FirebaseRemoteConfig.getInstance()
+
+    @Singleton
+    @Provides
+    internal fun provideWarsawApikeyRepository(firebaseRemoteConfig: FirebaseRemoteConfig): WarsawApikeyRepository =
+        WarsawApikeyRepositoryImpl(firebaseRemoteConfig)
 
     @Singleton
     @Provides

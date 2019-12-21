@@ -19,6 +19,7 @@ import org.amshove.kluent.`should be`
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import kotlin.math.abs
 
 class MainViewModelTest {
 
@@ -97,8 +98,8 @@ class MainViewModelTest {
         tested.lastLocation.observeForever(mockObserver)
 
         // then
-        (tested.lastLocation.value!!.latitude - selectedCity.latLng.latitude) `should be less or equal to` 0.00000001
-        (tested.lastLocation.value!!.longitude - selectedCity.latLng.longitude) `should be less or equal to` 0.00000001
+        abs(tested.lastLocation.value!!.latitude - selectedCity.latLng.latitude) `should be less or equal to` 0.00000001
+        abs(tested.lastLocation.value!!.longitude - selectedCity.latLng.longitude) `should be less or equal to` 0.00000001
     }
 
     @Test

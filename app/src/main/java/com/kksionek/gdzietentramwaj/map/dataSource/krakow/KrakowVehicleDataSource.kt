@@ -19,7 +19,6 @@ class KrakowVehicleDataSource(
             krakowTramInterface.trams()
                 .compose(transformer)
                 .flatMapObservable { Observable.fromIterable(it) }
-
         ).toList()
 
     private val transformer: SingleTransformer<KrakowVehicleResponse, List<VehicleData>> =
