@@ -223,6 +223,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.main_menu, menu)
+        @Suppress("ConstantConditionIf")
+        if (!BuildConfig.FEATURE_PLAY_STORE) {
+            menu.findItem(R.id.menu_item_rate).isVisible = false
+            menu.findItem(R.id.menu_item_share).isVisible = false
+        }
         menu.findItem(R.id.menu_item_refresh)?.also {
             context?.let { context ->
                 menuItemRefresh = MenuItemRefreshCtrl(context, it)
