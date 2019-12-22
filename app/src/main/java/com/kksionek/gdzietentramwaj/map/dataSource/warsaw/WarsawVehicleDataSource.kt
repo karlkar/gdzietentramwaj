@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
+import androidx.annotation.VisibleForTesting
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Observable
@@ -37,7 +38,7 @@ class WarsawVehicleDataSource(
 
     private fun Single<WarsawVehicleResponse>.filterOutOutdated() =
         map { result ->
-            val refDate = Calendar.getInstance()
+            val refDate = Calendar.getInstance() // TODO: Don't use Calendar
                 .apply { add(Calendar.MINUTE, -2) }
                 .let { dateFormat.format(it.time) }
             result.list.filter { refDate <= it.time }
@@ -45,7 +46,8 @@ class WarsawVehicleDataSource(
 
     companion object {
 
-        private val dateFormat = SimpleDateFormat(
+        @VisibleForTesting
+        val dateFormat = SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss",
             Locale.US
         )
