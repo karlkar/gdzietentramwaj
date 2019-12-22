@@ -19,19 +19,20 @@ class WarsawDifficultiesDataSource(
                 if (result.isEmpty()) {
                     DifficultiesState(true, emptyList())
                 } else {
-                    val channel = xmlDeserializer.deserialize(result, WarsawDifficultyRss::class)
-                        .channel
-                        .items
-                        .map {
-                            DifficultiesEntity(
-                                null,
-                                it.title,
-                                it.link
-                            )
-                        }
-                        .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
+                    val difficultiesEntities =
+                        xmlDeserializer.deserialize(result, WarsawDifficultyRss::class)
+                            .channel
+                            .items
+                            .map {
+                                DifficultiesEntity(
+                                    null,
+                                    it.title,
+                                    it.link
+                                )
+                            }
+                            .ifEmpty { throw IllegalArgumentException("HTML parsing failed") }
 
-                    DifficultiesState(true, channel)
+                    DifficultiesState(true, difficultiesEntities)
                 }
             }
     }
