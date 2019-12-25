@@ -1,12 +1,14 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.google.android.gms.maps.model.LatLng
+import com.kksionek.gdzietentramwaj.RxImmediateSchedulerRule
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import io.reactivex.exceptions.CompositeException
+import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 import java.util.Calendar
@@ -14,6 +16,10 @@ import java.util.Calendar
 private const val APIKEY = "apikey"
 
 class WarsawVehicleDataSourceTest {
+
+    @Rule
+    @JvmField
+    val testSchedulerRule = RxImmediateSchedulerRule()
 
     private val warsawApiKeyRepository: WarsawApikeyRepository = mock {
         on { apikey } doReturn Single.just(APIKEY)
