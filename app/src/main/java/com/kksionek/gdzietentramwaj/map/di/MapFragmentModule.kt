@@ -5,10 +5,13 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
+import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepository
 import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.model.SimpleXmlDeserializer
 import com.kksionek.gdzietentramwaj.map.model.XmlDeserializer
+import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
+import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
@@ -80,4 +83,10 @@ class MapFragmentModule {
     @Provides
     internal fun provideXmlDeserializer(persister: Persister): XmlDeserializer =
         SimpleXmlDeserializer(persister)
+
+    @Provides
+    internal fun provideDifficultiesRepository(
+        difficultiesDataSourceFactory: DifficultiesDataSourceFactory
+    ): DifficultiesRepository =
+        DifficultiesRepositoryImpl(difficultiesDataSourceFactory)
 }

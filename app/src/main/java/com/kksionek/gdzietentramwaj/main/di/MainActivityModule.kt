@@ -11,8 +11,8 @@ import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepositoryImpl
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityCheckerImpl
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
+import com.kksionek.gdzietentramwaj.map.repository.FusedLocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
-import com.kksionek.gdzietentramwaj.map.repository.LocationRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 import com.kksionek.gdzietentramwaj.view.AdProvider
 import dagger.Binds
@@ -54,5 +54,5 @@ class MainActivityModule {
     @Singleton
     @Provides
     fun provideLocationRepository(context: Context): LocationRepository =
-        LocationRepositoryImpl(context)
+        FusedLocationRepository(context)
 }
