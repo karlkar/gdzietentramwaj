@@ -1,7 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.getDouble
@@ -20,6 +20,7 @@ private const val PREF_TRAFFIC_SHOWING = "TRAFFIC_SHOWING"
 private const val PREF_MAP_TYPE = "MAP_TYPE"
 private const val PREF_CITY = "CITY"
 
+// TODO: Instrumentation tests needed here
 class SettingsRepositoryImpl(context: Context) :
     MapsViewSettingsRepository, IconSettingsManager, MapSettingsManager {
 
