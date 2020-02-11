@@ -33,10 +33,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-
-        buildTypes.each {
-            it.buildConfigField 'String', 'ZTM_API_KEY', project.findProperty("ztmApiKey") ?: System.getenv("ZTM_API_KEY")
-        }
     }
     packagingOptions {
         exclude 'META-INF/rxjava.properties'
