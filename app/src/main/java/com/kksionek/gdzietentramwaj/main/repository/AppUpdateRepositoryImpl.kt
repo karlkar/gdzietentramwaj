@@ -1,19 +1,15 @@
 package com.kksionek.gdzietentramwaj.main.repository
 
 import android.app.Activity
-import android.content.Context
 import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.tasks.Tasks
 import io.reactivex.Single
 
-class AppUpdateRepositoryImpl(
-    context: Context
-) : AppUpdateRepository {
-
-    private val updateManager = AppUpdateManagerFactory.create(context)
+// TODO: Implement Android test using FakeAppUpdateRepository
+class AppUpdateRepositoryImpl(private val updateManager: AppUpdateManager) : AppUpdateRepository {
 
     private lateinit var appUpdateInfo: AppUpdateInfo
 

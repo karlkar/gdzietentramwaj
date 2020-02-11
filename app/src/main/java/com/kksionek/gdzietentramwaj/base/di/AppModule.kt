@@ -15,8 +15,10 @@ import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
+import com.squareup.picasso.Picasso
 import dagger.Module
 import dagger.Provides
+import io.fabric.sdk.android.Fabric
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
@@ -41,7 +43,10 @@ class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
-    internal fun provideCrashlyticsInstance(): Crashlytics = Crashlytics.getInstance()
+    internal fun provideCrashlyticsInstance(application: TramApplication): Crashlytics {
+        Fabric.with(application, Crashlytics())
+        return Crashlytics.getInstance()
+    }
 
     @Singleton
     @Provides
@@ -83,9 +88,11 @@ class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
-    internal fun provideImageLoader(): ImageLoader {
-        return PicassoImageLoader()
-    }
+    internal fun providePicasso(): Picasso = Picasso.get()
+
+    @Singleton
+    @Provides
+    internal fun provideImageLoader(picasso: Picasso): ImageLoader = PicassoImageLoader(picasso)
 
     @Singleton
     @Provides

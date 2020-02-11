@@ -24,9 +24,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Install gpg
-        run: brew install gpg
-
       - name: Decrypt google-services files
         env:
           PASSWORD: ${{ secrets.GOOGLE_SERVICES_PASS }}
@@ -35,11 +32,7 @@ jobs:
           gpg --quiet --batch --yes --decrypt --passphrase $PASSWORD --output app/src/paid/google-services.json app/src/paid/google-services.json.gpg
 
       - name: Build with Gradle
-        env:
-          ZTM_API_KEY: ${{ secrets.ZTM_API_KEY }}
         run: ./gradlew assembleDebug
 
       - name: Unit Tests
-        env:
-          ZTM_API_KEY: ${{ secrets.ZTM_API_KEY }}
         run: ./gradlew test

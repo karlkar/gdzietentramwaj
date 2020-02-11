@@ -3,18 +3,19 @@ package com.kksionek.gdzietentramwaj.main.view
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
+import com.kksionek.gdzietentramwaj.toLocation
 import javax.inject.Inject
 
 private const val LOCATION_PERMISSION_REQUEST = 3456
@@ -29,9 +30,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainViewModel: MainViewModel
 
-    private val lastLocationObserver = Observer { location: Location? ->
+    private val lastLocationObserver = Observer { location: LatLng? ->
         location?.let {
-            adProviderInterface.loadAd(applicationContext, it)
+            adProviderInterface.loadAd(applicationContext, it.toLocation())
         }
     }
 

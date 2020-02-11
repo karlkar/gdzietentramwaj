@@ -1,11 +1,11 @@
 package com.kksionek.gdzietentramwaj.map.repository
 
-import android.location.Location
+import com.google.android.gms.maps.model.LatLng
 import io.reactivex.Single
 
 interface LocationRepository {
 
-    val lastKnownLocation: Single<Location>
+    val lastKnownLocation: Single<LatLng>
 
     fun isLocationPermissionGranted(): Boolean
 }

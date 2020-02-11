@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
+import androidx.annotation.VisibleForTesting
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
@@ -35,7 +36,8 @@ class WroclawVehicleDataSource(
 
     companion object {
 
-        private val dateFormat = SimpleDateFormat(
+        @VisibleForTesting
+        val dateFormat = SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss",
             Locale.US
         )

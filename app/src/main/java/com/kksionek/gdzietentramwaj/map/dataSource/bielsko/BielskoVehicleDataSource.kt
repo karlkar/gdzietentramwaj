@@ -4,7 +4,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
-import java.util.Calendar
+import java.util.*
 
 class BielskoVehicleDataSource(
     private val bielskoVehicleInterface: BielskoVehicleInterface
@@ -15,8 +15,8 @@ class BielskoVehicleDataSource(
             .apply { add(Calendar.MINUTE, -2) }
             .timeInMillis
         return bielskoVehicleInterface.vehicles()
-            .map {
-                it.list
+            .map { bielskoVehicleList ->
+                bielskoVehicleList.list
                     .filter { it.timestamp > refDate }
                     .map {
                         VehicleData(

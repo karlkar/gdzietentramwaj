@@ -9,6 +9,7 @@ enum class MapTypes(val googleCode: Int) {
     HYBRID(GoogleMap.MAP_TYPE_HYBRID);
 
     fun next(): MapTypes = values()[(values().indexOf(this) + 1) % values().size]
+
     companion object {
         fun ofValue(code: Int) = values().firstOrNull { it.googleCode == code } ?: NORMAL
     }

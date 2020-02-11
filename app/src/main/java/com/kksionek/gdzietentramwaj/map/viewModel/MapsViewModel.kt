@@ -29,7 +29,6 @@ import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
-import com.kksionek.gdzietentramwaj.toLatLng
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
@@ -136,7 +135,7 @@ class MapsViewModel @Inject constructor(
                 .subscribe(
                     { location ->
                         if (!mapSettingsManager.isStartLocationEnabled()) {
-                            _mapControls.postValue(MapControls.MoveTo(location.toLatLng()))
+                            _mapControls.postValue(MapControls.MoveTo(location))
                         }
                     },
                     { throwable ->
@@ -350,6 +349,6 @@ class MapsViewModel @Inject constructor(
     }
 
     companion object {
-        const val TAG = "MapsViewModel"
+        private const val TAG = "MapsViewModel"
     }
 }

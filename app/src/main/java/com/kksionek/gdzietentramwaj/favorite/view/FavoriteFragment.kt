@@ -41,38 +41,35 @@ class FavoriteFragment : Fragment() {
         (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
             ViewModelProviders.of(this, viewModelFactory)[FavoriteLinesViewModel::class.java]
+        viewModel.forceReloadFavorites()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = FavoritesAdapter {
+        val favAdapter = FavoritesAdapter {
             viewModel.setTramFavorite(it.lineId, !it.isFavorite)
         }
-        favorites_lines_recyclerview.layoutManager = GridLayoutManager(view.context, COLUMN_COUNT)
-        favorites_lines_recyclerview.addItemDecoration(
-            SpacesItemDecoration(
-                view.context,
-                R.dimen.grid_offset
-            )
-        )
-        favorites_lines_recyclerview.itemAnimator = object : DefaultItemAnimator() {
-            override fun getChangeDuration(): Long = 100
+        favorites_lines_recyclerview.apply {
+            layoutManager = GridLayoutManager(view.context, COLUMN_COUNT)
+            addItemDecoration(SpacesItemDecoration(view.context, R.dimen.grid_offset))
+            itemAnimator = object : DefaultItemAnimator() {
+                override fun getChangeDuration(): Long = 100
+            }
+            adapter = favAdapter
         }
-        favorites_lines_recyclerview.adapter = adapter
-
         favorites_error_button.setOnClickListener {
             viewModel.forceReloadFavorites()
         }
 
         viewModel.favoriteTrams
-            .observe(this, Observer<UiState<List<FavoriteTram>>> {
+            .observe(viewLifecycleOwner, Observer<UiState<List<FavoriteTram>>> {
                 when (it) {
                     is UiState.Success -> {
                         favorites_progress.visibility = View.GONE
                         favorites_error_view_constraintlayout.visibility = View.GONE
                         favorites_success_view_constraintlayout.visibility = View.VISIBLE
-                        adapter.submitList(it.data)
+                        favAdapter.submitList(it.data)
                     }
                     is UiState.Error -> {
                         favorites_progress.visibility = View.GONE

@@ -7,13 +7,13 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import javax.inject.Inject
 
-class FavoriteTramRepository @Inject constructor(
+class FavoriteVehiclesRepository @Inject constructor(
     private val tramDao: TramDao
 ) {
 
-    fun getAllTrams(city: Cities): Flowable<List<FavoriteTram>> =
+    fun getAllVehicles(city: Cities): Flowable<List<FavoriteTram>> =
         tramDao.getAllVehicles(city.id).distinctUntilChanged()
 
-    fun setTramFavorite(city: Cities, lineId: String, favorite: Boolean): Completable =
-        Completable.fromAction { tramDao.setFavorite(city.id, lineId, favorite) }
+    fun setVehicleFavorite(city: Cities, lineId: String, favorite: Boolean): Completable =
+        tramDao.setFavorite(city.id, lineId, favorite)
 }

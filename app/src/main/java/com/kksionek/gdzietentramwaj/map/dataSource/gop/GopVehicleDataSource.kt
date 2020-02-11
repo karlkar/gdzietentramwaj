@@ -5,12 +5,14 @@ import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Observable
 import io.reactivex.Single
+import kotlin.math.atan
+import kotlin.math.exp
 
 class GopVehicleDataSource(
     private val gopVehicleInterface: GopVehicleInterface
 ) : VehicleDataSource {
 
-    private var routesSource = createResourcesSource()
+    private var routesSource = createResourcesSource() // TODO: Should it be done on init or first usage?
 
     private fun createResourcesSource(): Single<Map<Type, List<Int>>> = gopVehicleInterface.getRoutes()
         .map { result ->
@@ -76,10 +78,11 @@ class GopVehicleDataSource(
         private const val modifier = 180.0 / Math.PI
         private const val modifier2 = Math.PI / 180.0
         private const val modifier3 = Math.PI / 2.0
+
         private fun fromPointToLatLng(pointX: Double, pointY: Double): LatLng {
             val lon = (pointX / originShift) * 180.0
             val lat =
-                modifier * (2.0 * Math.atan(Math.exp(((pointY / originShift) * 180.0) * modifier2)) - modifier3)
+                modifier * (2.0 * atan(exp(((pointY / originShift) * 180.0) * modifier2)) - modifier3)
             return LatLng(lat, lon)
         }
 

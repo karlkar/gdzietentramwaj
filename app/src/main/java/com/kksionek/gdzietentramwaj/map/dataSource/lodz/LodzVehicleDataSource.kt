@@ -15,7 +15,9 @@ class LodzVehicleDataSource(
         lodzVehicleInterface.vehicles()
             .map { rawResponse ->
                 pattern.findAll(rawResponse).map { matchResult ->
-                    val items = matchResult.groupValues[1].split(",").map { it.replace("\"", "") }
+                    val items = matchResult.groupValues[1]
+                        .split(",")
+                        .map { it.replace("\"", "") }
                     val line = items[2].trim()
                     if (line.isEmpty()) {
                         null

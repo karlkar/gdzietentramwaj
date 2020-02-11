@@ -2,24 +2,26 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.location.Location
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.play.core.install.model.AppUpdateType
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import com.kksionek.gdzietentramwaj.toLocation
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-private const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
-private const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
+@VisibleForTesting
+const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
+@VisibleForTesting
+const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
 
 class MainViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
@@ -40,8 +42,8 @@ class MainViewModel @Inject constructor(
     private val _appUpdateAvailable = MutableLiveData<Boolean>().initWith(false)
     val appUpdateAvailable: LiveData<Boolean> = _appUpdateAvailable
 
-    private val _lastLocation = MutableLiveData<Location>()
-    val lastLocation: LiveData<Location> = _lastLocation
+    private val _lastLocation = MutableLiveData<LatLng>()
+    val lastLocation: LiveData<LatLng> = _lastLocation
 
     init {
         subscribeToLastLocation()
@@ -51,7 +53,7 @@ class MainViewModel @Inject constructor(
     private fun subscribeToLastLocation() {
         compositeDisposable.add(
             locationRepository.lastKnownLocation
-                .onErrorReturnItem(mapSettingsProvider.getCity().latLng.toLocation())
+                .onErrorReturnItem(mapSettingsProvider.getCity().latLng)
                 .subscribe { location ->
                     _lastLocation.postValue(location)
                 }
