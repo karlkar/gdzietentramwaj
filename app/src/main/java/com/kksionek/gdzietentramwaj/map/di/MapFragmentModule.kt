@@ -8,8 +8,6 @@ import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSourceFactory
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSourceFactory
-import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepository
-import com.kksionek.gdzietentramwaj.map.dataSource.warsaw.WarsawApikeyRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.model.SimpleXmlDeserializer
 import com.kksionek.gdzietentramwaj.map.model.XmlDeserializer
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
@@ -73,11 +71,6 @@ class MapFragmentModule {
     @Provides
     internal fun provideFirebaseRemoteConfig(): FirebaseRemoteConfig =
         FirebaseRemoteConfig.getInstance()
-
-    @Singleton
-    @Provides
-    internal fun provideWarsawApikeyRepository(firebaseRemoteConfig: FirebaseRemoteConfig): WarsawApikeyRepository =
-        WarsawApikeyRepositoryImpl(firebaseRemoteConfig)
 
     @Singleton
     @Provides

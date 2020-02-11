@@ -1,25 +1,21 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.annotations.SerializedName
 
 data class WarsawVehicle(
-    @SerializedName("Time")
-    val time: String,
-    @SerializedName("Lat")
-    private val lat: Double,
-    @SerializedName("Lon")
-    private val lng: Double,
-    @SerializedName("Lines")
-    val firstLine: String,
-    @SerializedName("Brigade")
-    val brigade: String
+    val id: String,
+    val timestamp: String,
+    val position: Position,
+    val prevPosition: Position?,
+    val line: String,
+    val brigade: String,
+    val isTram: Boolean
 ) {
-    val id: String
-        get() = "$firstLine/$brigade"
-
     val latLng: LatLng
-        get() = LatLng(lat, lng)
+        get() = LatLng(position.latitude, position.longitude)
 
-    fun isTram(): Boolean = firstLine.length < 3
+    val prevLatLng: LatLng?
+        get() = prevPosition?.let { LatLng(it.latitude, it.longitude) }
 }
+
+data class Position(val latitude: Double, val longitude: Double)

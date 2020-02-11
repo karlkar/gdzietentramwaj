@@ -4,14 +4,13 @@ import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import javax.inject.Inject
 
-private const val BASE_URL = "https://api.um.warszawa.pl/"
+private const val BASE_URL = "https://gdzietentramwaj.herokuapp.com/"
 
 class WarsawVehicleDataSourceFactory @Inject constructor(
-    private val interfaceBuilder: InterfaceBuilder,
-    private val warsawApikeyRepository: WarsawApikeyRepository
+    private val interfaceBuilder: InterfaceBuilder
 ) {
     fun create(): VehicleDataSource {
         val ztmVehicleInterface = interfaceBuilder.create(BASE_URL, WarsawVehicleInterface::class)
-        return WarsawVehicleDataSource(ztmVehicleInterface, warsawApikeyRepository)
+        return WarsawVehicleDataSource(ztmVehicleInterface)
     }
 }

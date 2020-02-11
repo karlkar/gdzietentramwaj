@@ -19,7 +19,12 @@ import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
-import com.kksionek.gdzietentramwaj.map.repository.*
+import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
+import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
+import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
+import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
+import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
@@ -344,6 +349,6 @@ class MapsViewModel @Inject constructor(
     }
 
     companion object {
-        const val TAG = "MapsViewModel"
+        private const val TAG = "MapsViewModel"
     }
 }

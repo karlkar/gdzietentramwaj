@@ -7,13 +7,10 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
-import io.reactivex.exceptions.CompositeException
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 import java.util.Calendar
-
-private const val APIKEY = "apikey"
 
 class WarsawVehicleDataSourceTest {
 
@@ -21,39 +18,34 @@ class WarsawVehicleDataSourceTest {
     @JvmField
     val testSchedulerRule = RxImmediateSchedulerRule()
 
-    private val warsawApiKeyRepository: WarsawApikeyRepository = mock {
-        on { apikey } doReturn Single.just(APIKEY)
-    }
     private val warsawVehicleInterface: WarsawVehicleInterface = mock {
-        on { buses(APIKEY) } doReturn Single.just(
+        on { vehicles() } doReturn Single.just(
             WarsawVehicleResponse(
                 listOf(
                     WarsawVehicle(
+                        "500/brigade",
                         WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
-                        52.0,
-                        19.0,
+                        Position(52.0, 19.0),
+                        null,
                         "500",
-                        "brigade"
-                    )
-                )
-            )
-        )
-        on { trams(APIKEY) } doReturn Single.just(
-            WarsawVehicleResponse(
-                listOf(
+                        "brigade",
+                        false
+                    ),
                     WarsawVehicle(
+                        "5/brigade2",
                         WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
-                        52.4,
-                        19.4,
+                        Position(52.4, 19.4),
+                        null,
                         "5",
-                        "brigade2"
+                        "brigade2",
+                        true
                     )
                 )
             )
         )
     }
 
-    private val tested = WarsawVehicleDataSource(warsawVehicleInterface, warsawApiKeyRepository)
+    private val tested = WarsawVehicleDataSource(warsawVehicleInterface)
 
     @Test
     fun `should return vehicle list when request succeeded`() {
@@ -76,60 +68,16 @@ class WarsawVehicleDataSourceTest {
     }
 
     @Test
-    fun `should return error when api key request failed`() {
+    fun `should return error when vehicles request failed`() {
         // given
         val error: IOException = mock()
-        whenever(warsawApiKeyRepository.apikey).thenReturn(Single.error(error))
+        whenever(warsawVehicleInterface.vehicles()).thenReturn(Single.error(error))
 
         // when
         val observer = tested.vehicles().test()
 
         // then
         observer.assertError { it === error }
-    }
-
-    @Test
-    fun `should return error when bus request failed`() {
-        // given
-        val error: IOException = mock()
-        whenever(warsawVehicleInterface.buses(APIKEY)).thenReturn(Single.error(error))
-
-        // when
-        val observer = tested.vehicles().test()
-
-        // then
-        observer.assertError { it === error }
-    }
-
-    @Test
-    fun `should return error when tram request failed`() {
-        // given
-        val error: IOException = mock()
-        whenever(warsawVehicleInterface.trams(APIKEY)).thenReturn(Single.error(error))
-
-        // when
-        val observer = tested.vehicles().test()
-
-        // then
-        observer.assertError { it === error }
-    }
-
-    @Test
-    fun `should return error when trams and buses requests failed`() {
-        // given
-        val error: IOException = mock()
-        val error2: IOException = mock()
-        whenever(warsawVehicleInterface.buses(APIKEY)).thenReturn(Single.error(error))
-        whenever(warsawVehicleInterface.trams(APIKEY)).thenReturn(Single.error(error2))
-
-        // when
-        val observer = tested.vehicles().test()
-
-        // then
-        observer.assertError {
-            (it as CompositeException).exceptions
-                .containsAll(listOf(error, error2))
-        }
     }
 
     @Test
@@ -138,16 +86,27 @@ class WarsawVehicleDataSourceTest {
         val threeMinutesAgo = Calendar.getInstance().apply {
             add(Calendar.MINUTE, -3)
         }
-        whenever(warsawVehicleInterface.buses(APIKEY)).thenReturn(
+        whenever(warsawVehicleInterface.vehicles()).thenReturn(
             Single.just(
                 WarsawVehicleResponse(
                     listOf(
                         WarsawVehicle(
+                            "500/brigade",
                             WarsawVehicleDataSource.dateFormat.format(threeMinutesAgo.time),
-                            52.0,
-                            19.0,
+                            Position(52.0, 19.0),
+                            Position(52.0001, 19.0001),
                             "500",
-                            "brigade"
+                            "brigade",
+                            false
+                        ),
+                        WarsawVehicle(
+                            "5/brigade2",
+                            WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                            Position(52.4, 19.4),
+                            null,
+                            "5",
+                            "brigade2",
+                            true
                         )
                     )
                 )
@@ -173,16 +132,27 @@ class WarsawVehicleDataSourceTest {
     @Test // TODO: Serious! Should bee fixed ASAP!
     fun `should return error when request succeeded given some vehicles hav not proper format of date`() {
         // given
-        whenever(warsawVehicleInterface.buses(APIKEY)).thenReturn(
+        whenever(warsawVehicleInterface.vehicles()).thenReturn(
             Single.just(
                 WarsawVehicleResponse(
                     listOf(
                         WarsawVehicle(
+                            "500/brigade",
                             "000000000000000wrong format",
-                            52.0,
-                            19.0,
+                            Position(52.0, 19.0),
+                            null,
                             "500",
-                            "brigade"
+                            "brigade",
+                            false
+                        ),
+                        WarsawVehicle(
+                            "5/brigade2",
+                            WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                            Position(52.4, 19.4),
+                            null,
+                            "5",
+                            "brigade2",
+                            true
                         )
                     )
                 )
