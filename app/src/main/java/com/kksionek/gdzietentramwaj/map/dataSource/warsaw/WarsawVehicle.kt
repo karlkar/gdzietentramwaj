@@ -1,7 +1,9 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.warsaw
 
+import androidx.annotation.Keep
 import com.google.android.gms.maps.model.LatLng
 
+@Keep
 data class WarsawVehicle(
     val id: String,
     val timestamp: String,
@@ -18,4 +20,5 @@ data class WarsawVehicle(
         get() = prevPosition?.let { LatLng(it.latitude, it.longitude) }
 }
 
+@Keep
 data class Position(val latitude: Double, val longitude: Double)

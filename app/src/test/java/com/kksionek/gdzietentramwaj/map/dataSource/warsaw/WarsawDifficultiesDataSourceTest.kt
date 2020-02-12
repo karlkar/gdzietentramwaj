@@ -37,12 +37,7 @@ class WarsawDifficultiesDataSourceTest {
 
         // then
         observer
-            .assertValue {
-                it.isSupported
-                        && it.difficultiesEntities[0].msg == TITLE
-                        && it.difficultiesEntities[0].link == LINK
-                        && it.difficultiesEntities[0].iconUrl == null
-            }
+            .assertValue { it.isSupported && it.difficultiesEntities.isEmpty() }
             .assertNoErrors()
             .assertComplete()
     }
@@ -92,7 +87,10 @@ class WarsawDifficultiesDataSourceTest {
         val observer = tested.getDifficulties().test()
 
         // then
-        observer.assertError { it === error }
+        observer
+            .assertValue { it.isSupported && it.difficultiesEntities.isEmpty() }
+            .assertNoErrors()
+            .assertComplete()
     }
 
     @Test
@@ -108,9 +106,9 @@ class WarsawDifficultiesDataSourceTest {
         val observer = tested.getDifficulties().test()
 
         // then
-        observer.assertError(IllegalArgumentException::class.java) // TODO: Serious! When there are no difficulties should return empty list, not an error!
-//            .assertValue { it.isSupported && it.difficultiesEntities.isEmpty() }
-//            .assertNoErrors()
-//            .assertComplete()
+        observer
+            .assertValue { it.isSupported && it.difficultiesEntities.isEmpty() }
+            .assertNoErrors()
+            .assertComplete()
     }
 }
