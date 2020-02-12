@@ -6,21 +6,13 @@ apply plugin: 'io.fabric'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    signingConfigs {
-        releaseTry {
-            storeFile file('/Users/ksionekk/AndroidStudioProjects/priv/upload_keystore.jks')
-            storePassword 'windows98'
-            keyAlias = 'myandroidkey'
-            keyPassword 'windows98'
-        }
-    }
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.kksionek.gdzietentramwaj"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 53
-        versionName "1.53"
+        versionCode 54
+        versionName "1.54"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -40,8 +32,6 @@ android {
             manifestPlaceholders = [enableCrashReporting: "true"]
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.releaseTry
-            debuggable true
         }
     }
     packagingOptions {
