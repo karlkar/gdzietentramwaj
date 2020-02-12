@@ -9,7 +9,7 @@ import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
 import kotlinx.android.synthetic.main.item_favorite_line.*
-import java.util.*
+import java.util.Collections
 
 class FavoritesAdapter(onItemClickListener: OnItemClickListener<FavoriteTram>) :
     BaseAdapter<FavoriteTram, FavoritesAdapter.ViewHolder>(
@@ -38,11 +38,12 @@ class FavoritesAdapter(onItemClickListener: OnItemClickListener<FavoriteTram>) :
     }
 
     override fun submitList(list: List<FavoriteTram>?) {
+        val mutableList = list?.toMutableList() ?: mutableListOf()
         Collections.sort(
-            list?.toMutableList() ?: mutableListOf(),
+            mutableList,
             NaturalOrderComparator()
         )
-        super.submitList(list)
+        super.submitList(mutableList)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

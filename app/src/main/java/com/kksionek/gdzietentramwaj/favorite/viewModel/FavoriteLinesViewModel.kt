@@ -11,6 +11,7 @@ import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteVehiclesRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.view.UiState
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -44,6 +45,7 @@ class FavoriteLinesViewModel @Inject constructor(
                 UiState.Error(R.string.favorites_failed_to_load)
             }
             .startWith(UiState.InProgress())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe { list -> _favoriteTrams.setValue(list) }
         )
     }
