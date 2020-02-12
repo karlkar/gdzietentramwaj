@@ -16,7 +16,7 @@ class WarsawDifficultiesDataSource(
         return warsawDifficultiesInterface.getDifficulties()
             .subscribeOn(Schedulers.io())
             .map { result ->
-                if (result.isEmpty()) {
+                if (result.isEmpty() || !result.contains("<item>")) {
                     DifficultiesState(true, emptyList())
                 } else {
                     val difficultiesEntities =
