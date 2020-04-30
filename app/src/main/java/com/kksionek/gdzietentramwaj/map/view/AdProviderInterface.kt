@@ -5,7 +5,7 @@ import android.location.Location
 import android.view.ViewGroup
 
 interface AdProviderInterface {
-    fun initialize(context: Context, adMobAppId: String)
+    fun initialize(context: Context)
     fun showAd(adView: ViewGroup)
     fun resume()
     fun pause()

@@ -16,8 +16,18 @@ class AdProvider : AdProviderInterface {
 
     private var adView: AdView? = null
 
-    override fun initialize(context: Context, adMobAppId: String) {
-        MobileAds.initialize(context, adMobAppId)
+    override fun initialize(context: Context) {
+        if (BuildConfig.DEBUG) {
+            val requestConfiguration = MobileAds.getRequestConfiguration().toBuilder()
+                .setTestDeviceIds(
+                    listOf(
+                        context.getString(R.string.adMobTestDeviceS7Edge),
+                        context.getString(R.string.adMobTestDeviceS7Edge2)
+                    )
+                ).build()
+            MobileAds.setRequestConfiguration(requestConfiguration)
+        }
+        MobileAds.initialize(context)
     }
 
     override fun showAd(adView: ViewGroup) {
@@ -35,13 +45,9 @@ class AdProvider : AdProviderInterface {
     override fun loadAd(context: Context, location: Location) {
         adView?.let {
             it.visibility = VISIBLE
-            val adRequest = AdRequest.Builder().apply {
-                if (BuildConfig.DEBUG) {
-                    addTestDevice(context.getString(R.string.adMobTestDeviceS7Edge))
-                    addTestDevice(context.getString(R.string.adMobTestDeviceS7Edge2))
-                }
-                setLocation(location)
-            }.build()
+            val adRequest = AdRequest.Builder()
+                .setLocation(location)
+                .build()
             it.loadAd(adRequest)
         }
     }

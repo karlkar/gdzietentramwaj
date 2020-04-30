@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.maps.model.LatLng
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         (application as TramApplication).appComponent.inject(this)
 
-        mainViewModel = ViewModelProviders.of(this, viewModelFactory)[MainViewModel::class.java]
+        mainViewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
         if (mainViewModel.locationPermission.value == false) {
             mainViewModel.locationPermissionRequestLiveData.observe(this, Observer {

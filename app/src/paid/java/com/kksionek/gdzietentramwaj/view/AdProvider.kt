@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
 
 class AdProvider : AdProviderInterface {
-    override fun initialize(context: Context, adMobAppId: String) {}
+    override fun initialize(context: Context) {}
 
     override fun showAd(adView: ViewGroup) {}
 

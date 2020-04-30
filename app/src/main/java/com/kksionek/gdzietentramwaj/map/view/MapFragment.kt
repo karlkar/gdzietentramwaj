@@ -20,8 +20,8 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.ShareActionProvider
 import androidx.core.view.MenuItemCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -50,8 +50,8 @@ import javax.inject.Inject
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var mapsViewModel: MapsViewModel
+    private val mainViewModel: MainViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val mapsViewModel: MapsViewModel by viewModels(factoryProducer = { viewModelFactory })
 
     private lateinit var menuItemFavoriteSwitch: MenuItem
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
@@ -149,10 +149,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (context.applicationContext as TramApplication).appComponent.inject(this)
-        mainViewModel =
-            ViewModelProviders.of(activity!!, viewModelFactory)[MainViewModel::class.java]
-        mapsViewModel =
-            ViewModelProviders.of(this, viewModelFactory)[MapsViewModel::class.java]
 
         displaysOldIcons = mapsViewModel.isOldIconSetEnabled
     }
@@ -182,11 +178,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 ?.getMapAsync(this)
         }
 
-        mapsViewModel.tramData.observe(this, tramDataObserver)
-        mapsViewModel.favoriteView.observe(this, favoriteModeObserver)
-        mapsViewModel.difficulties.observe(this, difficultiesObserver)
+        mapsViewModel.tramData.observe(viewLifecycleOwner, tramDataObserver)
+        mapsViewModel.favoriteView.observe(viewLifecycleOwner, favoriteModeObserver)
+        mapsViewModel.difficulties.observe(viewLifecycleOwner, difficultiesObserver)
         if (mainViewModel.locationPermission.value != true) {
-            mainViewModel.locationPermission.observe(this, locationPermissionObserver)
+            mainViewModel.locationPermission.observe(viewLifecycleOwner, locationPermissionObserver)
         }
 
         setSwitchButtonMargin()
@@ -440,7 +436,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        for (i in 0 until tramMarkerList.size) {
+        for (i in tramMarkerList.indices) {
             val tramMarker = tramMarkerList[i]
             if (diffResult.convertNewPositionToOld(i) == DiffUtil.DiffResult.NO_POSITION) {
                 if (tramMarker.marker == null) {
