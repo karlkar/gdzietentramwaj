@@ -127,8 +127,8 @@ class WarsawVehicleDataSourceTest {
             .assertComplete()
     }
 
-    @Test // TODO: Serious! Should bee fixed ASAP!
-    fun `should return error when request succeeded given some vehicles hav not proper format of date`() {
+    @Test // TODO: Should report to crashlytics?
+    fun `should return error when request succeeded given some vehicles have not proper format of date`() {
         // given
         whenever(warsawVehicleInterface.vehicles()).thenReturn(
             Single.just(

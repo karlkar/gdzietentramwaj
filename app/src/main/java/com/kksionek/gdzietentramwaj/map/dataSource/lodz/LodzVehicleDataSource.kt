@@ -28,7 +28,7 @@ class LodzVehicleDataSource(
                             prevPosition = LatLng(items[12].toDouble(), items[11].toDouble()),
                             line = items[2].trim(),
                             isTram = items[23].trim() == "T",
-                            brigade = items[3]
+                            brigade = items[3].trim()
                         )
                     }
                 }

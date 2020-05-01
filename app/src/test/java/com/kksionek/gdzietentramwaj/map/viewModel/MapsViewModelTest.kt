@@ -203,7 +203,7 @@ class MapsViewModelTest {
         argCaptor.secondValue `should equal` MapControls.ChangeType(mapType.next())
     }
 
-    @Test // TODO: Potential risk if saving to shared preferences is slower than user clicks
+    @Test
     fun `should change the map type multiple times when user has changed the map type multiple times`() {
         // given
         val mapType = MapTypes.NORMAL

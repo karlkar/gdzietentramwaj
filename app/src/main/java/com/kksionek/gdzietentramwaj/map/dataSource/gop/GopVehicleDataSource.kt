@@ -12,7 +12,7 @@ class GopVehicleDataSource(
     private val gopVehicleInterface: GopVehicleInterface
 ) : VehicleDataSource {
 
-    private var routesSource = createResourcesSource() // TODO: Should it be done on init or first usage?
+    private var routesSource = createResourcesSource()
 
     private fun createResourcesSource(): Single<Map<Type, List<Int>>> = gopVehicleInterface.getRoutes()
         .map { result ->
