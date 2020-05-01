@@ -22,6 +22,7 @@ import io.fabric.sdk.android.Fabric
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.CallAdapter
 import javax.inject.Singleton
 
@@ -78,11 +79,11 @@ class AppModule(private val application: TramApplication) {
     @Singleton
     @Provides
     internal fun provideOkHttpClient(): OkHttpClient {
-        // DEBUG
-        //        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        //        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        val interceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
         return OkHttpClient.Builder()
-            //                .addInterceptor(interceptor)
+            .addInterceptor(interceptor)
             .build()
     }
 

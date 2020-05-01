@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.favorite.viewModel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,6 +14,7 @@ import com.kksionek.gdzietentramwaj.map.view.UiState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 class FavoriteLinesViewModel @Inject constructor(
@@ -40,7 +40,7 @@ class FavoriteLinesViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .map { UiState.Success(it) as UiState<List<FavoriteTram>> }
             .onErrorReturn {
-                Log.e(TAG, "Failed getting all the favorites from the database", it)
+                Timber.e(it, "Failed getting all the favorites from the database")
                 crashReportingService.reportCrash(
                     it,
                     "Failed getting all the favorites from the database"
@@ -58,10 +58,10 @@ class FavoriteLinesViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
-                    Log.v(TAG, "Tram saved as favorite")
+                    Timber.v("Tram saved as favorite")
                 },
                 {
-                    Log.e(TAG, "Failed to save the tram as favorite", it)
+                    Timber.e(it, "Failed to save the tram as favorite")
                     crashReportingService.reportCrash(
                         it,
                         "Failed to save the tram as favorite"

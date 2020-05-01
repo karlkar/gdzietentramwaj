@@ -2,7 +2,6 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,6 +16,7 @@ import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 @VisibleForTesting
@@ -63,7 +63,7 @@ class MainViewModel @Inject constructor(
 
     private fun subscribeToAppUpdateAvailability() {
         appUpdateRepository.isUpdateAvailable()
-            .doOnError { Log.w(TAG, "Couldn't check app update availability", it) }
+            .doOnError { Timber.w(it, "Couldn't check app update availability") }
             .onErrorReturnItem(false)
             .subscribeOn(Schedulers.io())
             .subscribe { updateAvailability ->
@@ -92,7 +92,7 @@ class MainViewModel @Inject constructor(
 
     fun onResume(activity: Activity) {
         appUpdateRepository.isUpdateInProgress()
-            .doOnError { Log.w(TAG, "Couldn't check if update is in progress", it) }
+            .doOnError { Timber.w(it, "Couldn't check if update is in progress") }
             .onErrorReturnItem(false)
             .subscribeOn(Schedulers.io())
             .subscribe { updateInProgress ->

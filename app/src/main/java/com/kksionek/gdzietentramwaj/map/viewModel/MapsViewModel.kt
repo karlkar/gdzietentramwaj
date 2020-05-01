@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,6 +34,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.ExecutionException
@@ -140,7 +140,7 @@ class MapsViewModel @Inject constructor(
                 },
                 { throwable ->
                     if (throwable !is ExecutionException || throwable.cause !is SecurityException) {
-                        Log.w(TAG, "Failed to get last location", throwable)
+                        Timber.w(throwable, "Failed to get last location")
                         crashReportingService.reportCrash(
                             throwable,
                             "Failed to get last location"
@@ -163,7 +163,7 @@ class MapsViewModel @Inject constructor(
         vehiclesRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable: Throwable ->
-                Log.e(TAG, "Failed getting all the favorites from the database", throwable)
+                Timber.e(throwable, "Failed getting all the favorites from the database")
                 crashReportingService.reportCrash(
                     throwable,
                     "Failed getting the favorite data from database"
@@ -185,7 +185,7 @@ class MapsViewModel @Inject constructor(
                 when (result) {
                     is NetworkOperationResult.Success -> UiState.Success(result.data)
                     is NetworkOperationResult.Error -> {
-                        Log.e(TAG, "Failed to reload difficulties", result.throwable)
+                        Timber.e(result.throwable, "Failed to reload difficulties")
                         if (result.throwable !is HttpException) {
                             crashReportingService.reportCrash(
                                 result.throwable,
@@ -259,7 +259,7 @@ class MapsViewModel @Inject constructor(
                         )
                     }
                     if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Exception", operationResult.throwable)
+                        Timber.e(operationResult.throwable, "Exception")
                         UiState.Error(
                             R.string.map_debug_error_message,
                             listOf(

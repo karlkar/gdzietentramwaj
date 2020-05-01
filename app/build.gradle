@@ -118,8 +118,7 @@ dependencies {
 
     implementation "androidx.multidex:multidex:2.0.1"
 
-    // DEBUG:
-    //        implementation "com.squareup.okhttp3:logging-interceptor:3.6.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.2.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
@@ -139,16 +138,19 @@ dependencies {
         exclude module: "xpp3"
     }
 
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.2.4'
+
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     testImplementation "junit:junit:4.12"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "org.amshove.kluent:kluent:1.58"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation('org.threeten:threetenbp:1.4.4') {
+        exclude group: 'com.jakewharton.threetenabp', module: 'threetenabp'
+    }
 
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.test:runner:1.2.0"
-
-    implementation 'com.jakewharton.threetenabp:threetenabp:1.2.4'
-    testImplementation ('org.threeten:threetenbp:1.4.0'){
-        exclude group:'com.jakewharton.threetenabp', module:'threetenabp'
-    }
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }

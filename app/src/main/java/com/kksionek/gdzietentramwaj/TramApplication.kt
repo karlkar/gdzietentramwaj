@@ -8,6 +8,7 @@ import com.kksionek.gdzietentramwaj.base.di.DaggerAppComponent
 import com.kksionek.gdzietentramwaj.map.view.AdProvider
 import io.reactivex.functions.Consumer
 import io.reactivex.plugins.RxJavaPlugins
+import timber.log.Timber
 import javax.inject.Inject
 
 class TramApplication : MultiDexApplication() {
@@ -24,7 +25,10 @@ class TramApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
 
-        AndroidThreeTen.init(this);
+        AndroidThreeTen.init(this)
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
 
         appComponent = DaggerAppComponent
             .builder()
