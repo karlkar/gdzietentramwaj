@@ -9,7 +9,12 @@ import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteVehiclesRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.view.UiState
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.subjects.ReplaySubject
@@ -42,41 +47,65 @@ class FavoriteLinesViewModelTest {
         on { getCity() } doReturn selectedCity
     }
 
-    private val tested = FavoriteLinesViewModel(
-        favoriteVehiclesRepository,
-        crashReportingService,
-        mapSettingsProvider
-    )
+    private lateinit var tested: FavoriteLinesViewModel
+
+    private val favoriteTramsObserver: Observer<UiState<List<FavoriteTram>>> = mock()
+
+    private fun setupTested() {
+        tested = FavoriteLinesViewModel(
+            favoriteVehiclesRepository,
+            crashReportingService,
+            mapSettingsProvider
+        )
+        tested.favoriteTrams.observeForever(favoriteTramsObserver)
+    }
+
+    @Test
+    fun `should get all vehicles on init`() {
+        // given
+        setupTested()
+
+        // then
+        verify(favoriteVehiclesRepository).getAllVehicles(selectedCity)
+    }
+
+    @Test
+    fun `should emit in progress event on init`() {
+        // given
+        setupTested()
+
+        // then
+        val argCaptor = argumentCaptor<UiState<List<FavoriteTram>>>()
+        verify(favoriteTramsObserver).onChanged(argCaptor.capture())
+        argCaptor.firstValue `should be instance of` UiState.InProgress::class
+    }
 
     @Test
     fun `should emit in progress event when reload requested`() {
         // given
-        val observer: Observer<UiState<List<FavoriteTram>>> = mock()
-        tested.favoriteTrams.observeForever(observer)
+        setupTested()
 
         // when
         tested.forceReloadFavorites()
 
         // then
         val argCaptor = argumentCaptor<UiState<List<FavoriteTram>>>()
-        verify(observer, times(1)).onChanged(argCaptor.capture())
-        argCaptor.firstValue `should be instance of` UiState.InProgress::class
+        verify(favoriteTramsObserver, times(2)).onChanged(argCaptor.capture())
+        argCaptor.secondValue `should be instance of` UiState.InProgress::class
     }
 
     @Test
     fun `should emit obtained vehicles when vehicles obtained`() {
         // given
-        val observer: Observer<UiState<List<FavoriteTram>>> = mock()
         val vehicleList = listOf(FavoriteTram("1", false, selectedCity.id))
-        tested.favoriteTrams.observeForever(observer)
+        setupTested()
 
         // when
-        tested.forceReloadFavorites()
         vehiclesSubject.onNext(vehicleList)
 
         // then
         val argCaptor = argumentCaptor<UiState<List<FavoriteTram>>>()
-        verify(observer, times(2)).onChanged(argCaptor.capture())
+        verify(favoriteTramsObserver, times(2)).onChanged(argCaptor.capture())
         with(argCaptor.lastValue) {
             this as UiState.Success
             this.data `should equal` vehicleList
@@ -87,16 +116,14 @@ class FavoriteLinesViewModelTest {
     fun `should emit error event when reload failed`() {
         // given
         val error: IOException = mock()
-        val observer: Observer<UiState<List<FavoriteTram>>> = mock()
-        tested.favoriteTrams.observeForever(observer)
+        setupTested()
 
         // when
-        tested.forceReloadFavorites()
         vehiclesSubject.onError(error)
 
         // then
         val argCaptor = argumentCaptor<UiState<List<FavoriteTram>>>()
-        verify(observer, times(2)).onChanged(argCaptor.capture())
+        verify(favoriteTramsObserver, times(2)).onChanged(argCaptor.capture())
         argCaptor.secondValue `should be instance of` UiState.Error::class
     }
 
@@ -104,11 +131,9 @@ class FavoriteLinesViewModelTest {
     fun `should report error event when reload failed`() {
         // given
         val error: IOException = mock()
-        val observer: Observer<UiState<List<FavoriteTram>>> = mock()
-        tested.favoriteTrams.observeForever(observer)
+        setupTested()
 
         // when
-        tested.forceReloadFavorites()
         vehiclesSubject.onError(error)
 
         // then
@@ -121,7 +146,6 @@ class FavoriteLinesViewModelTest {
     @Test
     fun `should skip results of old requests when reload requested two times given the first request didn't succeed until the second request`() {
         // given
-        val observer: Observer<UiState<List<FavoriteTram>>> = mock()
         val vehicleList = listOf(FavoriteTram("1", false, selectedCity.id))
         val vehicleList2 = listOf(FavoriteTram("2", true, selectedCity.id))
         val abortedRequestSubject = ReplaySubject.create<List<FavoriteTram>>()
@@ -129,7 +153,7 @@ class FavoriteLinesViewModelTest {
             abortedRequestSubject.toFlowable(BackpressureStrategy.LATEST),
             vehiclesSubject.toFlowable(BackpressureStrategy.LATEST)
         )
-        tested.favoriteTrams.observeForever(observer)
+        setupTested()
 
         // when
         tested.forceReloadFavorites()
@@ -139,10 +163,11 @@ class FavoriteLinesViewModelTest {
 
         // then
         val argCaptor = argumentCaptor<UiState<List<FavoriteTram>>>()
-        verify(observer, times(3)).onChanged(argCaptor.capture())
+        verify(favoriteTramsObserver, times(4)).onChanged(argCaptor.capture())
         argCaptor.firstValue `should be instance of` UiState.InProgress::class
         argCaptor.secondValue `should be instance of` UiState.InProgress::class
-        with(argCaptor.thirdValue) {
+        argCaptor.thirdValue `should be instance of` UiState.InProgress::class
+        with(argCaptor.lastValue) {
             this as UiState.Success
             this.data `should equal` vehicleList2
         }
@@ -150,6 +175,9 @@ class FavoriteLinesViewModelTest {
 
     @Test
     fun `should persist the favorite tram when requested`() {
+        // given
+        setupTested()
+
         // when
         tested.setTramFavorite(lineId, favorite)
 

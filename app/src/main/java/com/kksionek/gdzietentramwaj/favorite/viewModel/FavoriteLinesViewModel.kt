@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.addToDisposable
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
@@ -29,11 +30,13 @@ class FavoriteLinesViewModel @Inject constructor(
 
     private val selectedCity: Cities = mapSettingsProvider.getCity()
 
-    // TODO: forceReloadFavorites was called from init() maybe it was good? But then test should have before block with tested initialized from there
+    init {
+        forceReloadFavorites()
+    }
 
     fun forceReloadFavorites() {
         compositeDisposable.clear()
-        compositeDisposable.add(favoriteVehiclesRepository.getAllVehicles(selectedCity)
+        favoriteVehiclesRepository.getAllVehicles(selectedCity)
             .subscribeOn(Schedulers.io())
             .map { UiState.Success(it) as UiState<List<FavoriteTram>> }
             .onErrorReturn {
@@ -47,25 +50,24 @@ class FavoriteLinesViewModel @Inject constructor(
             .startWith(UiState.InProgress())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { list -> _favoriteTrams.setValue(list) }
-        )
+            .addToDisposable(compositeDisposable)
     }
 
     fun setTramFavorite(lineId: String, favorite: Boolean) {
-        compositeDisposable.add(
-            favoriteVehiclesRepository.setVehicleFavorite(selectedCity, lineId, favorite)
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                    {
-                        Log.v(TAG, "Tram saved as favorite")
-                    },
-                    {
-                        Log.e(TAG, "Failed to save the tram as favorite", it)
-                        crashReportingService.reportCrash(
-                            it,
-                            "Failed to save the tram as favorite"
-                        )
-                    })
-        )
+        favoriteVehiclesRepository.setVehicleFavorite(selectedCity, lineId, favorite)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                {
+                    Log.v(TAG, "Tram saved as favorite")
+                },
+                {
+                    Log.e(TAG, "Failed to save the tram as favorite", it)
+                    crashReportingService.reportCrash(
+                        it,
+                        "Failed to save the tram as favorite"
+                    )
+                })
+            .addToDisposable(compositeDisposable)
     }
 
     override fun onCleared() {

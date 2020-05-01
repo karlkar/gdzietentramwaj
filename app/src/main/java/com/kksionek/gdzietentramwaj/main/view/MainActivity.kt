@@ -6,12 +6,12 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.observeNonNullOneEvent
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
@@ -56,12 +56,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("NewApi")
     private fun setupLocationPermissionObserver() {
         if (mainViewModel.locationPermissionGrantedStatus.value == false) {
-            mainViewModel.locationPermissionRequestor.observe(this, Observer {
+            mainViewModel.locationPermissionRequestor.observeNonNull(this) {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     LOCATION_PERMISSION_REQUEST
                 )
-            })
+            }
         }
     }
 

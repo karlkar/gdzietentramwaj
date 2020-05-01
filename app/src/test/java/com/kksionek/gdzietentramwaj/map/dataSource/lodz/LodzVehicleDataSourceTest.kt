@@ -43,7 +43,7 @@ class LodzVehicleDataSourceTest {
                         && abs(it[0].position.longitude - 19.44865) < 0.00001
                         && it[0].line == "15"
                         && it[0].isTram
-                        && it[0].brigade == " 4" // TODO: Need to trim
+                        && it[0].brigade == "4"
                         && abs(it[0].prevPosition!!.latitude - 51.77612) < 0.00001
                         && abs(it[0].prevPosition!!.longitude - 19.44794) < 0.00001
             }
