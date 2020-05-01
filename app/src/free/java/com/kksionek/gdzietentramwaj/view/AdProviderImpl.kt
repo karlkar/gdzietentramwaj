@@ -10,24 +10,24 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
+import com.kksionek.gdzietentramwaj.map.view.AdProvider
 
-class AdProvider : AdProviderInterface {
+class AdProviderImpl(applicationContext: Context) : AdProvider {
 
     private var adView: AdView? = null
 
-    override fun initialize(context: Context) {
+    init {
         if (BuildConfig.DEBUG) {
             val requestConfiguration = MobileAds.getRequestConfiguration().toBuilder()
                 .setTestDeviceIds(
                     listOf(
-                        context.getString(R.string.adMobTestDeviceS7Edge),
-                        context.getString(R.string.adMobTestDeviceS7Edge2)
+                        applicationContext.getString(R.string.adMobTestDeviceS7Edge),
+                        applicationContext.getString(R.string.adMobTestDeviceS7Edge2)
                     )
                 ).build()
             MobileAds.setRequestConfiguration(requestConfiguration)
         }
-        MobileAds.initialize(context)
+        MobileAds.initialize(applicationContext)
     }
 
     override fun showAd(adView: ViewGroup) {
@@ -42,7 +42,7 @@ class AdProvider : AdProviderInterface {
         adView?.pause()
     }
 
-    override fun loadAd(context: Context, location: Location) {
+    override fun loadAd(location: Location) {
         adView?.let {
             it.visibility = VISIBLE
             val adRequest = AdRequest.Builder()

@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.play.core.install.model.AppUpdateType
+import com.kksionek.gdzietentramwaj.addToDisposable
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
@@ -20,6 +21,7 @@ import javax.inject.Inject
 
 @VisibleForTesting
 const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
+
 @VisibleForTesting
 const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
 
@@ -34,10 +36,10 @@ class MainViewModel @Inject constructor(
 
     private val _locationPermission =
         MutableLiveData<Boolean>().initWith(locationRepository.isLocationPermissionGranted())
-    val locationPermission: LiveData<Boolean> = _locationPermission
+    val locationPermissionGrantedStatus: LiveData<Boolean> = _locationPermission
 
-    private val _locationPermissionRequestLiveData = MutableLiveData<Boolean>()
-    val locationPermissionRequestLiveData: LiveData<Boolean> = _locationPermissionRequestLiveData
+    private val _locationPermissionRequestor = MutableLiveData<Boolean>()
+    val locationPermissionRequestor: LiveData<Boolean> = _locationPermissionRequestor
 
     private val _appUpdateAvailable = MutableLiveData<Boolean>().initWith(false)
     val appUpdateAvailable: LiveData<Boolean> = _appUpdateAvailable
@@ -51,30 +53,28 @@ class MainViewModel @Inject constructor(
     }
 
     private fun subscribeToLastLocation() {
-        compositeDisposable.add(
-            locationRepository.lastKnownLocation
-                .onErrorReturnItem(mapSettingsProvider.getCity().latLng)
-                .subscribe { location ->
-                    _lastLocation.postValue(location)
-                }
-        )
+        locationRepository.lastKnownLocation
+            .onErrorReturnItem(mapSettingsProvider.getCity().latLng)
+            .subscribe { location ->
+                _lastLocation.postValue(location)
+            }
+            .addToDisposable(compositeDisposable)
     }
 
     private fun subscribeToAppUpdateAvailability() {
-        compositeDisposable.add(
-            appUpdateRepository.isUpdateAvailable()
-                .doOnError { Log.w(TAG, "Couldn't check app update availability", it) }
-                .onErrorReturnItem(false)
-                .subscribeOn(Schedulers.io())
-                .subscribe { updateAvailability ->
-                    _appUpdateAvailable.postValue(updateAvailability)
-                }
-        )
+        appUpdateRepository.isUpdateAvailable()
+            .doOnError { Log.w(TAG, "Couldn't check app update availability", it) }
+            .onErrorReturnItem(false)
+            .subscribeOn(Schedulers.io())
+            .subscribe { updateAvailability ->
+                _appUpdateAvailable.postValue(updateAvailability)
+            }
+            .addToDisposable(compositeDisposable)
     }
 
     fun requestLocationPermission() {
         if (!locationRepository.isLocationPermissionGranted()) {
-            _locationPermissionRequestLiveData.postValue(true)
+            _locationPermissionRequestor.postValue(true)
         }
     }
 
@@ -91,7 +91,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun onResume(activity: Activity) {
-        compositeDisposable.add(appUpdateRepository.isUpdateInProgress()
+        appUpdateRepository.isUpdateInProgress()
             .doOnError { Log.w(TAG, "Couldn't check if update is in progress", it) }
             .onErrorReturnItem(false)
             .subscribeOn(Schedulers.io())
@@ -99,7 +99,8 @@ class MainViewModel @Inject constructor(
                 if (updateInProgress) {
                     startUpdateFlowForResult(activity)
                 }
-            })
+            }
+            .addToDisposable(compositeDisposable)
     }
 
     fun showGoogleApiUpdateNeededDialog(activity: Activity, callback: ((DialogInterface) -> Unit)) {

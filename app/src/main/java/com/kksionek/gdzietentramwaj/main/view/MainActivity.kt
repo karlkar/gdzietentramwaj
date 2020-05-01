@@ -4,17 +4,18 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
+import com.kksionek.gdzietentramwaj.base.observeNonNullOneEvent
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
-import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
+import com.kksionek.gdzietentramwaj.map.view.AdProvider
 import com.kksionek.gdzietentramwaj.toLocation
 import javax.inject.Inject
 
@@ -26,25 +27,10 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var viewModelFactory: ViewModelFactory
 
     @Inject
-    internal lateinit var adProviderInterface: AdProviderInterface
+    internal lateinit var adProvider: AdProvider
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by viewModels(factoryProducer = { viewModelFactory })
 
-    private val lastLocationObserver = Observer { location: LatLng? ->
-        location?.let {
-            adProviderInterface.loadAd(applicationContext, it.toLocation())
-        }
-    }
-
-    private val appUpdateObserver = Observer { appUpdateAvailability: Boolean? ->
-        appUpdateAvailability?.let { it ->
-            if (it) {
-                mainViewModel.startUpdateFlowForResult(this)
-            }
-        }
-    }
-
-    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -53,22 +39,30 @@ class MainActivity : AppCompatActivity() {
 
         (application as TramApplication).appComponent.inject(this)
 
-        mainViewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+        setupLocationPermissionObserver()
+        mainViewModel.lastLocation.observeNonNullOneEvent(this) { latLng: LatLng ->
+            adProvider.loadAd(latLng.toLocation())
+        }
 
-        if (mainViewModel.locationPermission.value == false) {
-            mainViewModel.locationPermissionRequestLiveData.observe(this, Observer {
+        mainViewModel.appUpdateAvailable.observeNonNullOneEvent(this) { appUpdateAvailability ->
+            if (appUpdateAvailability) {
+                mainViewModel.startUpdateFlowForResult(this)
+            }
+        }
+
+        adProvider.showAd(findViewById(R.id.adview_maps_adview))
+    }
+
+    @SuppressLint("NewApi")
+    private fun setupLocationPermissionObserver() {
+        if (mainViewModel.locationPermissionGrantedStatus.value == false) {
+            mainViewModel.locationPermissionRequestor.observe(this, Observer {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     LOCATION_PERMISSION_REQUEST
                 )
             })
         }
-        mainViewModel.lastLocation.observe(this, lastLocationObserver)
-
-        mainViewModel.appUpdateAvailable.observe(this, appUpdateObserver)
-
-        adProviderInterface.initialize(this, getString(R.string.adMobAppId))
-        adProviderInterface.showAd(findViewById(R.id.adview_maps_adview))
     }
 
     override fun onSupportNavigateUp(): Boolean =
@@ -82,12 +76,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        adProviderInterface.resume()
+        adProvider.resume()
         mainViewModel.onResume(this)
     }
 
     override fun onPause() {
-        adProviderInterface.pause()
+        adProvider.pause()
         super.onPause()
     }
 
@@ -97,13 +91,12 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mainViewModel.onRequestPermissionsResult(
-            requestCode == LOCATION_PERMISSION_REQUEST
-                    && permissions.isNotEmpty()
-                    && grantResults.isNotEmpty()
-                    && permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
-        )
+        if (requestCode == LOCATION_PERMISSION_REQUEST) {
+            mainViewModel.onRequestPermissionsResult(
+                permissions.firstOrNull() == Manifest.permission.ACCESS_FINE_LOCATION
+                        && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+            )
+        }
     }
 
     companion object {
