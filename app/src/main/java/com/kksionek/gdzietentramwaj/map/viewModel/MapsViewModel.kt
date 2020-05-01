@@ -11,6 +11,7 @@ import com.google.maps.android.SphericalUtil
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.addToDisposable
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.initWith
@@ -130,24 +131,24 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun subscribeToLastLocation() {
-        compositeDisposable.add(
-            locationRepository.lastKnownLocation
-                .subscribe(
-                    { location ->
-                        if (!mapSettingsManager.isStartLocationEnabled()) {
-                            _mapControls.postValue(MapControls.MoveTo(location))
-                        }
-                    },
-                    { throwable ->
-                        if (throwable !is ExecutionException || throwable.cause !is SecurityException) {
-                            Log.w(TAG, "Failed to get last location", throwable)
-                            crashReportingService.reportCrash(
-                                throwable,
-                                "Failed to get last location"
-                            )
-                        }
-                    })
-        )
+        locationRepository.lastKnownLocation
+            .subscribe(
+                { location ->
+                    if (!mapSettingsManager.isStartLocationEnabled()) {
+                        _mapControls.postValue(MapControls.MoveTo(location))
+                    }
+                },
+                { throwable ->
+                    if (throwable !is ExecutionException || throwable.cause !is SecurityException) {
+                        Log.w(TAG, "Failed to get last location", throwable)
+                        crashReportingService.reportCrash(
+                            throwable,
+                            "Failed to get last location"
+                        )
+                    }
+                })
+            .addToDisposable(compositeDisposable)
+
     }
 
     private fun subscribeToAllData() {
@@ -159,7 +160,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun subscribeToFavoriteTrams(city: Cities) {
-        compositeDisposable.add(vehiclesRepository.getFavoriteVehicleLines(city)
+        vehiclesRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable: Throwable ->
                 Log.e(TAG, "Failed getting all the favorites from the database", throwable)
@@ -175,11 +176,11 @@ class MapsViewModel @Inject constructor(
                         favoriteTrams = it
                     }
                 })
-        )
+            .addToDisposable(compositeDisposable)
     }
 
     private fun subscribeToDifficulties(city: Cities) {
-        compositeDisposable.add(difficultiesRepository.dataStream(city)
+        difficultiesRepository.dataStream(city)
             .map { result ->
                 when (result) {
                     is NetworkOperationResult.Success -> UiState.Success(result.data)
@@ -198,11 +199,12 @@ class MapsViewModel @Inject constructor(
             }
             .subscribe {
                 _difficulties.postValue(it)
-            })
+            }
+            .addToDisposable(compositeDisposable)
     }
 
     private fun subscribeToVehicles(city: Cities) {
-        compositeDisposable.add(vehiclesRepository.dataStream(city)
+        vehiclesRepository.dataStream(city)
             .subscribeOn(Schedulers.io())
             .transformEmptyListToError()
             .subscribe { operationResult ->
@@ -214,7 +216,8 @@ class MapsViewModel @Inject constructor(
                     is NetworkOperationResult.InProgress ->
                         _tramData.postValue(UiState.InProgress())
                 }.makeExhaustive
-            })
+            }
+            .addToDisposable(compositeDisposable)
     }
 
     private fun Flowable<NetworkOperationResult<List<VehicleData>>>.transformEmptyListToError() =

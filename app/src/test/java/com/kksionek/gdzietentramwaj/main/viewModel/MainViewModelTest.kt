@@ -12,7 +12,12 @@ import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
 import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.amshove.kluent.`should be less or equal to`
 import org.amshove.kluent.`should be`
@@ -140,7 +145,7 @@ class MainViewModelTest {
         tested.requestLocationPermission()
 
         // then
-        tested.locationPermissionRequestLiveData.value `should be` true
+        tested.locationPermissionRequestor.value `should be` true
     }
 
     @Test
@@ -153,7 +158,7 @@ class MainViewModelTest {
         tested.requestLocationPermission()
 
         // then
-        tested.locationPermissionRequestLiveData.value `should be` null
+        tested.locationPermissionRequestor.value `should be` null
     }
 
     @Test
@@ -166,7 +171,7 @@ class MainViewModelTest {
         tested.onRequestPermissionsResult(result)
 
         // then
-        tested.locationPermission.value `should be` result
+        tested.locationPermissionGrantedStatus.value `should be` result
     }
 
     @Test

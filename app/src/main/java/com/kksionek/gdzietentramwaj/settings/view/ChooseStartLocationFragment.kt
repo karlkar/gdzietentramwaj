@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -28,7 +28,7 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModels(factoryProducer = { viewModelFactory })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +40,6 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
         super.onAttach(context)
 
         (context.applicationContext as TramApplication).appComponent.inject(this)
-        viewModel =
-            ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
         viewModel.locationChooserFragmentClosedWithResult = false
     }
 

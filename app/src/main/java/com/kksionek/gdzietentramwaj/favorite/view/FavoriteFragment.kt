@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kksionek.gdzietentramwaj.R
@@ -40,7 +40,7 @@ class FavoriteFragment : Fragment() {
 
         (context.applicationContext as TramApplication).appComponent.inject(this)
         viewModel =
-            ViewModelProviders.of(this, viewModelFactory)[FavoriteLinesViewModel::class.java]
+            ViewModelProvider(this, viewModelFactory).get(FavoriteLinesViewModel::class.java)
         viewModel.forceReloadFavorites()
     }
 

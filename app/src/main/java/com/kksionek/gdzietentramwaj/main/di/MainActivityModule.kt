@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.di.ActivityScope
 import com.kksionek.gdzietentramwaj.base.di.ViewModelKey
 import com.kksionek.gdzietentramwaj.main.repository.AppUpdateRepository
@@ -13,8 +14,8 @@ import com.kksionek.gdzietentramwaj.main.repository.GoogleApiAvailabilityChecker
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.repository.FusedLocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
-import com.kksionek.gdzietentramwaj.map.view.AdProviderInterface
-import com.kksionek.gdzietentramwaj.view.AdProvider
+import com.kksionek.gdzietentramwaj.map.view.AdProvider
+import com.kksionek.gdzietentramwaj.view.AdProviderImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,7 +35,8 @@ class MainActivityModule {
 
     @ActivityScope
     @Provides
-    internal fun provideAdProvider(): AdProviderInterface = AdProvider()
+    internal fun provideAdProvider(application: TramApplication): AdProvider =
+        AdProviderImpl(application)
 
     @Singleton
     @Provides

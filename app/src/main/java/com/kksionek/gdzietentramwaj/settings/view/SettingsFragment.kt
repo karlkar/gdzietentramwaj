@@ -12,7 +12,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -27,7 +27,7 @@ class SettingsFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModels(factoryProducer = { viewModelFactory })
 
     private var locationChooserFragmentStarted = false
 
@@ -39,10 +39,7 @@ class SettingsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
         (context.applicationContext as TramApplication).appComponent.inject(this)
-        viewModel =
-            ViewModelProviders.of(activity!!, viewModelFactory)[SettingsViewModel::class.java]
     }
 
     @SuppressLint("SetTextI18n")
