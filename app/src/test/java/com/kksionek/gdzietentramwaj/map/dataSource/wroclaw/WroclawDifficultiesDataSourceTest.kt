@@ -12,9 +12,9 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeParseException
 import java.io.IOException
-import java.text.ParseException
-import java.util.Calendar
 
 private const val TITLE = "title"
 private const val LINK = "link"
@@ -25,29 +25,9 @@ class WroclawDifficultiesDataSourceTest {
     @JvmField
     val testSchedulerRule = RxImmediateSchedulerRule()
 
-    private val difficultyFrom: String = {
-        // TODO: Use ABP
-        val cal = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+    private val difficultyFrom: String = dateFormat.format(LocalDate.now())
 
-        dateFormat.format(cal.time)
-    }()
-
-    private val difficultyTo: String = {
-        val cal = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            add(Calendar.DAY_OF_MONTH, 10)
-        }
-
-        dateFormat.format(cal.time)
-    }()
+    private val difficultyTo: String = dateFormat.format(LocalDate.now().plusDays(10))
 
     private val wroclawDifficultiesInterface: WroclawDifficultiesInterface = mock {
         on { getDifficulties() } doReturn Single.just(
@@ -135,12 +115,7 @@ class WroclawDifficultiesDataSourceTest {
     @Test
     fun `should return difficulties when request succeeded given validity is a single date`() {
         // given
-        val currentDate = dateFormat.format(Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time)
+        val currentDate = dateFormat.format(LocalDate.now())
         whenever(wroclawDifficultiesInterface.getDifficulties()).thenReturn(
             Single.just(
                 """<div class="box box-blue box-border box-large">
@@ -175,12 +150,7 @@ class WroclawDifficultiesDataSourceTest {
     @Test
     fun `should return error when request succeeded given validity is a single date and format is invalid`() {
         // given
-        val currentDate = dateFormat.format(Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time)
+        val currentDate = dateFormat.format(LocalDate.now())
         val currentDateWithWrongFormat = currentDate.replace('.', '/')
         whenever(wroclawDifficultiesInterface.getDifficulties()).thenReturn(
             Single.just(
@@ -202,7 +172,7 @@ class WroclawDifficultiesDataSourceTest {
         val observer = tested.getDifficulties().test()
 
         // then
-        observer.assertError(ParseException::class.java) // TODO: Should be reported to crashlytics, maybe just 1 item should be skipped?
+        observer.assertError(DateTimeParseException::class.java) // TODO: Should be reported to crashlytics, maybe just 1 item should be skipped?
     }
 
     @Test
@@ -230,7 +200,7 @@ class WroclawDifficultiesDataSourceTest {
         val observer = tested.getDifficulties().test()
 
         // then
-        observer.assertError(ParseException::class.java) // TODO: Should be reported to crashlytics, maybe just 1 item should be skipped like in case when link/date are missing
+        observer.assertError(DateTimeParseException::class.java) // TODO: Should be reported to crashlytics, maybe just 1 item should be skipped like in case when link/date are missing
     }
 
     @Test

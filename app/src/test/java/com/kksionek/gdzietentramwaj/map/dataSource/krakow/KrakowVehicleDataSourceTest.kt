@@ -7,7 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
+import org.threeten.bp.Instant
 
 class KrakowVehicleDataSourceTest {
 
@@ -18,7 +18,7 @@ class KrakowVehicleDataSourceTest {
     private val krakowTramInterface: KrakowTramInterface = mock {
         on { trams() } doReturn Single.just(
             KrakowVehicleResponse(
-                Calendar.getInstance().timeInMillis,
+                Instant.now().toEpochMilli(),
                 listOf(KrakowVehicle(false, "1", "na", 3600000, 2 * 3600000))
             )
         )
@@ -26,7 +26,7 @@ class KrakowVehicleDataSourceTest {
     private val krakowBusInterface: KrakowBusInterface = mock {
         on { buses() } doReturn Single.just(
             KrakowVehicleResponse(
-                Calendar.getInstance().timeInMillis,
+                Instant.now().toEpochMilli(),
                 listOf(KrakowVehicle(false, "2", "name2", 3 * 3600000, 4 * 3600000))
             )
         )
@@ -70,7 +70,7 @@ class KrakowVehicleDataSourceTest {
         whenever(krakowTramInterface.trams()).thenReturn(
             Single.just(
                 KrakowVehicleResponse(
-                    Calendar.getInstance().timeInMillis,
+                    Instant.now().toEpochMilli(),
                     listOf(KrakowVehicle(true, "1", "na", 3600000, 2 * 3600000))
                 )
             )
