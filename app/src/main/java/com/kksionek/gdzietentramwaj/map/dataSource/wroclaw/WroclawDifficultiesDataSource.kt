@@ -6,12 +6,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import io.reactivex.Single
-import java.util.Calendar
-import java.util.Calendar.HOUR_OF_DAY
-import java.util.Calendar.MILLISECOND
-import java.util.Calendar.MINUTE
-import java.util.Calendar.SECOND
-import java.util.Date
+import org.threeten.bp.LocalDate
 
 @VisibleForTesting
 const val WROCLAW_BASE_URL = "http://mpk.wroc.pl"
@@ -57,15 +52,7 @@ class WroclawDifficultiesDataSource(
             .toList()
     }
 
-    private fun getCurrentDate(): Date { // TODO: Extract to time provider?
-        val cal = Calendar.getInstance().apply {
-            set(HOUR_OF_DAY, 0)
-            set(MINUTE, 0)
-            set(SECOND, 0)
-            set(MILLISECOND, 0)
-        }
-        return cal.time
-    }
+    private fun getCurrentDate(): LocalDate = LocalDate.now()
 
     private fun getDateRange(matchResult: MatchResult): DateRange? {
         val singleDate = dateSinglePattern.find(matchResult.groupValues[1])?.groupValues?.get(1)

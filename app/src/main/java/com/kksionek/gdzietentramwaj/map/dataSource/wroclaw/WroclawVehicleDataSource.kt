@@ -4,9 +4,8 @@ import androidx.annotation.VisibleForTesting
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class WroclawVehicleDataSource(
     private val wroclawVehicleInterface: WroclawVehicleInterface
@@ -15,12 +14,10 @@ class WroclawVehicleDataSource(
     override fun vehicles(): Single<List<VehicleData>> =
         wroclawVehicleInterface.buses()
             .map { mpkVehicle ->
-                val refDate = Calendar.getInstance()
-                    .apply { add(Calendar.MINUTE, -2) }
-                    .let { dateFormat.format(it.time) }
+                val refDateTime = dateFormat.format(LocalDateTime.now().minusMinutes(2))
                 mpkVehicle.result.records
                     .filter { it.line != "None" }
-                    .filter { refDate <= it.timestamp }
+                    .filter { refDateTime <= it.timestamp }
             }
             .map { list ->
                 list.map {
@@ -37,9 +34,6 @@ class WroclawVehicleDataSource(
     companion object {
 
         @VisibleForTesting
-        val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.US
-        )
+        val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     }
 }

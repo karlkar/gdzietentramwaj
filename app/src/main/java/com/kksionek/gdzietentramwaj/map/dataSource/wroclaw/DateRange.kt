@@ -1,42 +1,33 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
 import androidx.annotation.VisibleForTesting
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeFormatter
 
-sealed class DateRange { // TODO: Move to ABP
+sealed class DateRange {
 
-    abstract fun isInRange(otherDate: Date): Boolean
+    abstract fun isInRange(otherDate: LocalDate): Boolean
 
-    data class SingleDate(val date: Date) : DateRange() {
+    data class SingleDate(val date: LocalDate) : DateRange() {
 
-        constructor(dateStr: String) : this(dateFormat.parse(dateStr)!!)
+        constructor(dateStr: String) : this(LocalDate.parse(dateStr, dateFormat))
 
-        override fun isInRange(otherDate: Date): Boolean =
-            otherDate.before(date) || otherDate == date
+        override fun isInRange(otherDate: LocalDate): Boolean = otherDate <= date
     }
 
-    data class RangeDate(val start: Date, val end: Date) : DateRange() {
+    data class RangeDate(val start: LocalDate, val end: LocalDate) : DateRange() {
 
         constructor(startDate: String, endDate: String) : this(
-            dateFormat.parse(startDate)!!,
-            dateFormat.parse(endDate)!!
+            LocalDate.parse(startDate, dateFormat),
+            LocalDate.parse(endDate, dateFormat)
         )
 
-        override fun isInRange(otherDate: Date): Boolean =
-            otherDate.before(start)
-                    || ((otherDate == start || otherDate.after(start)) && (otherDate == end || otherDate.before(
-                end
-            )))
+        override fun isInRange(otherDate: LocalDate): Boolean = otherDate in start..end
     }
 
     companion object {
 
         @VisibleForTesting
-        val dateFormat = SimpleDateFormat(
-            "dd.MM.yyyy",
-            Locale.US
-        )
+        val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     }
 }

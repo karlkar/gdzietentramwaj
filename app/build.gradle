@@ -146,4 +146,9 @@ dependencies {
 
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.test:runner:1.2.0"
+
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.2.4'
+    testImplementation ('org.threeten:threetenbp:1.4.0'){
+        exclude group:'com.jakewharton.threetenabp', module:'threetenabp'
+    }
 }

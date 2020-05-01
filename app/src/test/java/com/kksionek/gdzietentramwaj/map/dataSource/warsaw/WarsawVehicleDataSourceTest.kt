@@ -9,8 +9,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
+import org.threeten.bp.LocalDateTime
 import java.io.IOException
-import java.util.Calendar
 
 class WarsawVehicleDataSourceTest {
 
@@ -24,7 +24,7 @@ class WarsawVehicleDataSourceTest {
                 listOf(
                     WarsawVehicle(
                         "500/brigade",
-                        WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                        WarsawVehicleDataSource.dateFormat.format(LocalDateTime.now()),
                         Position(52.0, 19.0),
                         null,
                         "500",
@@ -33,7 +33,7 @@ class WarsawVehicleDataSourceTest {
                     ),
                     WarsawVehicle(
                         "5/brigade2",
-                        WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                        WarsawVehicleDataSource.dateFormat.format(LocalDateTime.now()),
                         Position(52.4, 19.4),
                         null,
                         "5",
@@ -83,16 +83,14 @@ class WarsawVehicleDataSourceTest {
     @Test
     fun `should filter out outdated vehicles when request succeeded given some vehicles are out dated`() {
         // given
-        val threeMinutesAgo = Calendar.getInstance().apply {
-            add(Calendar.MINUTE, -3)
-        }
+        val threeMinutesAgo = LocalDateTime.now().minusMinutes(3)
         whenever(warsawVehicleInterface.vehicles()).thenReturn(
             Single.just(
                 WarsawVehicleResponse(
                     listOf(
                         WarsawVehicle(
                             "500/brigade",
-                            WarsawVehicleDataSource.dateFormat.format(threeMinutesAgo.time),
+                            WarsawVehicleDataSource.dateFormat.format(threeMinutesAgo),
                             Position(52.0, 19.0),
                             Position(52.0001, 19.0001),
                             "500",
@@ -101,7 +99,7 @@ class WarsawVehicleDataSourceTest {
                         ),
                         WarsawVehicle(
                             "5/brigade2",
-                            WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                            WarsawVehicleDataSource.dateFormat.format(LocalDateTime.now()),
                             Position(52.4, 19.4),
                             null,
                             "5",
@@ -147,7 +145,7 @@ class WarsawVehicleDataSourceTest {
                         ),
                         WarsawVehicle(
                             "5/brigade2",
-                            WarsawVehicleDataSource.dateFormat.format(Calendar.getInstance().time),
+                            WarsawVehicleDataSource.dateFormat.format(LocalDateTime.now()),
                             Position(52.4, 19.4),
                             null,
                             "5",

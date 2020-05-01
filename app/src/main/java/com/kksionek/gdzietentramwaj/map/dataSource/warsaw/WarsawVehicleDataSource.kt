@@ -5,9 +5,8 @@ import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Observable
 import io.reactivex.Single
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class WarsawVehicleDataSource(
     private val warsawVehicleInterface: WarsawVehicleInterface
@@ -31,18 +30,13 @@ class WarsawVehicleDataSource(
 
     private fun Single<WarsawVehicleResponse>.filterOutOutdated() =
         map { result ->
-            val refDate = Calendar.getInstance() // TODO: Don't use Calendar
-                .apply { add(Calendar.MINUTE, -2) }
-                .let { dateFormat.format(it.time) }
+            val refDate = dateFormat.format(LocalDateTime.now().minusMinutes(2))
             result.list.filter { refDate <= it.timestamp }
         }
 
     companion object {
 
         @VisibleForTesting
-        val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.US
-        )
+        val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     }
 }

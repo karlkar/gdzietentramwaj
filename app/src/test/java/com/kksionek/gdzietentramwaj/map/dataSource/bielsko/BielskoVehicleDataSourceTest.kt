@@ -7,7 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
+import org.threeten.bp.Instant
 
 class BielskoVehicleDataSourceTest {
 
@@ -20,7 +20,7 @@ class BielskoVehicleDataSourceTest {
     private val vehicleBrigade = "brig1"
     private val vehicleLongitude = 1.0
     private val vehicleLatitude = 2.0
-    private val vehicleTimestamp = Calendar.getInstance().timeInMillis
+    private val vehicleTimestamp = Instant.now().toEpochMilli()
 
     private val bielskoVehicleInterface: BielskoVehicleInterface = mock {
         on { vehicles() } doReturn Single.just(

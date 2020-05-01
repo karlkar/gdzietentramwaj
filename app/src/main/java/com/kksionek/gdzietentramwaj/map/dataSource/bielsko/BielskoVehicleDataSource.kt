@@ -4,20 +4,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
-import java.util.*
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneOffset
+import org.threeten.bp.ZonedDateTime
 
 class BielskoVehicleDataSource(
     private val bielskoVehicleInterface: BielskoVehicleInterface
 ) : VehicleDataSource {
 
     override fun vehicles(): Single<List<VehicleData>> {
-        val refDate = Calendar.getInstance()
-            .apply { add(Calendar.MINUTE, -2) }
-            .timeInMillis
+        val zone = ZoneOffset.from(ZonedDateTime.now())
+        val refMillis = LocalDateTime.now().minusMinutes(2).toInstant(zone).toEpochMilli()
         return bielskoVehicleInterface.vehicles()
             .map { bielskoVehicleList ->
                 bielskoVehicleList.list
-                    .filter { it.timestamp > refDate }
+                    .filter { it.timestamp > refMillis }
                     .map {
                         VehicleData(
                             id = it.id.toString(),

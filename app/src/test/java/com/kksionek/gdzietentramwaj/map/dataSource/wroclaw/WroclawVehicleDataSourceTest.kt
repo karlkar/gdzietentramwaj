@@ -9,8 +9,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
+import org.threeten.bp.LocalDateTime
 import java.io.IOException
-import java.util.Calendar
 
 class WroclawVehicleDataSourceTest {
 
@@ -18,7 +18,7 @@ class WroclawVehicleDataSourceTest {
     @JvmField
     val testSchedulerRule = RxImmediateSchedulerRule()
 
-    private val timestamp: String = dateFormat.format(Calendar.getInstance().time)
+    private val timestamp: String = dateFormat.format(LocalDateTime.now())
     private val wroclawVehicleInterface: WroclawVehicleInterface = mock {
         on { buses() } doReturn Single.just(
             WroclawVehicleResponse(
@@ -67,8 +67,7 @@ class WroclawVehicleDataSourceTest {
     @Test
     fun `should filter out outdated when request succeeded given some vehicles are outdated`() {
         // given
-        val outdatedTimestamp =
-            dateFormat.format(Calendar.getInstance().apply { add(Calendar.MINUTE, -3) }.time)
+        val outdatedTimestamp = dateFormat.format(LocalDateTime.now().minusMinutes(3))
         whenever(wroclawVehicleInterface.buses()).thenReturn(
             Single.just(
                 WroclawVehicleResponse(
