@@ -6,13 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
-import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
+import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
@@ -27,7 +26,7 @@ class FavoriteFragment : Fragment() {
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
 
-    private lateinit var viewModel: FavoriteLinesViewModel
+    private val viewModel: FavoriteLinesViewModel by viewModels(factoryProducer = { viewModelFactory })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,9 +38,6 @@ class FavoriteFragment : Fragment() {
         super.onAttach(context)
 
         (context.applicationContext as TramApplication).appComponent.inject(this)
-        viewModel =
-            ViewModelProvider(this, viewModelFactory).get(FavoriteLinesViewModel::class.java)
-        viewModel.forceReloadFavorites()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,7 +59,7 @@ class FavoriteFragment : Fragment() {
         }
 
         viewModel.favoriteTrams
-            .observe(viewLifecycleOwner, Observer<UiState<List<FavoriteTram>>> {
+            .observeNonNull(viewLifecycleOwner) {
                 when (it) {
                     is UiState.Success -> {
                         favorites_progress.visibility = View.GONE
@@ -77,12 +73,12 @@ class FavoriteFragment : Fragment() {
                         favorites_success_view_constraintlayout.visibility = View.GONE
                         favorites_error_textview.text = getString(it.message, it.args)
                     }
-                    null, is UiState.InProgress -> {
+                    is UiState.InProgress -> {
                         favorites_progress.visibility = View.VISIBLE
                         favorites_error_view_constraintlayout.visibility = View.GONE
                         favorites_success_view_constraintlayout.visibility = View.GONE
                     }
                 }.makeExhaustive
-            })
+            }
     }
 }

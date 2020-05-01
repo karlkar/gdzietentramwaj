@@ -7,8 +7,8 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import com.kksionek.gdzietentramwaj.R
+import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
@@ -24,52 +24,49 @@ class DifficultiesBottomSheet(
     imageLoader: ImageLoader
 ) : LayoutContainer {
 
-    private val difficultiesObserver =
-        Observer { uiState: UiState<DifficultiesState>? ->
-            when (uiState) {
-                is UiState.Success -> {
-                    if (uiState.data.isSupported) {
-                        containerView.visibility = View.VISIBLE
-                        stopDifficultiesLoading()
-                        textview_difficulties_title.text =
-                            context.getString(
-                                R.string.difficulties_bottom_sheet_title,
-                                uiState.data.difficultiesEntities.size
-                            )
-                        if (uiState.data.difficultiesEntities.isEmpty()) {
-                            textview_difficulties_message.text =
-                                context.getText(R.string.difficulties_bottom_sheet_no_items)
-                            recyclerview_difficulties_difficulties.visibility = View.GONE
-                            textview_difficulties_message.visibility = View.VISIBLE
-                        } else {
-                            textview_difficulties_message.visibility = View.GONE
-                            recyclerview_difficulties_difficulties.visibility = View.VISIBLE
-                            (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
-                                uiState.data.difficultiesEntities
-                            )
-                        }
-                    } else {
-                        containerView.visibility = View.GONE
-                    }
-                }
-                is UiState.Error -> {
+    private val difficultiesObserver: (UiState<DifficultiesState>) -> Unit = { uiState ->
+        when (uiState) {
+            is UiState.Success -> {
+                if (uiState.data.isSupported) {
                     containerView.visibility = View.VISIBLE
-                    textview_difficulties_title.text =
-                        context.getString(R.string.difficulties_bottom_sheet_title, 0)
-                    textview_difficulties_message.text =
-                        context.getString(uiState.message, uiState.args)
-                    recyclerview_difficulties_difficulties.visibility = View.GONE
-                    textview_difficulties_message.visibility = View.VISIBLE
                     stopDifficultiesLoading()
+                    textview_difficulties_title.text =
+                        context.getString(
+                            R.string.difficulties_bottom_sheet_title,
+                            uiState.data.difficultiesEntities.size
+                        )
+                    if (uiState.data.difficultiesEntities.isEmpty()) {
+                        textview_difficulties_message.text =
+                            context.getText(R.string.difficulties_bottom_sheet_no_items)
+                        recyclerview_difficulties_difficulties.visibility = View.GONE
+                        textview_difficulties_message.visibility = View.VISIBLE
+                    } else {
+                        textview_difficulties_message.visibility = View.GONE
+                        recyclerview_difficulties_difficulties.visibility = View.VISIBLE
+                        (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                            uiState.data.difficultiesEntities
+                        )
+                    }
+                } else {
+                    containerView.visibility = View.GONE
                 }
-                is UiState.InProgress -> {
-                    containerView.visibility = View.VISIBLE
-                    startDifficultiesLoading()
-                }
-                null -> {
-                }
-            }.makeExhaustive
-        }
+            }
+            is UiState.Error -> {
+                containerView.visibility = View.VISIBLE
+                textview_difficulties_title.text =
+                    context.getString(R.string.difficulties_bottom_sheet_title, 0)
+                textview_difficulties_message.text =
+                    context.getString(uiState.message, uiState.args)
+                recyclerview_difficulties_difficulties.visibility = View.GONE
+                textview_difficulties_message.visibility = View.VISIBLE
+                stopDifficultiesLoading()
+            }
+            is UiState.InProgress -> {
+                containerView.visibility = View.VISIBLE
+                startDifficultiesLoading()
+            }
+        }.makeExhaustive
+    }
 
     init {
         recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter(imageLoader) {
@@ -87,7 +84,7 @@ class DifficultiesBottomSheet(
             viewModel.forceReloadDifficulties()
         }
 
-        viewModel.difficulties.observe(lifecycleOwner, difficultiesObserver)
+        viewModel.difficulties.observeNonNull(lifecycleOwner, difficultiesObserver)
     }
 
     private val reloadAnimation: Animation by lazy {

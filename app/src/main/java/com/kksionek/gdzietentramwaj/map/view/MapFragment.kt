@@ -21,7 +21,6 @@ import androidx.appcompat.widget.ShareActionProvider
 import androidx.core.view.MenuItemCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -362,7 +361,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        mapsViewModel.mapControls.observe(this, Observer {
+        mapsViewModel.mapControls.observeNonNull(this) {
             when (it) {
                 is MapControls.ZoomIn ->
                     map.animateCamera(CameraUpdateFactory.zoomIn())
@@ -382,7 +381,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 is MapControls.ChangeType ->
                     map.mapType = it.mapType.googleCode
             }.makeExhaustive
-        })
+        }
 
         mapsViewModel.reloadLastLocation()
     }
