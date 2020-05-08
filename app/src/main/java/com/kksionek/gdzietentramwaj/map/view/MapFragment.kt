@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -22,14 +21,11 @@ import androidx.core.view.MenuItemCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -39,6 +35,7 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showToast
@@ -60,13 +57,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val polylineGenerator = PolylineGenerator()
     private val tramPathAnimator = TramPathAnimator(polylineGenerator)
-    private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
 
+    private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
     private lateinit var vehicleInfoWindowAdapter: VehicleInfoWindowAdapter
 
     private val cameraMoveInProgress = AtomicBoolean(false)
 
-    private var currentlyDisplayedTrams = emptyList<TramMarker>()
+    private var currentlyDisplayedVehicles = emptyList<TramMarker>()
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
@@ -96,12 +93,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             is UiState.Success -> {
                 menuItemRefresh?.endAnimation()
                 val tramMarkerList = uiState.data.data
-                if (mapsViewModel.favoriteView.value == true && uiState.data.data.isEmpty()) {
+                if (mapsViewModel.favoriteView.value == true && tramMarkerList.isEmpty()) {
                     showToast(R.string.map_error_no_favorites_visible)
                 } else if (uiState.data.newData) {
                     showToast(R.string.map_position_update_sucessful)
                 }
-                updateExistingMarkers(tramMarkerList, uiState.data.animate)
+                updateMarkers(tramMarkerList, uiState.data.animate)
             }
         }.makeExhaustive
     }
@@ -223,23 +220,21 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.main_menu, menu)
+
         menu.findItem(R.id.menu_item_refresh)?.also {
-            context?.let { context ->
-                menuItemRefresh = MenuItemRefreshCtrl(context, it)
-                if (mapsViewModel.tramData.value is UiState.InProgress) {
-                    menuItemRefresh?.startAnimation()
-                }
+            menuItemRefresh = MenuItemRefreshCtrl(requireContext(), it)
+            if (mapsViewModel.tramData.value is UiState.InProgress) {
+                menuItemRefresh?.startAnimation()
             }
         }
 
         val menuShare = menu.findItem(R.id.menu_item_share)
-        val shareActionProvider =
-            MenuItemCompat.getActionProvider(menuShare) as ShareActionProvider
-
-        shareActionProvider.setShareIntent(shareIntent)
+        (MenuItemCompat.getActionProvider(menuShare) as ShareActionProvider).apply {
+            setShareIntent(shareIntent)
+        }
 
         menuItemFavoriteSwitch = menu.findItem(R.id.menu_item_favorite_switch)
-        setFavoriteButtonIcon(mapsViewModel.favoriteView.value ?: false)
+        setFavoriteButtonIcon(favoriteEnabled = mapsViewModel.favoriteView.value == true)
         return super.onCreateOptionsMenu(menu, menuInflater)
     }
 
@@ -262,8 +257,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             R.id.menu_item_refresh -> mapsViewModel.forceReloadTrams()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
-                val handler = Handler()
-                handler.postDelayed(
+                Handler().postDelayed(
                     {
                         findNavController().apply {
                             if (currentDestination?.id == R.id.destination_map) {
@@ -320,14 +314,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             if (mapsViewModel.difficulties.value != null) {
                 setPadding(0, 0, 0, resources.getDimensionPixelOffset(R.dimen.map_zoom_offset))
             }
-            activity?.let {
-                setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                        it.applicationContext,
-                        R.raw.map_style
-                    )
+            setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireActivity().applicationContext,
+                    R.raw.map_style
                 )
-            }
+            )
             uiSettings?.apply {
                 isTiltGesturesEnabled = false
                 isZoomControlsEnabled = true
@@ -414,92 +406,73 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     @UiThread
-    private fun updateExistingMarkers(
-        tramMarkerList: List<TramMarker>,
+    private fun updateMarkers(
+        vehiclesToDrawList: List<VehicleToDrawData>,
         animate: Boolean
     ) {
-        val context = context ?: return
         if (!::map.isInitialized || cameraMoveInProgress.get()) {
             return
         }
-        if (animate) {
-            tramPathAnimator.removeAllAnimatedMarkers()
-        }
 
+        handleChangeOfIconsIfNeeded()
+        handleStaleMarkers(vehiclesToDrawList)
+        val vehicleMarkersToDraw = handleVisibleMarkers(vehiclesToDrawList)
+
+        currentlyDisplayedVehicles = vehicleMarkersToDraw
+        if (animate) {
+            with(tramPathAnimator) {
+                removeAllMarkers()
+                addAllMarkers(vehicleMarkersToDraw)
+                startAnimation()
+            }
+        }
+    }
+
+    private fun handleChangeOfIconsIfNeeded() {
         val currentOldIconEnabledSetting = mapsViewModel.isOldIconSetEnabled
         if (displaysOldIcons != currentOldIconEnabledSetting) {
-            TramMarker.clearCache()
             displaysOldIcons = currentOldIconEnabledSetting
-            currentlyDisplayedTrams.forEach {
+            currentlyDisplayedVehicles.forEach {
                 tramPathAnimator.removeMarker(it)
                 it.remove()
             }
-            currentlyDisplayedTrams = emptyList()
+            currentlyDisplayedVehicles = emptyList()
+            TramMarker.clearCache()
         }
+    }
 
-        val diffCallback = TramDiffCallback(currentlyDisplayedTrams, tramMarkerList)
-        val diffResult = DiffUtil.calculateDiff(diffCallback, false)
-
-        for (i in (currentlyDisplayedTrams.size - 1) downTo 0) {
-            if (diffResult.convertOldPositionToNew(i) == DiffUtil.DiffResult.NO_POSITION) {
-                currentlyDisplayedTrams[i].apply {
-                    tramPathAnimator.removeMarker(this)
-                    remove()
-                }
+    private fun handleStaleMarkers(vehiclesToDrawList: List<VehicleToDrawData>) {
+        for (vehicleMarker in currentlyDisplayedVehicles) {
+            if (vehiclesToDrawList.none { it.id == vehicleMarker.id }) {
+                tramPathAnimator.removeMarker(vehicleMarker)
+                vehicleMarker.remove()
             }
         }
+    }
 
-        for (i in tramMarkerList.indices) {
-            val tramMarker = tramMarkerList[i]
-            if (diffResult.convertNewPositionToOld(i) == DiffUtil.DiffResult.NO_POSITION) {
-                if (tramMarker.marker == null) {
-                    val title = getString(R.string.marker_info_line, tramMarker.tramLine)
-                    val snippet = getString(R.string.marker_info_brigade, tramMarker.brigade)
-
-                    tramMarker.marker = map.addMarker(
-                        MarkerOptions().apply {
-                            position(tramMarker.finalPosition) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
-                            title(title)
-                            snippet(snippet)
-                            icon(
-                                TramMarker.getBitmap(
-                                    tramMarker.tramLine,
-                                    tramMarker.isTram,
-                                    context,
-                                    mapsViewModel.isOldIconSetEnabled
-                                )
-                            )
-                            if (!currentOldIconEnabledSetting) {
-                                anchor(0.5f, 0.8f)
-                            }
-                        }
-                    ).apply {
-                        tag = FollowedTramData(
-                            tramMarker.id,
-                            title,
-                            snippet,
-                            tramMarker.finalPosition
-                        )
-                    }
+    private fun handleVisibleMarkers(vehiclesToDrawList: List<VehicleToDrawData>): List<TramMarker> {
+        val vehicleMarkersToDraw = mutableListOf<TramMarker>()
+        for (vehicleToDraw in vehiclesToDrawList) {
+            val indexOfExisting =
+                currentlyDisplayedVehicles.indexOfFirst { it.id == vehicleToDraw.id }
+            if (indexOfExisting != -1) {
+                // update marker with new data
+                val markerToUpdate = currentlyDisplayedVehicles[indexOfExisting].apply {
+                    update(vehicleToDraw)
                 }
-                if (tramMarker.polyline == null) {
-                    val newPoints = polylineGenerator.generatePolylinePoints(
-                        tramMarker.finalPosition,
-                        tramMarker.prevPosition
-                    )
-                    tramMarker.polyline = map.addPolyline(
-                        PolylineOptions()
-                            .color(Color.argb(255, 236, 57, 57))
-                            .width(TramMarker.POLYLINE_WIDTH)
-                    ).apply { points = newPoints }
-                }
+                vehicleMarkersToDraw.add(markerToUpdate)
+            } else {
+                // create new marker
+                val newMarker = TramMarker(
+                    requireContext(),
+                    map,
+                    vehicleToDraw,
+                    mapsViewModel.isOldIconSetEnabled,
+                    polylineGenerator
+                )
+                vehicleMarkersToDraw.add(newMarker)
             }
-            tramPathAnimator.addMarker(tramMarker)
         }
-
-        currentlyDisplayedTrams = tramMarkerList
-        if (animate) {
-            tramPathAnimator.startAnimation()
-        }
+        return vehicleMarkersToDraw
     }
 }

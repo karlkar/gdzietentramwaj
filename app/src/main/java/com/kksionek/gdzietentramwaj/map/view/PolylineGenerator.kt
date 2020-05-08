@@ -2,6 +2,10 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 private const val MAX_DISTANCE = 150.0
 private const val MAX_DISTANCE_RAD = MAX_DISTANCE / 6371000
@@ -19,11 +23,7 @@ class PolylineGenerator {
             return pointsList.also { pointsList.add(finalPosition) }
         }
 
-        if (SphericalUtil.computeDistanceBetween(
-                finalPosition,
-                prevPosition
-            ) < MAX_DISTANCE
-        ) {
+        if (SphericalUtil.computeDistanceBetween(finalPosition, prevPosition) < MAX_DISTANCE) {
             pointsList.add(prevPosition)
         } else {
             pointsList.add(
@@ -42,14 +42,11 @@ class PolylineGenerator {
         val lat1 = Math.toRadians(dst.latitude)
         val lon1 = Math.toRadians(dst.longitude)
 
-        val lat2 = Math.asin(
-            Math.sin(lat1) * Math.cos(MAX_DISTANCE_RAD) + Math.cos(lat1) * Math.sin(
-                MAX_DISTANCE_RAD
-            ) * Math.cos(brng)
-        )
-        val a = Math.atan2(
-            Math.sin(brng) * Math.sin(MAX_DISTANCE_RAD) * Math.cos(lat1),
-            Math.cos(MAX_DISTANCE_RAD) - Math.sin(lat1) * Math.sin(lat2)
+        val lat2 =
+            asin(sin(lat1) * cos(MAX_DISTANCE_RAD) + cos(lat1) * sin(MAX_DISTANCE_RAD) * cos(brng))
+        val a = atan2(
+            sin(brng) * sin(MAX_DISTANCE_RAD) * cos(lat1),
+            cos(MAX_DISTANCE_RAD) - sin(lat1) * sin(lat2)
         )
         var lon2 = lon1 + a
 
@@ -64,11 +61,9 @@ class PolylineGenerator {
         val lam1 = src.longitude * degToRad
         val lam2 = dst.longitude * degToRad
 
-        return Math.atan2(
-            Math.sin(lam2 - lam1) * Math.cos(phi2),
-            Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(
-                lam2 - lam1
-            )
+        return atan2(
+            sin(lam2 - lam1) * cos(phi2),
+            cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lam2 - lam1)
         ) * 180 / Math.PI
     }
 }

@@ -9,67 +9,98 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.UiThread
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.model.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
+import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 
-class TramMarker(tramData: VehicleData) {
-
-    val tramLine: String = tramData.line
-
-    var finalPosition: LatLng = tramData.position
-        private set
+class TramMarker(
+    context: Context,
+    map: GoogleMap,
+    tramData: VehicleToDrawData,
+    isOldIconSetEnabled: Boolean,
+    polylineGenerator: PolylineGenerator
+) {
 
     val id = tramData.id
 
-    val brigade = tramData.brigade
+    var finalPosition: LatLng = tramData.position
+        private set
+    var prevPosition: LatLng = tramData.prevPosition ?: tramData.position
+        private set
 
-    val isTram = tramData.isTram
+    val marker: Marker = createMarker(context, map, tramData, isOldIconSetEnabled)
 
-    private var _marker: Marker? = null
-    var marker: Marker?
-        get() = _marker
-        set(marker) {
-            _marker?.remove()
-            _marker = marker
-        }
-
-    private var _polyline: Polyline? = null
-    var polyline: Polyline?
-        get() = _polyline
-        set(polyline) {
-            _polyline?.remove()
-            _polyline = polyline
-        }
-
-    private var _prevPosition: LatLng? = tramData.prevPosition
-    val prevPosition: LatLng
-        get() = _prevPosition ?: finalPosition
+    var trail: Polyline = createTrail(tramData, map, polylineGenerator)
 
     @UiThread
     fun remove() {
-        _marker?.remove()
-        _marker = null
-
-        _polyline?.remove()
-        _polyline = null
+        marker.remove()
+        trail.remove()
     }
 
-    fun isOnMap(bounds: LatLngBounds): Boolean = bounds.contains(finalPosition)
-            || (_prevPosition?.let { bounds.contains(it) } ?: false)
+    fun update(vehicleToDraw: VehicleToDrawData) {
+        finalPosition = vehicleToDraw.position
+        prevPosition = vehicleToDraw.prevPosition ?: vehicleToDraw.position
+    }
 
-    fun updatePosition(newFinalPosition: LatLng) {
-        if (newFinalPosition === finalPosition)
-            _prevPosition = null
-        else {
-            _prevPosition = finalPosition
-            finalPosition = newFinalPosition
+    private fun createMarker(
+        context: Context,
+        map: GoogleMap,
+        vehicleToDrawData: VehicleToDrawData,
+        isOldIconSetEnabled: Boolean
+    ): Marker {
+        val title = context.getString(R.string.marker_info_line, vehicleToDrawData.line)
+        val snippet = context.getString(R.string.marker_info_brigade, vehicleToDrawData.brigade)
+
+        return map.addMarker(
+            MarkerOptions().apply {
+                position(vehicleToDrawData.position) // if the markers blink - this is the reason - prevPosition should be here, but then new markers appear at the previous position instead of final
+                title(title)
+                snippet(snippet)
+                icon(
+                    TramMarker.getBitmap( // TODO: Extract to non static class
+                        vehicleToDrawData.line,
+                        vehicleToDrawData.isTram,
+                        context,
+                        isOldIconSetEnabled
+                    )
+                )
+                if (!isOldIconSetEnabled) {
+                    anchor(0.5f, 0.8f)
+                }
+            }
+        ).apply {
+            tag = FollowedTramData(
+                vehicleToDrawData.id,
+                title,
+                snippet,
+                vehicleToDrawData.position
+            )
         }
+    }
+
+    private fun createTrail(
+        vehicleToDrawData: VehicleToDrawData,
+        map: GoogleMap,
+        polylineGenerator: PolylineGenerator
+    ): Polyline {
+        val newPoints = polylineGenerator.generatePolylinePoints(
+            vehicleToDrawData.position,
+            vehicleToDrawData.prevPosition
+        )
+        return map.addPolyline(
+            PolylineOptions()
+                .color(Color.argb(255, 236, 57, 57))
+                .width(TramMarker.POLYLINE_WIDTH)
+        ).apply { points = newPoints }
     }
 
     companion object {
@@ -86,8 +117,7 @@ class TramMarker(tramData: VehicleData) {
         ): BitmapDescriptor {
             val descriptor = bitmapCache[line]
             return if (descriptor == null) {
-                val bitmap =
-                    createBitmap(context, line, isTram, isOldIconSetEnabled)
+                val bitmap = createBitmap(context, line, isTram, isOldIconSetEnabled)
                 val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
                 bitmapCache.put(line, bitmapDescriptor)
                 bitmapDescriptor

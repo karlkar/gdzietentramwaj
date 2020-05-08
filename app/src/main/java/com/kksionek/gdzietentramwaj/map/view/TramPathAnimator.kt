@@ -2,9 +2,6 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import android.animation.ValueAnimator
 import androidx.annotation.UiThread
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polyline
 import com.google.maps.android.SphericalUtil
 
 const val ANIMATION_DURATION = 3000L
@@ -16,20 +13,16 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
     private val animatorUpdateListener =
         ValueAnimator.AnimatorUpdateListener { animation ->
             val fraction = animation?.animatedFraction ?: return@AnimatorUpdateListener
-            var marker: Marker
-            var polyline: Polyline
-            var prevPosition: LatLng
-            var intermediatePos: LatLng
 
             val immutableList: List<TramMarker> = animationMarkers.toList()
             for (tramMarker in immutableList) {
-                marker = tramMarker.marker ?: continue
-                polyline = tramMarker.polyline ?: continue
-                prevPosition = tramMarker.prevPosition
+                val marker = tramMarker.marker ?: continue
+                val polyline = tramMarker.trail ?: continue
+                val prevPosition = tramMarker.prevPosition
                 if (prevPosition == tramMarker.finalPosition) {
                     continue
                 }
-                intermediatePos = SphericalUtil.interpolate(
+                val intermediatePos = SphericalUtil.interpolate(
                     prevPosition,
                     tramMarker.finalPosition,
                     fraction.toDouble()
@@ -52,7 +45,7 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
         .setDuration(ANIMATION_DURATION).apply { addUpdateListener(animatorUpdateListener) }
 
     @UiThread
-    fun removeAllAnimatedMarkers() {
+    fun removeAllMarkers() {
         animationMarkers.clear()
     }
 
@@ -65,6 +58,11 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
     @UiThread
     fun addMarker(tramMarker: TramMarker) {
         animationMarkers.add(tramMarker)
+    }
+
+    @UiThread
+    fun addAllMarkers(iterable: Iterable<TramMarker>) {
+        animationMarkers.addAll(iterable)
     }
 
     fun removeMarker(tramMarker: TramMarker) {

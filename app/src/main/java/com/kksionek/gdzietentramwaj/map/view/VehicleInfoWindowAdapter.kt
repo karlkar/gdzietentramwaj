@@ -24,7 +24,5 @@ class VehicleInfoWindowAdapter(
         return containerView
     }
 
-    override fun getInfoWindow(marker: Marker?): View? {
-        return null
-    }
+    override fun getInfoWindow(marker: Marker?): View? = null
 }

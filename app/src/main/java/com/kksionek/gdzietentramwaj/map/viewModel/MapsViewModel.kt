@@ -19,6 +19,7 @@ import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
@@ -27,7 +28,6 @@ import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
-import com.kksionek.gdzietentramwaj.map.view.TramMarker
 import com.kksionek.gdzietentramwaj.map.view.UiState
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
@@ -69,8 +69,7 @@ class MapsViewModel @Inject constructor(
     private val _mapControls = MutableLiveData<MapControls>()
     val mapControls: LiveData<MapControls> = _mapControls
 
-    private var allKnownTrams = mapOf<String, TramMarker>()
-    private var allTrams: List<TramMarker> = emptyList()
+    private var allKnownTrams = mapOf<String, VehicleToDrawData>()
 
     private val _tramData = MutableLiveData<UiState<BusTramLoading>>()
     val tramData: LiveData<UiState<BusTramLoading>> = _tramData
@@ -230,8 +229,12 @@ class MapsViewModel @Inject constructor(
         }
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
-        allTrams = operationResult.data
-            .map { allKnownTrams[it.id]?.apply { updatePosition(it.position) } ?: TramMarker(it) }
+        val allTrams = operationResult.data
+            .map {
+                allKnownTrams[it.id]
+                    ?.apply { updatePosition(it.position) }
+                    ?: VehicleToDrawData(it)
+            }
         allKnownTrams = allTrams.associateBy { it.id }
 
         showOrZoom(animate = true, newData = true)
@@ -278,8 +281,8 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
-        val onlyVisibleTrams = allTrams
-            .filter { isMarkerLineVisible(it.tramLine) }
+        val onlyVisibleTrams = allKnownTrams.values
+            .filter { isVehicleVisible(it.line) }
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
 
         when {
@@ -295,14 +298,14 @@ class MapsViewModel @Inject constructor(
 
         val followed = followedVehicle
         if (followed != null && animate) {
-            allTrams.firstOrNull { it.id == followed.id }?.let { tramMarker ->
-                _mapControls.postValue(MapControls.MoveTo(tramMarker.finalPosition, true))
+            allKnownTrams.values.firstOrNull { it.id == followed.id }?.let { tramMarker ->
+                _mapControls.postValue(MapControls.MoveTo(tramMarker.position, true))
             }
         }
     }
 
-    private fun isMarkerLineVisible(line: String): Boolean = favoriteLock.read {
-        !(favoriteView.value ?: false) || line in favoriteTrams
+    private fun isVehicleVisible(line: String): Boolean = favoriteLock.read {
+        favoriteView.value != true || line in favoriteTrams
     }
 
     fun forceReloadTrams() {
