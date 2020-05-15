@@ -8,7 +8,6 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
 import com.google.maps.android.SphericalUtil
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
-import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.addToDisposable
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
@@ -62,7 +61,11 @@ class MapsViewModel @Inject constructor(
         MutableLiveData<Boolean>().initWith(mapsViewSettingsRepository.isFavoriteViewEnabled())
     val favoriteView: LiveData<Boolean> = _favoriteView
 
-    private var followedVehicle: FollowedVehicleData? = null
+    var followedVehicle: FollowedVehicleData? by Delegates.observable(null) { _, _: FollowedVehicleData?, value: FollowedVehicleData? ->
+        value?.let {
+            _mapControls.postValue(MapControls.MoveTo(it.latLng))
+        }
+    }
 
     private val _mapControls = MutableLiveData<MapControls>()
     val mapControls: LiveData<MapControls> = _mapControls
@@ -104,7 +107,7 @@ class MapsViewModel @Inject constructor(
     private val compositeDisposable = CompositeDisposable()
 
     private val favoriteLock = ReentrantReadWriteLock()
-    private var favoriteVehicles = emptyList<String>()
+    private var favoriteVehicles = emptySet<String>()
 
     val mapInitialPosition: LatLng
     val mapInitialZoom: Float
@@ -145,18 +148,17 @@ class MapsViewModel @Inject constructor(
                     }
                 })
             .addToDisposable(compositeDisposable)
-
     }
 
     private fun subscribeToAllData() {
         compositeDisposable.clear()
         val selectedCity = mapSettingsManager.getCity()
-        subscribeToFavoriteTrams(selectedCity)
+        subscribeToFavoriteVehicles(selectedCity)
         subscribeToDifficulties(selectedCity)
         subscribeToVehicles(selectedCity)
     }
 
-    private fun subscribeToFavoriteTrams(city: Cities) {
+    private fun subscribeToFavoriteVehicles(city: Cities) {
         vehiclesRepository.getFavoriteVehicleLines(city)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable: Throwable ->
@@ -167,6 +169,7 @@ class MapsViewModel @Inject constructor(
                 )
                 emptyList()
             }
+            .map { it.toHashSet() }
             .subscribe(
                 Consumer {
                     favoriteLock.write { favoriteVehicles = it }
@@ -192,9 +195,7 @@ class MapsViewModel @Inject constructor(
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
             }
-            .subscribe {
-                _difficulties.postValue(it)
-            }
+            .subscribe { _difficulties.postValue(it) }
             .addToDisposable(compositeDisposable)
     }
 
@@ -257,19 +258,8 @@ class MapsViewModel @Inject constructor(
                             "Error handled with a toast."
                         )
                     }
-                    if (BuildConfig.DEBUG) {
-                        Timber.e(operationResult.throwable, "Exception")
-                        UiState.Error(
-                            R.string.map_debug_error_message,
-                            listOf(
-                                operationResult.throwable.javaClass.simpleName,
-                                operationResult.throwable.message
-                                    ?: "null"
-                            )
-                        )
-                    } else {
-                        UiState.Error(R.string.map_error_ztm)
-                    }
+                    Timber.e(operationResult.throwable, "Exception when getting vehicles")
+                    UiState.Error(R.string.map_error_ztm)
                 }
             }
         }
@@ -298,16 +288,13 @@ class MapsViewModel @Inject constructor(
                 _mapControls.postValue(MapControls.IgnoredZoomIn(R.string.map_auto_zoom_disabled_message))
         }
 
-        val followed = followedVehicle
-        if (followed != null && animate) {
-            allKnownVehicles.values.firstOrNull { it.id == followed.id }?.let { tramMarker ->
-                _mapControls.postValue(MapControls.MoveTo(tramMarker.position, true))
+        followedVehicle?.let {
+            if (animate) {
+                allKnownVehicles[it.id]?.let { followedVehicleData ->
+                    _mapControls.postValue(MapControls.MoveTo(followedVehicleData.position, true))
+                }
             }
         }
-    }
-
-    fun setFollowedVehicle(followedVehicleData: FollowedVehicleData?) {
-        followedVehicleData?.let { _mapControls.postValue(MapControls.MoveTo(it.latLng)) }
     }
 
     private fun isVehicleVisible(line: String): Boolean = favoriteLock.read {

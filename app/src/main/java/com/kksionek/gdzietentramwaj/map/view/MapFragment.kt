@@ -357,9 +357,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 return@setOnMarkerClickListener true
             }
             setOnInfoWindowClickListener {
-                val followedTramData = it.tag as FollowedVehicleData
-                mapsViewModel.setFollowedVehicle(followedTramData)
-                followedView.showFollowedView(followedTramData)
+                val followedVehicleData = it.tag as FollowedVehicleData
+                mapsViewModel.followedVehicle = followedVehicleData
+                followedView.showFollowedView(followedVehicleData)
                 it.hideInfoWindow()
             }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
