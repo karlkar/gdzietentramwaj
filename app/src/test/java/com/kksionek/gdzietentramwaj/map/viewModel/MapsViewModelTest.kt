@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer
 import com.kksionek.gdzietentramwaj.RxImmediateSchedulerRule
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
+import com.kksionek.gdzietentramwaj.map.model.MapControls
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
@@ -12,7 +13,6 @@ import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
-import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock

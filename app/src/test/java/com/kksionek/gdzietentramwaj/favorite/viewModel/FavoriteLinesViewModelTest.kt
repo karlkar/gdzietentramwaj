@@ -7,8 +7,8 @@ import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteVehiclesRepository
+import com.kksionek.gdzietentramwaj.map.model.UiState
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
-import com.kksionek.gdzietentramwaj.map.view.UiState
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock

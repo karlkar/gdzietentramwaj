@@ -16,9 +16,13 @@ import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.MapControls
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
+import com.kksionek.gdzietentramwaj.map.model.UiState
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
+import com.kksionek.gdzietentramwaj.map.model.VehicleLoadingResult
 import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
 import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
@@ -26,9 +30,6 @@ import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
-import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
-import com.kksionek.gdzietentramwaj.map.view.MapControls
-import com.kksionek.gdzietentramwaj.map.view.UiState
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
@@ -71,8 +72,8 @@ class MapsViewModel @Inject constructor(
 
     private var allKnownTrams = mapOf<String, VehicleToDrawData>()
 
-    private val _tramData = MutableLiveData<UiState<BusTramLoading>>()
-    val tramData: LiveData<UiState<BusTramLoading>> = _tramData
+    private val _tramData = MutableLiveData<UiState<VehicleLoadingResult>>()
+    val tramData: LiveData<UiState<VehicleLoadingResult>> = _tramData
 
     private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
     val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
@@ -241,7 +242,7 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun handleError(operationResult: NetworkOperationResult.Error<List<VehicleData>>) {
-        val uiState: UiState.Error<BusTramLoading> = when (operationResult.throwable) {
+        val uiState: UiState.Error<VehicleLoadingResult> = when (operationResult.throwable) {
             NoTramsLoadedException -> UiState.Error(R.string.map_none_position_is_up_to_date)
             is UnknownHostException, is SocketTimeoutException -> UiState.Error(R.string.map_error_internet)
             else -> {
@@ -288,7 +289,13 @@ class MapsViewModel @Inject constructor(
         when {
             onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS ->
                 _tramData.postValue(
-                    UiState.Success(BusTramLoading(onlyVisibleTrams, animate, newData))
+                    UiState.Success(
+                        VehicleLoadingResult(
+                            onlyVisibleTrams,
+                            animate,
+                            newData
+                        )
+                    )
                 )
             mapSettingsManager.isAutoZoomEnabled() ->
                 _mapControls.postValue(MapControls.ZoomIn)

@@ -15,7 +15,7 @@ import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
-import com.kksionek.gdzietentramwaj.map.view.UiState
+import com.kksionek.gdzietentramwaj.map.model.UiState
 import kotlinx.android.synthetic.main.fragment_favorite.*
 import javax.inject.Inject
 

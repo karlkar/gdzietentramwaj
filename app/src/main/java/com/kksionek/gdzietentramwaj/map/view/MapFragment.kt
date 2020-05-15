@@ -13,7 +13,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.BounceInterpolator
 import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.ShareActionProvider
@@ -35,8 +34,11 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
+import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.MapControls
+import com.kksionek.gdzietentramwaj.map.model.UiState
+import com.kksionek.gdzietentramwaj.map.model.VehicleLoadingResult
 import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
-import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showToast
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
@@ -60,16 +62,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
     private lateinit var vehicleInfoWindowAdapter: VehicleInfoWindowAdapter
+    private lateinit var followedView: FollowedView
 
     private val cameraMoveInProgress = AtomicBoolean(false)
 
-    private var currentlyDisplayedVehicles = emptyList<TramMarker>()
+    private var currentlyDisplayedVehicles = emptyList<VehicleMarker>()
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelFactory
 
     @Inject
     internal lateinit var imageLoader: ImageLoader
+
+    @Inject
+    internal lateinit var bitmapCache: BitmapCache
 
     private val shareIntent: Intent by lazy {
         Intent(Intent.ACTION_SEND).apply {
@@ -81,7 +87,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private val tramDataObserver: (UiState<BusTramLoading>) -> Unit = { uiState ->
+    private val tramDataObserver: (UiState<VehicleLoadingResult>) -> Unit = { uiState ->
         when (uiState) {
             is UiState.InProgress -> {
                 menuItemRefresh?.startAnimation()
@@ -108,7 +114,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if (this::map.isInitialized) {
             @Suppress("MissingPermission")
             map.isMyLocationEnabled = permissionGranted
-            setSwitchButtonMargin()
+            setMapTypeSwitchTopMargin()
         }
     }
 
@@ -130,6 +136,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private val mapControlsObserver: (MapControls) -> Unit = {
+        when (it) {
+            is MapControls.ZoomIn ->
+                map.animateCamera(CameraUpdateFactory.zoomIn())
+            is MapControls.IgnoredZoomIn ->
+                showToast(it.data)
+            is MapControls.MoveTo -> {
+                if (it.customAnimationDuration) {
+                    map.animateCamera(
+                        CameraUpdateFactory.newLatLng(it.location),
+                        ANIMATION_DURATION.toInt(),
+                        null
+                    )
+                } else {
+                    map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
+                }
+            }
+            is MapControls.ChangeType ->
+                map.mapType = it.mapType.googleCode
+        }.makeExhaustive
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -142,16 +170,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (context.applicationContext as TramApplication).appComponent.inject(this)
-
-        displaysOldIcons = mapsViewModel.isOldIconSetEnabled
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupFollowedTramView()
-
         loadMap()
+
+        followedView = FollowedView(
+            requireContext(),
+            map_followed_constraintlayout,
+            mapsViewModel
+        )
 
         mapsViewModel.apply {
             tramData.observeNonNull(viewLifecycleOwner, tramDataObserver)
@@ -165,7 +195,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             )
         }
 
-        setSwitchButtonMargin()
+        setMapTypeSwitchTopMargin()
         map_switch_type_imagebutton.setOnClickListener {
             mapsViewModel.onSwitchMapTypeButtonClicked()
         }
@@ -183,20 +213,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mainViewModel.requestLocationPermission()
     }
 
-    private fun setupFollowedTramView() {
-        val followedTramData = mapsViewModel.followedVehicle
-        if (followedTramData == null) {
-            hideFollowedView(animate = false)
-        } else {
-            showFollowedView(followedTramData)
-        }
-
-        map_followed_cancel_button.setOnClickListener {
-            mapsViewModel.followedVehicle = null
-            hideFollowedView()
-        }
-    }
-
     private fun loadMap() {
         if (!this::map.isInitialized) {
             (childFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment)
@@ -204,7 +220,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun setSwitchButtonMargin() {
+    private fun setMapTypeSwitchTopMargin() {
         @DimenRes
         val marginForMapSwitchButton: Int =
             if (this::map.isInitialized && map.isMyLocationEnabled) {
@@ -329,7 +345,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             isTrafficEnabled = mapsViewModel.isTrafficShowingEnabled
             @SuppressLint("MissingPermission")
             isMyLocationEnabled = mainViewModel.locationPermissionGrantedStatus.value ?: false
-            setSwitchButtonMargin()
+            setMapTypeSwitchTopMargin()
             mapType = mapsViewModel.getMapType().googleCode
 
             setInfoWindowAdapter(vehicleInfoWindowAdapter)
@@ -343,7 +359,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             setOnInfoWindowClickListener {
                 val followedTramData = it.tag as FollowedTramData
                 mapsViewModel.followedVehicle = followedTramData
-                showFollowedView(followedTramData)
+                followedView.showFollowedView(followedTramData)
                 it.hideInfoWindow()
             }
             setOnCameraMoveStartedListener { cameraMoveInProgress.set(true) }
@@ -353,55 +369,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        mapsViewModel.mapControls.observeNonNull(this) {
-            when (it) {
-                is MapControls.ZoomIn ->
-                    map.animateCamera(CameraUpdateFactory.zoomIn())
-                is MapControls.IgnoredZoomIn ->
-                    showToast(it.data)
-                is MapControls.MoveTo -> {
-                    if (it.customAnimationDuration) {
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLng(it.location),
-                            ANIMATION_DURATION.toInt(),
-                            null
-                        )
-                    } else {
-                        map.animateCamera(CameraUpdateFactory.newLatLng(it.location))
-                    }
-                }
-                is MapControls.ChangeType ->
-                    map.mapType = it.mapType.googleCode
-            }.makeExhaustive
-        }
-
-        mapsViewModel.reloadLastLocation()
-    }
-
-    private fun showFollowedView(marker: FollowedTramData) {
-        map_followed_constraintlayout.animate()
-            .y(0f)
-            .setDuration(1000L)
-            .setInterpolator(BounceInterpolator())
-            .start()
-        map_followed_textview.text =
-            getString(R.string.map_followed_text, marker.title, marker.snippet)
-    }
-
-    private fun hideFollowedView(animate: Boolean = true) {
-        if (animate) {
-            map_followed_constraintlayout.animate()
-                .y(-map_followed_constraintlayout.height.toFloat())
-                .setInterpolator(BounceInterpolator())
-                .setDuration(1000L)
-                .start()
-        } else {
-            map_followed_constraintlayout.apply {
-                post {
-                    y = -height.toFloat()
-                    visibility = View.VISIBLE
-                }
-            }
+        with(mapsViewModel) {
+            mapControls.observeNonNull(viewLifecycleOwner, mapControlsObserver)
+            reloadLastLocation()
         }
     }
 
@@ -437,7 +407,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 it.remove()
             }
             currentlyDisplayedVehicles = emptyList()
-            TramMarker.clearCache()
+            bitmapCache.clearCache()
         }
     }
 
@@ -450,8 +420,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun handleVisibleMarkers(vehiclesToDrawList: List<VehicleToDrawData>): List<TramMarker> {
-        val vehicleMarkersToDraw = mutableListOf<TramMarker>()
+    private fun handleVisibleMarkers(
+        vehiclesToDrawList: List<VehicleToDrawData>
+    ): List<VehicleMarker> {
+        val vehicleMarkersToDraw = mutableListOf<VehicleMarker>()
         for (vehicleToDraw in vehiclesToDrawList) {
             val indexOfExisting =
                 currentlyDisplayedVehicles.indexOfFirst { it.id == vehicleToDraw.id }
@@ -463,12 +435,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 vehicleMarkersToDraw.add(markerToUpdate)
             } else {
                 // create new marker
-                val newMarker = TramMarker(
+                val newMarker = VehicleMarker.Factory.createMarker(
                     requireContext(),
                     map,
                     vehicleToDraw,
                     mapsViewModel.isOldIconSetEnabled,
-                    polylineGenerator
+                    polylineGenerator,
+                    bitmapCache
                 )
                 vehicleMarkersToDraw.add(newMarker)
             }

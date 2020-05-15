@@ -1,8 +1,7 @@
-package com.kksionek.gdzietentramwaj.map.view
+package com.kksionek.gdzietentramwaj.map.model
 
 import androidx.annotation.StringRes
 import com.google.android.gms.maps.model.LatLng
-import com.kksionek.gdzietentramwaj.map.model.MapTypes
 
 sealed class MapControls {
 

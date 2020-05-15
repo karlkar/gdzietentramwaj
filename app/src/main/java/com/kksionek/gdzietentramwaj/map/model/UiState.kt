@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.view
+package com.kksionek.gdzietentramwaj.map.model
 
 import androidx.annotation.StringRes
 
@@ -13,3 +13,4 @@ sealed class UiState<out T> {
     data class Error<T>(@StringRes val message: Int, val args: List<String?> = emptyList()) :
         UiState<T>()
 }
+// TODO: Error should not contain resources, but should contain data describing it

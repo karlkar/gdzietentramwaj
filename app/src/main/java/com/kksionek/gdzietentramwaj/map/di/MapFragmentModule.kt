@@ -1,6 +1,7 @@
 package com.kksionek.gdzietentramwaj.map.di
 
 import androidx.lifecycle.ViewModel
+import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilder
 import com.kksionek.gdzietentramwaj.base.dataSource.InterfaceBuilderImpl
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
@@ -16,6 +17,8 @@ import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
 import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepositoryImpl
+import com.kksionek.gdzietentramwaj.map.view.BitmapCache
+import com.kksionek.gdzietentramwaj.map.view.BitmapCacheImpl
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import dagger.Binds
 import dagger.Module
@@ -87,4 +90,8 @@ class MapFragmentModule {
         vehicleDataSourceFactory: VehicleDataSourceFactory
     ): VehiclesRepository =
         VehiclesRepositoryImpl(tramDao, vehicleDataSourceFactory)
+
+    @Provides
+    internal fun provideBitmapCache(appContext: TramApplication): BitmapCache =
+        BitmapCacheImpl(appContext)
 }

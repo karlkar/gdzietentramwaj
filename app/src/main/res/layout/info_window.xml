@@ -30,8 +30,8 @@
         android:id="@+id/info_window_follow_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         android:text="@string/info_window_follow_text"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/info_window_description_textview" />

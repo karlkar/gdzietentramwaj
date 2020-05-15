@@ -1,4 +1,4 @@
-package com.kksionek.gdzietentramwaj.map.viewModel
+package com.kksionek.gdzietentramwaj.map.model
 
 import com.google.android.gms.maps.model.LatLng
 

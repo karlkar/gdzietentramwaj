@@ -8,35 +8,33 @@ const val ANIMATION_DURATION = 3000L
 
 class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
 
-    private val animationMarkers = mutableListOf<TramMarker>()
+    private val animationMarkers = mutableListOf<VehicleMarker>()
 
     private val animatorUpdateListener =
         ValueAnimator.AnimatorUpdateListener { animation ->
             val fraction = animation?.animatedFraction ?: return@AnimatorUpdateListener
 
-            val immutableList: List<TramMarker> = animationMarkers.toList()
-            for (tramMarker in immutableList) {
-                val marker = tramMarker.marker ?: continue
-                val polyline = tramMarker.trail ?: continue
-                val prevPosition = tramMarker.prevPosition
-                if (prevPosition == tramMarker.finalPosition) {
+            val vehicleMarkerList: List<VehicleMarker> = animationMarkers.toList()
+            for (vehicleMarker in vehicleMarkerList) {
+                val prevPosition = vehicleMarker.prevPosition
+                if (prevPosition == vehicleMarker.finalPosition) {
                     continue
                 }
                 val intermediatePos = SphericalUtil.interpolate(
                     prevPosition,
-                    tramMarker.finalPosition,
+                    vehicleMarker.finalPosition,
                     fraction.toDouble()
                 )
-                marker.position = intermediatePos
+                vehicleMarker.marker.position = intermediatePos
 
-                val curPointsList = polyline.points
+                val curPointsList = vehicleMarker.trail.points
                 val prevPos = if (curPointsList.size != 0) {
                     curPointsList[0]
                 } else {
                     prevPosition
                 }
                 val pointsList = polylineGenerator.generatePolylinePoints(intermediatePos, prevPos)
-                polyline.points = pointsList
+                vehicleMarker.trail.points = pointsList
             }
         }
 
@@ -56,17 +54,17 @@ class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
     }
 
     @UiThread
-    fun addMarker(tramMarker: TramMarker) {
-        animationMarkers.add(tramMarker)
+    fun addMarker(vehicleMarker: VehicleMarker) {
+        animationMarkers.add(vehicleMarker)
     }
 
     @UiThread
-    fun addAllMarkers(iterable: Iterable<TramMarker>) {
+    fun addAllMarkers(iterable: Iterable<VehicleMarker>) {
         animationMarkers.addAll(iterable)
     }
 
-    fun removeMarker(tramMarker: TramMarker) {
-        animationMarkers.remove(tramMarker)
+    fun removeMarker(vehicleMarker: VehicleMarker) {
+        animationMarkers.remove(vehicleMarker)
     }
 
     companion object {
