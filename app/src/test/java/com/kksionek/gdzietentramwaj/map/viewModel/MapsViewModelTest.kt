@@ -42,7 +42,7 @@ class MapsViewModelTest {
         on { lastKnownLocation } doReturn Single.just(Cities.WARSAW.latLng)
     }
     private val mapsViewSettingsRepository: MapsViewSettingsRepository = mock {
-        on { isFavoriteTramViewEnabled() } doReturn false
+        on { isFavoriteViewEnabled() } doReturn false
     }
     private val difficultiesRepository: DifficultiesRepository = mock()
     private val crashReportingService: CrashReportingService = mock()

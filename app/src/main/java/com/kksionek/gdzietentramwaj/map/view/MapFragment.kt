@@ -34,7 +34,7 @@ import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
-import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.FollowedVehicleData
 import com.kksionek.gdzietentramwaj.map.model.MapControls
 import com.kksionek.gdzietentramwaj.map.model.UiState
 import com.kksionek.gdzietentramwaj.map.model.VehicleLoadingResult
@@ -184,7 +184,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         )
 
         mapsViewModel.apply {
-            tramData.observeNonNull(viewLifecycleOwner, tramDataObserver)
+            vehicleData.observeNonNull(viewLifecycleOwner, tramDataObserver)
             favoriteView.observeNonNull(viewLifecycleOwner, favoriteModeObserver)
             difficulties.observeNonNull(viewLifecycleOwner, difficultiesObserver)
         }
@@ -239,7 +239,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         menu.findItem(R.id.menu_item_refresh)?.also {
             menuItemRefresh = MenuItemRefreshCtrl(requireContext(), it)
-            if (mapsViewModel.tramData.value is UiState.InProgress) {
+            if (mapsViewModel.vehicleData.value is UiState.InProgress) {
                 menuItemRefresh?.startAnimation()
             }
         }
@@ -357,8 +357,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 return@setOnMarkerClickListener true
             }
             setOnInfoWindowClickListener {
-                val followedTramData = it.tag as FollowedTramData
-                mapsViewModel.followedVehicle = followedTramData
+                val followedTramData = it.tag as FollowedVehicleData
+                mapsViewModel.setFollowedVehicle(followedTramData)
                 followedView.showFollowedView(followedTramData)
                 it.hideInfoWindow()
             }

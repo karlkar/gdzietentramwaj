@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.animation.BounceInterpolator
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.FollowedVehicleData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -29,7 +29,7 @@ class FollowedView(
         }
     }
 
-    fun showFollowedView(marker: FollowedTramData) {
+    fun showFollowedView(marker: FollowedVehicleData) {
         map_followed_constraintlayout.animate()
             .y(0f)
             .setDuration(1000L)

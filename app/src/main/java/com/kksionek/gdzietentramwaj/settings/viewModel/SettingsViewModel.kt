@@ -15,17 +15,13 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     var oldIconSetEnabled: Boolean
-        get() {
-            return iconSettingsManager.isOldIconSetEnabled()
-        }
+        get() = iconSettingsManager.isOldIconSetEnabled()
         set(value) {
             iconSettingsManager.setIsOldIconSetEnabled(value)
         }
 
     var autoZoomEnabled: Boolean
-        get() {
-            return mapSettingsManager.isAutoZoomEnabled()
-        }
+        get() = mapSettingsManager.isAutoZoomEnabled()
         set(value) {
             mapSettingsManager.setAutoZoomEnabled(value)
         }

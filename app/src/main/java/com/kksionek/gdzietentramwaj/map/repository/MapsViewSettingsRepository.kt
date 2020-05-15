@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.map.repository
 
 interface MapsViewSettingsRepository {
 
-    fun isFavoriteTramViewEnabled(): Boolean
+    fun isFavoriteViewEnabled(): Boolean
 
-    fun saveFavoriteTramViewState(enabled: Boolean)
+    fun saveFavoriteViewState(enabled: Boolean)
 }

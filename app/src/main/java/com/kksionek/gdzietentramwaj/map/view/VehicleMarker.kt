@@ -10,7 +10,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.FollowedVehicleData
 import com.kksionek.gdzietentramwaj.map.model.VehicleToDrawData
 
 private const val POLYLINE_WIDTH = 8F
@@ -86,7 +86,7 @@ class VehicleMarker(
                     }
                 }
             ).apply {
-                tag = FollowedTramData(
+                tag = FollowedVehicleData(
                     vehicleToDrawData.id,
                     title,
                     snippet,

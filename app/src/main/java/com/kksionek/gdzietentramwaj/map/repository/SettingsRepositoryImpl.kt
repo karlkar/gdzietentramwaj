@@ -8,7 +8,7 @@ import com.kksionek.gdzietentramwaj.getDouble
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.putDouble
 
-private const val PREF_FAVORITE_TRAM_VIEW = "FAVORITE_TRAM_VIEW"
+private const val PREF_FAVORITE_VIEW = "FAVORITE_TRAM_VIEW"
 private const val PREF_OLD_ICON_SET = "OLD_ICON_SET"
 private const val PREF_AUTO_ZOOM = "AUTO_ZOOM"
 private const val PREF_START_LOCATION = "START_LOCATION"
@@ -27,13 +27,13 @@ class SettingsRepositoryImpl(context: Context) :
     private val sharedPreferences = PreferenceManager
         .getDefaultSharedPreferences(context)
 
-    override fun isFavoriteTramViewEnabled(): Boolean =
-        sharedPreferences.getBoolean(PREF_FAVORITE_TRAM_VIEW, false)
+    override fun isFavoriteViewEnabled(): Boolean =
+        sharedPreferences.getBoolean(PREF_FAVORITE_VIEW, false)
 
-    override fun saveFavoriteTramViewState(enabled: Boolean) {
+    override fun saveFavoriteViewState(enabled: Boolean) {
         sharedPreferences
             .edit()
-            .putBoolean(PREF_FAVORITE_TRAM_VIEW, enabled)
+            .putBoolean(PREF_FAVORITE_VIEW, enabled)
             .apply()
     }
 

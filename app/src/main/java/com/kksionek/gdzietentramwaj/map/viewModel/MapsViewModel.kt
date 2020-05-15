@@ -16,7 +16,7 @@ import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.initWith
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
-import com.kksionek.gdzietentramwaj.map.model.FollowedTramData
+import com.kksionek.gdzietentramwaj.map.model.FollowedVehicleData
 import com.kksionek.gdzietentramwaj.map.model.MapControls
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
@@ -58,22 +58,19 @@ class MapsViewModel @Inject constructor(
     private val mapSettingsManager: MapSettingsManager
 ) : ViewModel() {
 
-    val favoriteView =
-        MutableLiveData<Boolean>().initWith(mapsViewSettingsRepository.isFavoriteTramViewEnabled())
+    private val _favoriteView =
+        MutableLiveData<Boolean>().initWith(mapsViewSettingsRepository.isFavoriteViewEnabled())
+    val favoriteView: LiveData<Boolean> = _favoriteView
 
-    var followedVehicle: FollowedTramData? by Delegates.observable(null) { _, _: FollowedTramData?, value: FollowedTramData? ->
-        value?.let {
-            _mapControls.postValue(MapControls.MoveTo(it.latLng))
-        }
-    }
+    private var followedVehicle: FollowedVehicleData? = null
 
     private val _mapControls = MutableLiveData<MapControls>()
     val mapControls: LiveData<MapControls> = _mapControls
 
-    private var allKnownTrams = mapOf<String, VehicleToDrawData>()
+    private var allKnownVehicles = mapOf<String, VehicleToDrawData>()
 
-    private val _tramData = MutableLiveData<UiState<VehicleLoadingResult>>()
-    val tramData: LiveData<UiState<VehicleLoadingResult>> = _tramData
+    private val _vehicleData = MutableLiveData<UiState<VehicleLoadingResult>>()
+    val vehicleData: LiveData<UiState<VehicleLoadingResult>> = _vehicleData
 
     private val _difficulties = MutableLiveData<UiState<DifficultiesState>>()
     val difficulties: LiveData<UiState<DifficultiesState>> = _difficulties
@@ -107,7 +104,7 @@ class MapsViewModel @Inject constructor(
     private val compositeDisposable = CompositeDisposable()
 
     private val favoriteLock = ReentrantReadWriteLock()
-    private var favoriteTrams = emptyList<String>()
+    private var favoriteVehicles = emptyList<String>()
 
     val mapInitialPosition: LatLng
     val mapInitialZoom: Float
@@ -172,9 +169,7 @@ class MapsViewModel @Inject constructor(
             }
             .subscribe(
                 Consumer {
-                    favoriteLock.write {
-                        favoriteTrams = it
-                    }
+                    favoriteLock.write { favoriteVehicles = it }
                 })
             .addToDisposable(compositeDisposable)
     }
@@ -214,7 +209,7 @@ class MapsViewModel @Inject constructor(
                     is NetworkOperationResult.Error ->
                         handleError(operationResult)
                     is NetworkOperationResult.InProgress ->
-                        _tramData.postValue(UiState.InProgress())
+                        _vehicleData.postValue(UiState.InProgress())
                 }.makeExhaustive
             }
             .addToDisposable(compositeDisposable)
@@ -232,11 +227,11 @@ class MapsViewModel @Inject constructor(
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
         val allTrams = operationResult.data
             .map {
-                allKnownTrams[it.id]
+                allKnownVehicles[it.id]
                     ?.apply { updatePosition(it.position) }
                     ?: VehicleToDrawData(it)
             }
-        allKnownTrams = allTrams.associateBy { it.id }
+        allKnownVehicles = allTrams.associateBy { it.id }
 
         showOrZoom(animate = true, newData = true)
     }
@@ -278,17 +273,17 @@ class MapsViewModel @Inject constructor(
                 }
             }
         }
-        _tramData.postValue(uiState)
+        _vehicleData.postValue(uiState)
     }
 
     private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
-        val onlyVisibleTrams = allKnownTrams.values
+        val onlyVisibleTrams = allKnownVehicles.values
             .filter { isVehicleVisible(it.line) }
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
 
         when {
             onlyVisibleTrams.size <= MAX_VISIBLE_MARKERS ->
-                _tramData.postValue(
+                _vehicleData.postValue(
                     UiState.Success(
                         VehicleLoadingResult(
                             onlyVisibleTrams,
@@ -305,14 +300,18 @@ class MapsViewModel @Inject constructor(
 
         val followed = followedVehicle
         if (followed != null && animate) {
-            allKnownTrams.values.firstOrNull { it.id == followed.id }?.let { tramMarker ->
+            allKnownVehicles.values.firstOrNull { it.id == followed.id }?.let { tramMarker ->
                 _mapControls.postValue(MapControls.MoveTo(tramMarker.position, true))
             }
         }
     }
 
+    fun setFollowedVehicle(followedVehicleData: FollowedVehicleData?) {
+        followedVehicleData?.let { _mapControls.postValue(MapControls.MoveTo(it.latLng)) }
+    }
+
     private fun isVehicleVisible(line: String): Boolean = favoriteLock.read {
-        favoriteView.value != true || line in favoriteTrams
+        favoriteView.value != true || line in favoriteVehicles
     }
 
     fun forceReloadTrams() {
@@ -325,8 +324,8 @@ class MapsViewModel @Inject constructor(
 
     fun onToggleFavorite() {
         val favoriteViewOn = !(favoriteView.value ?: return)
-        mapsViewSettingsRepository.saveFavoriteTramViewState(favoriteViewOn)
-        favoriteView.value = favoriteViewOn
+        mapsViewSettingsRepository.saveFavoriteViewState(favoriteViewOn)
+        _favoriteView.value = favoriteViewOn
         showOrZoom(false)
     }
 
