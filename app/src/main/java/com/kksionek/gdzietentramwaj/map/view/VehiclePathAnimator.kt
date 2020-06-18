@@ -6,7 +6,7 @@ import com.google.maps.android.SphericalUtil
 
 const val ANIMATION_DURATION = 3000L
 
-class TramPathAnimator(private val polylineGenerator: PolylineGenerator) {
+class VehiclePathAnimator(private val polylineGenerator: PolylineGenerator) {
 
     private val animationMarkers = mutableListOf<VehicleMarker>()
 

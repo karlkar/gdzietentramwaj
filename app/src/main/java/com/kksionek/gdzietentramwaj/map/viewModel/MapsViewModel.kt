@@ -80,15 +80,19 @@ class MapsViewModel @Inject constructor(
 
     var visibleRegion by Delegates.observable<LatLngBounds?>(null) { _, _, newValue ->
         newValue?.let { latLngBounds ->
-            val nearestCity = getNearestCity(latLngBounds)
-            val selectedCity = mapSettingsManager.getCity()
-            if (selectedCity != nearestCity) {
-                mapSettingsManager.setCity(nearestCity)
-                subscribeToAllData()
-            }
+            checkAndHandleCityChange(latLngBounds)
         }
 
-        showOrZoom(false)
+        updateMapView(newData = false)
+    }
+
+    private fun checkAndHandleCityChange(latLngBounds: LatLngBounds) {
+        val nearestCity = getNearestCity(latLngBounds)
+        val selectedCity = mapSettingsManager.getCity()
+        if (selectedCity != nearestCity) {
+            mapSettingsManager.setCity(nearestCity)
+            subscribeToAllData()
+        }
     }
 
     private fun getNearestCity(latLngBounds: LatLngBounds): Cities {
@@ -190,7 +194,7 @@ class MapsViewModel @Inject constructor(
                                 "Failed to reload difficulties"
                             )
                         }
-                        UiState.Error<DifficultiesState>(R.string.difficulties_error_failed_to_reload_difficulties)
+                        UiState.Error(R.string.difficulties_error_failed_to_reload_difficulties)
                     }
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
@@ -226,15 +230,15 @@ class MapsViewModel @Inject constructor(
         }
 
     private fun handleSuccess(operationResult: NetworkOperationResult.Success<List<VehicleData>>) {
-        val allTrams = operationResult.data
+        allKnownVehicles = operationResult.data
             .map {
                 allKnownVehicles[it.id]
                     ?.apply { updatePosition(it.position) }
                     ?: VehicleToDrawData(it)
             }
-        allKnownVehicles = allTrams.associateBy { it.id }
+            .associateBy { it.id }
 
-        showOrZoom(animate = true, newData = true)
+        updateMapView(newData = true)
     }
 
     private fun handleError(operationResult: NetworkOperationResult.Error<List<VehicleData>>) {
@@ -266,7 +270,7 @@ class MapsViewModel @Inject constructor(
         _vehicleData.postValue(uiState)
     }
 
-    private fun showOrZoom(animate: Boolean, newData: Boolean = false) {
+    private fun updateMapView(newData: Boolean) {
         val onlyVisibleTrams = allKnownVehicles.values
             .filter { isVehicleVisible(it.line) }
             .filter { visibleRegion?.let { region -> it.isOnMap(region) } ?: false }
@@ -277,7 +281,6 @@ class MapsViewModel @Inject constructor(
                     UiState.Success(
                         VehicleLoadingResult(
                             onlyVisibleTrams,
-                            animate,
                             newData
                         )
                     )
@@ -289,7 +292,7 @@ class MapsViewModel @Inject constructor(
         }
 
         followedVehicle?.let {
-            if (animate) {
+            if (newData) {
                 allKnownVehicles[it.id]?.let { followedVehicleData ->
                     _mapControls.postValue(MapControls.MoveTo(followedVehicleData.position, true))
                 }
@@ -301,7 +304,7 @@ class MapsViewModel @Inject constructor(
         favoriteView.value != true || line in favoriteVehicles
     }
 
-    fun forceReloadTrams() {
+    fun forceReloadVehicles() {
         vehiclesRepository.forceReload()
     }
 
@@ -313,7 +316,7 @@ class MapsViewModel @Inject constructor(
         val favoriteViewOn = !(favoriteView.value ?: return)
         mapsViewSettingsRepository.saveFavoriteViewState(favoriteViewOn)
         _favoriteView.value = favoriteViewOn
-        showOrZoom(false)
+        updateMapView(newData = false)
     }
 
     fun onSwitchMapTypeButtonClicked() {
@@ -345,9 +348,5 @@ class MapsViewModel @Inject constructor(
     override fun onCleared() {
         compositeDisposable.clear()
         super.onCleared()
-    }
-
-    companion object {
-        private const val TAG = "MapsViewModel"
     }
 }

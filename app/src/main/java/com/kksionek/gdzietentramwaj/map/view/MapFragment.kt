@@ -58,7 +58,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var displaysOldIcons = false
 
     private val polylineGenerator = PolylineGenerator()
-    private val tramPathAnimator = TramPathAnimator(polylineGenerator)
+    private val vehiclePathAnimator = VehiclePathAnimator(polylineGenerator)
 
     private lateinit var difficultiesBottomSheet: DifficultiesBottomSheet
     private lateinit var vehicleInfoWindowAdapter: VehicleInfoWindowAdapter
@@ -87,7 +87,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private val tramDataObserver: (UiState<VehicleLoadingResult>) -> Unit = { uiState ->
+    private val vehicleDataObserver: (UiState<VehicleLoadingResult>) -> Unit = { uiState ->
         when (uiState) {
             is UiState.InProgress -> {
                 menuItemRefresh?.startAnimation()
@@ -98,13 +98,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
             is UiState.Success -> {
                 menuItemRefresh?.endAnimation()
-                val tramMarkerList = uiState.data.data
-                if (mapsViewModel.favoriteView.value == true && tramMarkerList.isEmpty()) {
+                val vehicleMarkerList = uiState.data.data
+                if (mapsViewModel.favoriteView.value == true && vehicleMarkerList.isEmpty()) {
                     showToast(R.string.map_error_no_favorites_visible)
                 } else if (uiState.data.newData) {
                     showToast(R.string.map_position_update_sucessful)
                 }
-                updateMarkers(tramMarkerList, uiState.data.animate)
+                updateMarkers(vehicleMarkerList, uiState.data.newData)
             }
         }.makeExhaustive
     }
@@ -184,7 +184,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         )
 
         mapsViewModel.apply {
-            vehicleData.observeNonNull(viewLifecycleOwner, tramDataObserver)
+            vehicleData.observeNonNull(viewLifecycleOwner, vehicleDataObserver)
             favoriteView.observeNonNull(viewLifecycleOwner, favoriteModeObserver)
             difficulties.observeNonNull(viewLifecycleOwner, difficultiesObserver)
         }
@@ -270,7 +270,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_refresh -> mapsViewModel.forceReloadTrams()
+            R.id.menu_item_refresh -> mapsViewModel.forceReloadVehicles()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
                 Handler().postDelayed(
@@ -390,7 +390,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         currentlyDisplayedVehicles = vehicleMarkersToDraw
         if (animate) {
-            with(tramPathAnimator) {
+            with(vehiclePathAnimator) {
                 removeAllMarkers()
                 addAllMarkers(vehicleMarkersToDraw)
                 startAnimation()
@@ -403,7 +403,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if (displaysOldIcons != currentOldIconEnabledSetting) {
             displaysOldIcons = currentOldIconEnabledSetting
             currentlyDisplayedVehicles.forEach {
-                tramPathAnimator.removeMarker(it)
+                vehiclePathAnimator.removeMarker(it)
                 it.remove()
             }
             currentlyDisplayedVehicles = emptyList()
@@ -414,7 +414,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun handleStaleMarkers(vehiclesToDrawList: List<VehicleToDrawData>) {
         for (vehicleMarker in currentlyDisplayedVehicles) {
             if (vehiclesToDrawList.none { it.id == vehicleMarker.id }) {
-                tramPathAnimator.removeMarker(vehicleMarker)
+                vehiclePathAnimator.removeMarker(vehicleMarker)
                 vehicleMarker.remove()
             }
         }
