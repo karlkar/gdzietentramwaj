@@ -19,12 +19,10 @@ class AdProviderImpl(applicationContext: Context) : AdProvider {
     init {
         if (BuildConfig.DEBUG) {
             val requestConfiguration = MobileAds.getRequestConfiguration().toBuilder()
-                .setTestDeviceIds(
-                    listOf(
-                        applicationContext.getString(R.string.adMobTestDeviceS7Edge),
-                        applicationContext.getString(R.string.adMobTestDeviceS7Edge2)
-                    )
-                ).build()
+                    .setTestDeviceIds(listOf(
+                            applicationContext.getString(R.string.adMobTestDeviceMi9TPro)
+                    ))
+                    .build()
             MobileAds.setRequestConfiguration(requestConfiguration)
         }
         MobileAds.initialize(applicationContext)
@@ -46,8 +44,8 @@ class AdProviderImpl(applicationContext: Context) : AdProvider {
         adView?.let {
             it.visibility = VISIBLE
             val adRequest = AdRequest.Builder()
-                .setLocation(location)
-                .build()
+                    .setLocation(location)
+                    .build()
             it.loadAd(adRequest)
         }
     }

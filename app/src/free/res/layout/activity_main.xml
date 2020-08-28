@@ -23,6 +23,7 @@
         android:layout_gravity="bottom"
         android:background="@android:color/black"
         android:visibility="gone"
+        tools:visibility="visible"
         app:adSize="SMART_BANNER"
         app:adUnitId="@string/banner_ad_unit_id"
         app:layout_constraintBottom_toBottomOf="parent"

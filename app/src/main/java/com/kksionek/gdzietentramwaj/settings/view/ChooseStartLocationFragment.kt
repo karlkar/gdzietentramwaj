@@ -28,12 +28,15 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private val viewModel: SettingsViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val viewModel: SettingsViewModel by viewModels(
+            factoryProducer = { viewModelFactory },
+            ownerProducer = { requireActivity() }
+    )
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_settings_start_location, container, false)
 
     override fun onAttach(context: Context) {
@@ -48,7 +51,7 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
 
         if (!this::map.isInitialized) {
             (childFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment)
-                ?.getMapAsync(this)
+                    ?.getMapAsync(this)
         }
 
         settings_start_location_choose_button.setOnClickListener {

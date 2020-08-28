@@ -27,7 +27,10 @@ class SettingsFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private val viewModel: SettingsViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val viewModel: SettingsViewModel by viewModels(
+            factoryProducer = { viewModelFactory },
+            ownerProducer = { requireActivity() }
+    )
 
     private var locationChooserFragmentStarted = false
 

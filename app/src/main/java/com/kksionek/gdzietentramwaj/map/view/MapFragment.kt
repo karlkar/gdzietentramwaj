@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -50,7 +51,10 @@ import javax.inject.Inject
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private val mainViewModel: MainViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val mainViewModel: MainViewModel by viewModels(
+            factoryProducer = { viewModelFactory },
+            ownerProducer = { requireActivity() }
+    )
     private val mapsViewModel: MapsViewModel by viewModels(factoryProducer = { viewModelFactory })
 
     private lateinit var menuItemFavoriteSwitch: MenuItem
@@ -262,7 +266,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             R.id.menu_item_refresh -> mapsViewModel.forceReloadTrams()
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
-                val handler = Handler()
+                val handler = Handler(Looper.getMainLooper())
                 handler.postDelayed(
                     {
                         findNavController().apply {

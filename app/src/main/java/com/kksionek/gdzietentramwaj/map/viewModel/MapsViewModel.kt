@@ -99,7 +99,7 @@ class MapsViewModel @Inject constructor(
             currentCity
         } else {
             Cities.values()
-                .minBy { SphericalUtil.computeDistanceBetween(it.latLng, latLngBounds.center) }
+                .minByOrNull { SphericalUtil.computeDistanceBetween(it.latLng, latLngBounds.center) }
                 ?: Cities.WARSAW
         }
     }
