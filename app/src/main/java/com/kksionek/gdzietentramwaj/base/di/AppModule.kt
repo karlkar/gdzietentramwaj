@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj.base.di
 
 import android.content.Context
 import androidx.room.Room
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.TramApplication
@@ -18,7 +18,6 @@ import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.squareup.picasso.Picasso
 import dagger.Module
 import dagger.Provides
-import io.fabric.sdk.android.Fabric
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
@@ -44,18 +43,16 @@ class AppModule(private val application: TramApplication) {
 
     @Singleton
     @Provides
-    internal fun provideCrashlyticsInstance(application: TramApplication): Crashlytics {
-        Fabric.with(application, Crashlytics())
-        return Crashlytics.getInstance()
-    }
+    internal fun provideCrashlyticsInstance(): FirebaseCrashlytics =
+        FirebaseCrashlytics.getInstance()
 
     @Singleton
     @Provides
-    internal fun provideCrashReportingService(crashlytics: Crashlytics): CrashReportingService {
+    internal fun provideCrashReportingService(crashlytics: FirebaseCrashlytics): CrashReportingService {
         return if (BuildConfig.DEBUG) {
             NoOpCrashReportingService()
         } else {
-            CrashlyticsCrashReportingService(crashlytics.core)
+            CrashlyticsCrashReportingService(crashlytics)
         }
     }
 
