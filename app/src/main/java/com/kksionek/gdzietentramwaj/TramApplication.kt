@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj
 
 import androidx.multidex.MultiDexApplication
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kksionek.gdzietentramwaj.base.di.AppComponent
 import com.kksionek.gdzietentramwaj.base.di.AppModule
 import com.kksionek.gdzietentramwaj.base.di.DaggerAppComponent
@@ -25,7 +24,6 @@ class TramApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
 
-        AndroidThreeTen.init(this)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

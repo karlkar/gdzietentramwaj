@@ -4,8 +4,8 @@ import androidx.annotation.VisibleForTesting
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class WroclawVehicleDataSource(
     private val wroclawVehicleInterface: WroclawVehicleInterface

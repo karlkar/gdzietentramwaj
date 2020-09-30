@@ -1,8 +1,8 @@
 package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 
 import androidx.annotation.VisibleForTesting
-import org.threeten.bp.LocalDate
-import org.threeten.bp.format.DateTimeFormatter
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 sealed class DateRange {
 

@@ -4,9 +4,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.map.dataSource.VehicleDataSource
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
 import io.reactivex.Single
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.ZoneOffset
-import org.threeten.bp.ZonedDateTime
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class BielskoVehicleDataSource(
     private val bielskoVehicleInterface: BielskoVehicleInterface

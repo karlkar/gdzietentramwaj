@@ -7,7 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
-import org.threeten.bp.Instant
+import java.time.Instant
 
 class KrakowVehicleDataSourceTest {
 

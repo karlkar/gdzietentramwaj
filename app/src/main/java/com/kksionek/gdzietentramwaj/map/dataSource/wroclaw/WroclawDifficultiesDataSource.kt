@@ -6,7 +6,7 @@ import com.kksionek.gdzietentramwaj.map.dataSource.DifficultiesDataSource
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import io.reactivex.Single
-import org.threeten.bp.LocalDate
+import java.time.LocalDate
 
 @VisibleForTesting
 const val WROCLAW_BASE_URL = "http://mpk.wroc.pl"

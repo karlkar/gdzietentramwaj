@@ -9,8 +9,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
-import org.threeten.bp.LocalDateTime
 import java.io.IOException
+import java.time.LocalDateTime
 
 class WarsawVehicleDataSourceTest {
 

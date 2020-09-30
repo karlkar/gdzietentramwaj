@@ -1,6 +1,6 @@
 package com.kksionek.gdzietentramwaj.base.crash
 
-import com.crashlytics.android.core.CrashlyticsCore
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
@@ -8,10 +8,10 @@ import java.io.IOException
 
 class CrashlyticsCrashReportingServiceTest {
 
-    private val crashlyticsCore: CrashlyticsCore = mock()
+    private val firebaseCrashlytics: FirebaseCrashlytics = mock()
 
     private val tested: CrashlyticsCrashReportingService =
-        CrashlyticsCrashReportingService(crashlyticsCore)
+        CrashlyticsCrashReportingService(firebaseCrashlytics)
 
     @Test
     fun `should log exception to crashlytics when requested`() {
@@ -22,7 +22,7 @@ class CrashlyticsCrashReportingServiceTest {
         tested.reportCrash(exception)
 
         // then
-        verify(crashlyticsCore).logException(exception)
+        verify(firebaseCrashlytics).recordException(exception)
     }
 
     @Test
@@ -35,7 +35,7 @@ class CrashlyticsCrashReportingServiceTest {
         tested.reportCrash(exception, message)
 
         // then
-        verify(crashlyticsCore).log(message)
-        verify(crashlyticsCore).logException(exception)
+        verify(firebaseCrashlytics).log(message)
+        verify(firebaseCrashlytics).recordException(exception)
     }
 }

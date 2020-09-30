@@ -3,18 +3,13 @@ package com.kksionek.gdzietentramwaj.map.dataSource.wroclaw
 import com.kksionek.gdzietentramwaj.RxImmediateSchedulerRule
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.map.dataSource.wroclaw.DateRange.Companion.dateFormat
-import com.nhaarman.mockitokotlin2.argThat
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
 import org.junit.Rule
 import org.junit.Test
-import org.threeten.bp.LocalDate
-import org.threeten.bp.format.DateTimeParseException
 import java.io.IOException
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 private const val TITLE = "title"
 private const val LINK = "link"
