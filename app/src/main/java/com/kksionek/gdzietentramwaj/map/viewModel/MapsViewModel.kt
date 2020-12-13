@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.map.viewModel
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,23 +9,14 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.JsonSyntaxException
 import com.google.maps.android.SphericalUtil
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
-import com.kksionek.gdzietentramwaj.BuildConfig
-import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.addToDisposable
+import com.kksionek.gdzietentramwaj.*
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
-import com.kksionek.gdzietentramwaj.initWith
-import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
 import com.kksionek.gdzietentramwaj.map.model.NetworkOperationResult
 import com.kksionek.gdzietentramwaj.map.model.VehicleData
-import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
-import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
-import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
-import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
-import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
-import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
+import com.kksionek.gdzietentramwaj.map.repository.*
 import com.kksionek.gdzietentramwaj.map.view.BusTramLoading
 import com.kksionek.gdzietentramwaj.map.view.MapControls
 import com.kksionek.gdzietentramwaj.map.view.TramMarker
@@ -39,7 +31,6 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import javax.inject.Inject
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.properties.Delegates
@@ -47,7 +38,7 @@ import kotlin.properties.Delegates
 private const val MAX_VISIBLE_MARKERS = 50
 private const val CITY_CHANGE_CHECK_THRESHOLD = 25000.0
 
-class MapsViewModel @Inject constructor(
+class MapsViewModel @ViewModelInject constructor(
     private val vehiclesRepository: VehiclesRepository,
     private val locationRepository: LocationRepository,
     private val mapsViewSettingsRepository: MapsViewSettingsRepository,

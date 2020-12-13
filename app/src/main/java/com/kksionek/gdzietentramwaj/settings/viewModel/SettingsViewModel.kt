@@ -1,14 +1,14 @@
 package com.kksionek.gdzietentramwaj.settings.viewModel
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
-import javax.inject.Inject
 
-class SettingsViewModel @Inject constructor(
+class SettingsViewModel @ViewModelInject constructor(
     private val iconSettingsManager: IconSettingsManager,
     private val mapSettingsManager: MapSettingsManager,
     private val locationRepository: LocationRepository

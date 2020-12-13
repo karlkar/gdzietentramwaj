@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,22 +14,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
-import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_settings.*
-import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsFragment : Fragment() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelFactory
-
-    private val viewModel: SettingsViewModel by viewModels(
-            factoryProducer = { viewModelFactory },
-            ownerProducer = { requireActivity() }
-    )
+    private val viewModel: SettingsViewModel by viewModels({ requireActivity() })
 
     private var locationChooserFragmentStarted = false
 
@@ -39,11 +31,6 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_settings, container, false)
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (context.applicationContext as TramApplication).appComponent.inject(this)
-    }
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

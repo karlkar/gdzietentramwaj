@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.favorite.viewModel
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,9 +16,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import javax.inject.Inject
 
-class FavoriteLinesViewModel @Inject constructor(
+class FavoriteLinesViewModel @ViewModelInject constructor(
     private val favoriteVehiclesRepository: FavoriteVehiclesRepository,
     private val crashReportingService: CrashReportingService,
     mapSettingsProvider: MapSettingsProvider

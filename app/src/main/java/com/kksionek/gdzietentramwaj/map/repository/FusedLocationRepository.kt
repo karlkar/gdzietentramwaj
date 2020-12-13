@@ -9,13 +9,14 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 // TODO: Should be tested using instrumentation
-class FusedLocationRepository @Inject constructor(private val context: Context) :
+class FusedLocationRepository @Inject constructor(@ApplicationContext private val context: Context) :
     LocationRepository {
 
     @SuppressLint("MissingPermission") // when permission is missing we will get an error. It needs to be handled

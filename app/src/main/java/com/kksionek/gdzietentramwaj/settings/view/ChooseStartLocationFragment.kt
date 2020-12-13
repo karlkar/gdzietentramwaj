@@ -1,7 +1,6 @@
 package com.kksionek.gdzietentramwaj.settings.view
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,24 +13,17 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.WARSAW_LATLNG
-import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_settings_start_location.*
-import javax.inject.Inject
 
+@AndroidEntryPoint
 class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelFactory
-
-    private val viewModel: SettingsViewModel by viewModels(
-            factoryProducer = { viewModelFactory },
-            ownerProducer = { requireActivity() }
-    )
+    private val viewModel: SettingsViewModel by viewModels({ requireActivity() })
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -39,15 +31,10 @@ class ChooseStartLocationFragment : Fragment(), OnMapReadyCallback {
             savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_settings_start_location, container, false)
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        (context.applicationContext as TramApplication).appComponent.inject(this)
-        viewModel.locationChooserFragmentClosedWithResult = false
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.locationChooserFragmentClosedWithResult = false
 
         if (!this::map.isInitialized) {
             (childFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment)

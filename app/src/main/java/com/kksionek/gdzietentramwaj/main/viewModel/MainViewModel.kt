@@ -3,6 +3,7 @@ package com.kksionek.gdzietentramwaj.main.viewModel
 import android.app.Activity
 import android.content.DialogInterface
 import androidx.annotation.VisibleForTesting
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,6 @@ import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import javax.inject.Inject
 
 @VisibleForTesting
 const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
@@ -25,7 +25,7 @@ const val GOOGLE_API_AVAILABILITY_REQUEST_CODE = 2345
 @VisibleForTesting
 const val APP_UPDATE_AVAILABILITY_REQUEST_CODE = 7890
 
-class MainViewModel @Inject constructor(
+class MainViewModel @ViewModelInject constructor(
     private val locationRepository: LocationRepository,
     private val mapSettingsProvider: MapSettingsProvider,
     private val appUpdateRepository: AppUpdateRepository,

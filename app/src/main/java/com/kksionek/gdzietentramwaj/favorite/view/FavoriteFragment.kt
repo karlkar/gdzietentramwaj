@@ -1,6 +1,5 @@
 package com.kksionek.gdzietentramwaj.favorite.view
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,35 +9,25 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.observeNonNull
-import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.view.UiState
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_favorite.*
-import javax.inject.Inject
 
 private const val COLUMN_COUNT = 7
 
+@AndroidEntryPoint
 class FavoriteFragment : Fragment() {
 
-    @Inject
-    internal lateinit var viewModelFactory: ViewModelFactory
-
-    private val viewModel: FavoriteLinesViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val viewModel: FavoriteLinesViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_favorite, container, false)
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        (context.applicationContext as TramApplication).appComponent.inject(this)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

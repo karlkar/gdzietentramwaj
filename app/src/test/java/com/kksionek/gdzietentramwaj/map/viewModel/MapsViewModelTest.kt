@@ -6,22 +6,12 @@ import com.kksionek.gdzietentramwaj.RxImmediateSchedulerRule
 import com.kksionek.gdzietentramwaj.base.crash.CrashReportingService
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
 import com.kksionek.gdzietentramwaj.map.model.MapTypes
-import com.kksionek.gdzietentramwaj.map.repository.DifficultiesRepository
-import com.kksionek.gdzietentramwaj.map.repository.IconSettingsProvider
-import com.kksionek.gdzietentramwaj.map.repository.LocationRepository
-import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
-import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
-import com.kksionek.gdzietentramwaj.map.repository.VehiclesRepository
+import com.kksionek.gdzietentramwaj.map.repository.*
 import com.kksionek.gdzietentramwaj.map.view.MapControls
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
+import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be`
-import org.amshove.kluent.`should equal`
 import org.junit.Rule
 import org.junit.Test
 
@@ -136,7 +126,7 @@ class MapsViewModelTest {
         // initialized
 
         // then
-        tested.mapInitialZoom `should equal` 15.0f
+        tested.mapInitialZoom `should be equal to` 15.0f
     }
 
     @Test
@@ -151,7 +141,7 @@ class MapsViewModelTest {
         // initialized
 
         // then
-        tested.mapInitialZoom `should equal` 15.0f
+        tested.mapInitialZoom `should be equal to` 15.0f
     }
 
     @Test
@@ -166,7 +156,7 @@ class MapsViewModelTest {
         // initialized
 
         // then
-        tested.mapInitialZoom `should equal` 10.0f
+        tested.mapInitialZoom `should be equal to` 10.0f
     }
 
     @Test
@@ -200,7 +190,7 @@ class MapsViewModelTest {
         // then
         val argCaptor = argumentCaptor<MapControls>()
         verify(observer, times(2)).onChanged(argCaptor.capture())
-        argCaptor.secondValue `should equal` MapControls.ChangeType(mapType.next())
+        argCaptor.secondValue `should be equal to` MapControls.ChangeType(mapType.next())
     }
 
     @Test
@@ -224,9 +214,9 @@ class MapsViewModelTest {
         // then
         val argCaptor = argumentCaptor<MapControls>()
         verify(observer, times(4)).onChanged(argCaptor.capture())
-        argCaptor.secondValue `should equal` MapControls.ChangeType(mapType.next())
-        argCaptor.thirdValue `should equal` MapControls.ChangeType(mapType.next().next())
-        argCaptor.allValues[3] `should equal` MapControls.ChangeType(mapType.next().next().next())
+        argCaptor.secondValue `should be equal to` MapControls.ChangeType(mapType.next())
+        argCaptor.thirdValue `should be equal to` MapControls.ChangeType(mapType.next().next())
+        argCaptor.allValues[3] `should be equal to` MapControls.ChangeType(mapType.next().next().next())
     }
 
     @Test
@@ -242,7 +232,7 @@ class MapsViewModelTest {
         // then
         val argCaptor = argumentCaptor<MapControls>()
         verify(observer).onChanged(argCaptor.capture())
-        argCaptor.firstValue `should equal` MapControls.MoveTo(selectedCity.latLng, false)
+        argCaptor.firstValue `should be equal to` MapControls.MoveTo(selectedCity.latLng, false)
     }
 
     @Test

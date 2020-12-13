@@ -2,19 +2,13 @@ package com.kksionek.gdzietentramwaj.map.view
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.BounceInterpolator
 import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
@@ -33,29 +27,26 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
-import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showToast
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private val mainViewModel: MainViewModel by viewModels(
-            factoryProducer = { viewModelFactory },
-            ownerProducer = { requireActivity() }
-    )
-    private val mapsViewModel: MapsViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val mainViewModel: MainViewModel by viewModels({ requireActivity() })
+    private val mapsViewModel: MapsViewModel by viewModels()
 
     private lateinit var menuItemFavoriteSwitch: MenuItem
     private var menuItemRefresh: MenuItemRefreshCtrl? = null
@@ -71,9 +62,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
-
-    @Inject
-    internal lateinit var viewModelFactory: ViewModelFactory
 
     @Inject
     internal lateinit var imageLoader: ImageLoader
@@ -146,15 +134,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (context.applicationContext as TramApplication).appComponent.inject(this)
-
-        displaysOldIcons = mapsViewModel.isOldIconSetEnabled
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        displaysOldIcons = mapsViewModel.isOldIconSetEnabled
 
         setupFollowedTramView()
 

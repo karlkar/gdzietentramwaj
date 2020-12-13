@@ -9,17 +9,12 @@ import com.kksionek.gdzietentramwaj.base.dataSource.FavoriteTram
 import com.kksionek.gdzietentramwaj.favorite.repository.FavoriteVehiclesRepository
 import com.kksionek.gdzietentramwaj.map.repository.MapSettingsProvider
 import com.kksionek.gdzietentramwaj.map.view.UiState
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.subjects.ReplaySubject
+import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
-import org.amshove.kluent.`should equal`
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
@@ -108,7 +103,7 @@ class FavoriteLinesViewModelTest {
         verify(favoriteTramsObserver, times(2)).onChanged(argCaptor.capture())
         with(argCaptor.lastValue) {
             this as UiState.Success
-            this.data `should equal` vehicleList
+            this.data `should be equal to` vehicleList
         }
     }
 
@@ -169,7 +164,7 @@ class FavoriteLinesViewModelTest {
         argCaptor.thirdValue `should be instance of` UiState.InProgress::class
         with(argCaptor.lastValue) {
             this as UiState.Success
-            this.data `should equal` vehicleList2
+            this.data `should be equal to` vehicleList2
         }
     }
 

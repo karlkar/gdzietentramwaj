@@ -1,5 +1,6 @@
 package com.kksionek.gdzietentramwaj.base.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -18,35 +19,31 @@ import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.squareup.picasso.Picasso
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.CallAdapter
-import javax.inject.Singleton
 
+@InstallIn(SingletonComponent::class)
 @Module
-class AppModule(private val application: TramApplication) {
+class AppModule {
 
-    @Singleton
+    @Provides
+    internal fun provideTramApplication(application: Application): TramApplication =
+        application as TramApplication
+
     @Provides
     internal fun provideCallAdapterFactory(): CallAdapter.Factory =
         RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io())
 
-    @Singleton
-    @Provides
-    internal fun provideApplication(): TramApplication = application
-
-    @Singleton
-    @Provides
-    internal fun provideContext(): Context = application
-
-    @Singleton
     @Provides
     internal fun provideCrashlyticsInstance(): FirebaseCrashlytics =
         FirebaseCrashlytics.getInstance()
 
-    @Singleton
     @Provides
     internal fun provideCrashReportingService(crashlytics: FirebaseCrashlytics): CrashReportingService {
         return if (BuildConfig.DEBUG) {
@@ -56,9 +53,8 @@ class AppModule(private val application: TramApplication) {
         }
     }
 
-    @Singleton
     @Provides
-    internal fun getMyDatabase(context: Context): MyDatabase {
+    internal fun getMyDatabase(@ApplicationContext context: Context): MyDatabase {
         return Room.databaseBuilder(context, MyDatabase::class.java, "favorites.db")
             .addMigrations(
                 MyDatabase.MIGRATION_1_2,
@@ -69,11 +65,9 @@ class AppModule(private val application: TramApplication) {
             .build()
     }
 
-    @Singleton
     @Provides
     internal fun getTramDao(myDatabase: MyDatabase): TramDao = myDatabase.tramDao()
 
-    @Singleton
     @Provides
     internal fun provideOkHttpClient(): OkHttpClient {
         val interceptor = HttpLoggingInterceptor().apply {
@@ -84,15 +78,12 @@ class AppModule(private val application: TramApplication) {
             .build()
     }
 
-    @Singleton
     @Provides
     internal fun providePicasso(): Picasso = Picasso.get()
 
-    @Singleton
     @Provides
     internal fun provideImageLoader(picasso: Picasso): ImageLoader = PicassoImageLoader(picasso)
 
-    @Singleton
     @Provides
     internal fun provideRxJavaErrorHandler(
         crashReportingService: CrashReportingService
@@ -100,12 +91,10 @@ class AppModule(private val application: TramApplication) {
         crashReportingService.reportCrash(it, "Global Error Handler")
     }
 
-    @ActivityScope
     @Provides
-    internal fun provideSettingsRepository(context: Context): SettingsRepositoryImpl =
+    internal fun provideSettingsRepository(@ApplicationContext context: Context): SettingsRepositoryImpl =
         SettingsRepositoryImpl(context)
 
-    @ActivityScope
     @Provides
     internal fun provideMapsViewSettingsRepository(settingsRepositoryImpl: SettingsRepositoryImpl): MapsViewSettingsRepository =
         settingsRepositoryImpl

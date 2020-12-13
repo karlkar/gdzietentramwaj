@@ -10,34 +10,29 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.gms.maps.model.LatLng
 import com.kksionek.gdzietentramwaj.R
-import com.kksionek.gdzietentramwaj.TramApplication
 import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.observeNonNullOneEvent
-import com.kksionek.gdzietentramwaj.base.viewModel.ViewModelFactory
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.map.view.AdProvider
 import com.kksionek.gdzietentramwaj.toLocation
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 private const val LOCATION_PERMISSION_REQUEST = 3456
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-    @Inject
-    internal lateinit var viewModelFactory: ViewModelFactory
 
     @Inject
     internal lateinit var adProvider: AdProvider
 
-    private val mainViewModel: MainViewModel by viewModels(factoryProducer = { viewModelFactory })
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         setupActionBarWithNavController(findNavController(R.id.fragment_maps_content))
-
-        (application as TramApplication).appComponent.inject(this)
 
         setupLocationPermissionObserver()
         mainViewModel.lastLocation.observeNonNullOneEvent(this) { latLng: LatLng ->
