@@ -5,7 +5,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
-fun <T> Single<T>.toNetworkOperationResult(): Single<NetworkOperationResult<T>> =
+fun <T: Any> Single<T>.toNetworkOperationResult(): Single<NetworkOperationResult<T>> =
     map { data -> NetworkOperationResult.Success(data) as NetworkOperationResult<T> }
         .onErrorReturn { NetworkOperationResult.Error(it) }
 

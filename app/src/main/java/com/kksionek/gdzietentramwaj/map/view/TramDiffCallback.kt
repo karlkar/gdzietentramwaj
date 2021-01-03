@@ -3,9 +3,9 @@ package com.kksionek.gdzietentramwaj.map.view
 import androidx.recyclerview.widget.DiffUtil
 
 class TramDiffCallback(
-        private val oldList: List<TramMarker>,
-        private val newList: List<TramMarker>
-    ) : DiffUtil.Callback() {
+    private val oldList: List<TramMarker>,
+    private val newList: List<TramMarker>
+) : DiffUtil.Callback() {
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
             oldList[oldItemPosition].id == newList[newItemPosition].id
 

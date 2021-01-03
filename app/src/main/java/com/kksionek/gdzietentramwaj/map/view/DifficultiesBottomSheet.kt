@@ -10,66 +10,65 @@ import androidx.lifecycle.LifecycleOwner
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
+import com.kksionek.gdzietentramwaj.databinding.BottomSheetDifficultiesBinding
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
 
 class DifficultiesBottomSheet(
-    override val containerView: View,
+    private val binding: BottomSheetDifficultiesBinding,
     context: Context,
     lifecycleOwner: LifecycleOwner,
     viewModel: MapsViewModel,
     imageLoader: ImageLoader
-) : LayoutContainer {
+) {
 
     private val difficultiesObserver: (UiState<DifficultiesState>) -> Unit = { uiState ->
         when (uiState) {
             is UiState.Success -> {
                 if (uiState.data.isSupported) {
-                    containerView.visibility = View.VISIBLE
+                    binding.root.visibility = View.VISIBLE
                     stopDifficultiesLoading()
-                    textview_difficulties_title.text =
+                    binding.textviewDifficultiesTitle.text =
                         context.getString(
                             R.string.difficulties_bottom_sheet_title,
                             uiState.data.difficultiesEntities.size
                         )
                     if (uiState.data.difficultiesEntities.isEmpty()) {
-                        textview_difficulties_message.text =
+                        binding.textviewDifficultiesMessage.text =
                             context.getText(R.string.difficulties_bottom_sheet_no_items)
-                        recyclerview_difficulties_difficulties.visibility = View.GONE
-                        textview_difficulties_message.visibility = View.VISIBLE
+                        binding.recyclerviewDifficultiesDifficulties.visibility = View.GONE
+                        binding.textviewDifficultiesMessage.visibility = View.VISIBLE
                     } else {
-                        textview_difficulties_message.visibility = View.GONE
-                        recyclerview_difficulties_difficulties.visibility = View.VISIBLE
-                        (recyclerview_difficulties_difficulties.adapter as DifficultiesAdapter).submitList(
+                        binding.textviewDifficultiesMessage.visibility = View.GONE
+                        binding.recyclerviewDifficultiesDifficulties.visibility = View.VISIBLE
+                        (binding.recyclerviewDifficultiesDifficulties.adapter as DifficultiesAdapter).submitList(
                             uiState.data.difficultiesEntities
                         )
                     }
                 } else {
-                    containerView.visibility = View.GONE
+                    binding.root.visibility = View.GONE
                 }
             }
             is UiState.Error -> {
-                containerView.visibility = View.VISIBLE
-                textview_difficulties_title.text =
+                binding.root.visibility = View.VISIBLE
+                binding.textviewDifficultiesTitle.text =
                     context.getString(R.string.difficulties_bottom_sheet_title, 0)
-                textview_difficulties_message.text =
+                binding.textviewDifficultiesMessage.text =
                     context.getString(uiState.message, uiState.args)
-                recyclerview_difficulties_difficulties.visibility = View.GONE
-                textview_difficulties_message.visibility = View.VISIBLE
+                binding.recyclerviewDifficultiesDifficulties.visibility = View.GONE
+                binding.textviewDifficultiesMessage.visibility = View.VISIBLE
                 stopDifficultiesLoading()
             }
             is UiState.InProgress -> {
-                containerView.visibility = View.VISIBLE
+                binding.root.visibility = View.VISIBLE
                 startDifficultiesLoading()
             }
         }.makeExhaustive
     }
 
     init {
-        recyclerview_difficulties_difficulties.adapter = DifficultiesAdapter(imageLoader) {
+        binding.recyclerviewDifficultiesDifficulties.adapter = DifficultiesAdapter(imageLoader) {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.link))
             val chooser = Intent.createChooser(
                 intent,
@@ -80,7 +79,7 @@ class DifficultiesBottomSheet(
             }
         }
 
-        imagebutton_difficulties_refresh_button.setOnClickListener {
+        binding.imagebuttonDifficultiesRefreshButton.setOnClickListener {
             viewModel.forceReloadDifficulties()
         }
 
@@ -92,12 +91,16 @@ class DifficultiesBottomSheet(
     }
 
     private fun startDifficultiesLoading() {
-        imagebutton_difficulties_refresh_button.isEnabled = false
-        imagebutton_difficulties_refresh_button.startAnimation(reloadAnimation)
+        with(binding.imagebuttonDifficultiesRefreshButton) {
+            isEnabled = false
+            startAnimation(reloadAnimation)
+        }
     }
 
     private fun stopDifficultiesLoading() {
-        imagebutton_difficulties_refresh_button.isEnabled = true
-        imagebutton_difficulties_refresh_button.clearAnimation()
+        with(binding.imagebuttonDifficultiesRefreshButton) {
+            isEnabled = true
+            clearAnimation()
+        }
     }
 }

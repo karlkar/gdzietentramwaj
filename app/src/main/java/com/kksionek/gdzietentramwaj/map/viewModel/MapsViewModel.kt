@@ -183,7 +183,7 @@ class MapsViewModel @ViewModelInject constructor(
                                 "Failed to reload difficulties"
                             )
                         }
-                        UiState.Error<DifficultiesState>(R.string.difficulties_error_failed_to_reload_difficulties)
+                        UiState.Error(R.string.difficulties_error_failed_to_reload_difficulties)
                     }
                     is NetworkOperationResult.InProgress -> UiState.InProgress()
                 }
@@ -340,9 +340,5 @@ class MapsViewModel @ViewModelInject constructor(
     override fun onCleared() {
         compositeDisposable.clear()
         super.onCleared()
-    }
-
-    companion object {
-        private const val TAG = "MapsViewModel"
     }
 }

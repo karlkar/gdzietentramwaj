@@ -31,10 +31,12 @@ class MenuItemRefreshCtrl(
     }
 
     fun endAnimation() {
-        if (menuItem.actionView != null) {
-            menuItem.actionView.clearAnimation()
-            menuItem.actionView = null
+        with(menuItem) {
+            if (actionView != null) {
+                actionView.clearAnimation()
+                actionView = null
+            }
+            isEnabled = true
         }
-        menuItem.isEnabled = true
     }
 }

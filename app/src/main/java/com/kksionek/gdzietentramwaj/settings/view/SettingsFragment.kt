@@ -9,20 +9,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.dataSource.Cities
+import com.kksionek.gdzietentramwaj.databinding.FragmentSettingsBinding
 import com.kksionek.gdzietentramwaj.settings.viewModel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_settings.*
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels({ requireActivity() })
+
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
 
     private var locationChooserFragmentStarted = false
 
@@ -30,45 +32,47 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_settings, container, false)
+    ): View = FragmentSettingsBinding.inflate(inflater, container, false)
+        .also { _binding = it }
+        .root
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        settings_marker_new_bus_imageview.apply {
-            findViewById<TextView>(R.id.marker_textview).text = "112"
-            setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
+        binding.settingsMarkerNewBusImageview.apply {
+            markerTextview.text = "112"
+            root.setOnClickListener { binding.settingsMarkerNewRadiobutton.isChecked = true }
         }
-        settings_marker_new_tram_imageview.apply {
-            findViewById<TextView>(R.id.marker_textview).text = "25"
-            setOnClickListener { settings_marker_new_radiobutton.isChecked = true }
-        }
-
-        settings_marker_old_bus_imageview.apply {
-            findViewById<TextView>(R.id.marker_textview).text = "112"
-            setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
-        }
-        settings_marker_old_tram_imageview.apply {
-            findViewById<TextView>(R.id.marker_textview).text = "25"
-            setOnClickListener { settings_marker_old_radiobutton.isChecked = true }
+        binding.settingsMarkerNewTramImageview.apply {
+            markerTextview.text = "25"
+            root.setOnClickListener { binding.settingsMarkerNewRadiobutton.isChecked = true }
         }
 
-        settings_marker_old_radiobutton.apply {
+        binding.settingsMarkerOldBusImageview.apply {
+            markerTextview.text = "112"
+            root.setOnClickListener { binding.settingsMarkerOldRadiobutton.isChecked = true }
+        }
+        binding.settingsMarkerOldTramImageview.apply {
+            markerTextview.text = "25"
+            root.setOnClickListener { binding.settingsMarkerOldRadiobutton.isChecked = true }
+        }
+
+        binding.settingsMarkerOldRadiobutton.apply {
             isChecked = viewModel.oldIconSetEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    settings_marker_new_radiobutton.isChecked = false
+                    binding.settingsMarkerNewRadiobutton.isChecked = false
                     viewModel.oldIconSetEnabled = true
                 }
             }
         }
 
-        settings_marker_new_radiobutton.apply {
+        binding.settingsMarkerNewRadiobutton.apply {
             isChecked = !viewModel.oldIconSetEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    settings_marker_old_radiobutton.isChecked = false
+                    binding.settingsMarkerOldRadiobutton.isChecked = false
                     viewModel.oldIconSetEnabled = false
                 }
             }
@@ -76,12 +80,14 @@ class SettingsFragment : Fragment() {
 
         @Suppress("ConstantConditionIf")
         if (true) { // TODO Consider showing it in free version
-            settings_remove_ads_title.visibility = View.GONE
-            settings_remove_ads_description.visibility = View.GONE
-            settings_remove_ads_button.visibility = View.GONE
-            settings_divider_horizontal_3.visibility = View.GONE
+            with(binding) {
+                settingsRemoveAdsTitle.visibility = View.GONE
+                settingsRemoveAdsDescription.visibility = View.GONE
+                settingsRemoveAdsButton.visibility = View.GONE
+                settingsDividerHorizontal3.visibility = View.GONE
+            }
         } else {
-            settings_remove_ads_button.setOnClickListener {
+            binding.settingsRemoveAdsButton.setOnClickListener {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=com.kksionek.gdzietentramwaj.pro")
@@ -90,7 +96,7 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        settings_favorite_lines_button.setOnClickListener {
+        binding.settingsFavoriteLinesButton.setOnClickListener {
             findNavController().apply {
                 if (currentDestination?.id == R.id.destination_settings) {
                     navigate(R.id.destination_favorite)
@@ -98,16 +104,16 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        settings_auto_zoom_switch.isChecked = viewModel.autoZoomEnabled
-
-        settings_auto_zoom_switch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.autoZoomEnabled = isChecked
+        with(binding.settingsAutoZoomSwitch) {
+            isChecked = viewModel.autoZoomEnabled
+            setOnCheckedChangeListener { _, isChecked ->
+                viewModel.autoZoomEnabled = isChecked
+            }
         }
 
-        settings_start_location_switch.apply {
+        binding.settingsStartLocationSwitch.apply {
             isChecked = viewModel.startLocationEnabled
             setOnCheckedChangeListener { _, isChecked ->
-
                 if (isChecked && !viewModel.startLocationEnabled) {
                     startChooseLocationFragmentForResult()
                 }
@@ -115,14 +121,14 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        settings_brigade_showing_switch.apply {
+        binding.settingsBrigadeShowingSwitch.apply {
             isChecked = viewModel.brigadeShowingEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.brigadeShowingEnabled = isChecked
             }
         }
 
-        settings_traffic_showing_switch.apply {
+        binding.settingsTrafficShowingSwitch.apply {
             isChecked = viewModel.trafficShowingEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.trafficShowingEnabled = isChecked
@@ -130,7 +136,7 @@ class SettingsFragment : Fragment() {
         }
 
         val sortedCities = Cities.values().sortedBy { it.name }
-        settings_city_spinner.apply {
+        binding.settingsCitySpinner.apply {
             adapter = ArrayAdapter(
                 view.context,
                 android.R.layout.simple_spinner_dropdown_item,
@@ -148,7 +154,7 @@ class SettingsFragment : Fragment() {
                     id: Long
                 ) {
                     val selectedCity = sortedCities[position]
-                    settings_city_description.text = getString(
+                    binding.settingsCityDescription.text = getString(
                         when (selectedCity) {
                             Cities.WARSAW -> R.string.city_warsaw_description
                             Cities.KRAKOW -> R.string.city_krakow_description
@@ -169,10 +175,15 @@ class SettingsFragment : Fragment() {
         super.onResume()
         if (locationChooserFragmentStarted) {
             if (!viewModel.locationChooserFragmentClosedWithResult) {
-                settings_start_location_switch.isChecked = false
+                binding.settingsStartLocationSwitch.isChecked = false
             }
             locationChooserFragmentStarted = false
         }
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 
     private fun startChooseLocationFragmentForResult() {

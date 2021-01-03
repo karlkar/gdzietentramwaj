@@ -13,8 +13,11 @@ import android.view.animation.BounceInterpolator
 import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.ShareActionProvider
+import androidx.core.os.postDelayed
 import androidx.core.view.MenuItemCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -29,6 +32,7 @@ import com.kksionek.gdzietentramwaj.BuildConfig
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.observeNonNull
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
+import com.kksionek.gdzietentramwaj.databinding.FragmentMapBinding
 import com.kksionek.gdzietentramwaj.main.viewModel.MainViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesState
@@ -36,8 +40,6 @@ import com.kksionek.gdzietentramwaj.map.viewModel.FollowedTramData
 import com.kksionek.gdzietentramwaj.map.viewModel.MapsViewModel
 import com.kksionek.gdzietentramwaj.showToast
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.bottom_sheet_difficulties.*
-import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -45,7 +47,7 @@ import javax.inject.Inject
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private val mainViewModel: MainViewModel by viewModels({ requireActivity() })
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val mapsViewModel: MapsViewModel by viewModels()
 
     private lateinit var menuItemFavoriteSwitch: MenuItem
@@ -62,6 +64,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val cameraMoveInProgress = AtomicBoolean(false)
 
     private var currentlyDisplayedTrams = emptyList<TramMarker>()
+
+    private var _binding: FragmentMapBinding? = null
+    private val binding get() = _binding!!
 
     @Inject
     internal lateinit var imageLoader: ImageLoader
@@ -129,9 +134,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         setHasOptionsMenu(true)
-        return inflater.inflate(R.layout.fragment_map, container, false)
+        return FragmentMapBinding.inflate(inflater, container, false)
+            .also { _binding = it }
+            .root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -156,12 +163,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         setSwitchButtonMargin()
-        map_switch_type_imagebutton.setOnClickListener {
+        binding.mapSwitchTypeImagebutton.setOnClickListener {
             mapsViewModel.onSwitchMapTypeButtonClicked()
         }
 
         difficultiesBottomSheet = DifficultiesBottomSheet(
-            constraintlayout_bottomsheet_rootview,
+            binding.difficultiesBottomSheet,
             view.context,
             this,
             mapsViewModel,
@@ -173,6 +180,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mainViewModel.requestLocationPermission()
     }
 
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
+    }
+
     private fun setupFollowedTramView() {
         val followedTramData = mapsViewModel.followedVehicle
         if (followedTramData == null) {
@@ -181,7 +193,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             showFollowedView(followedTramData)
         }
 
-        map_followed_cancel_button.setOnClickListener {
+        binding.mapFollowedCancelButton.setOnClickListener {
             mapsViewModel.followedVehicle = null
             hideFollowedView()
         }
@@ -202,10 +214,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             } else {
                 R.dimen.map_layer_margin_small
             }
-        map_switch_type_imagebutton.layoutParams =
-            (map_switch_type_imagebutton.layoutParams as ViewGroup.MarginLayoutParams).apply {
-                topMargin = resources.getDimensionPixelOffset(marginForMapSwitchButton)
-            }
+        binding.mapSwitchTypeImagebutton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            topMargin = resources.getDimensionPixelOffset(marginForMapSwitchButton)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -250,16 +261,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             R.id.menu_item_rate -> rateApp()
             R.id.menu_item_settings -> {
                 val handler = Handler(Looper.getMainLooper())
-                handler.postDelayed(
-                    {
-                        findNavController().apply {
-                            if (currentDestination?.id == R.id.destination_map) {
-                                navigate(R.id.action_destinationMap_to_settingsFragment)
-                            }
+                handler.postDelayed(100) {
+                    findNavController().apply {
+                        if (currentDestination?.id == R.id.destination_map) {
+                            navigate(R.id.action_destinationMap_to_settingsFragment)
                         }
-                    },
-                    100
-                )
+                    }
+                }
             }
             R.id.menu_item_favorite_switch -> mapsViewModel.onToggleFavorite()
             else -> return super.onOptionsItemSelected(item)
@@ -374,24 +382,24 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun showFollowedView(marker: FollowedTramData) {
-        map_followed_constraintlayout.animate()
+        binding.mapFollowedConstraintlayout.animate()
             .y(0f)
             .setDuration(1000L)
             .setInterpolator(BounceInterpolator())
             .start()
-        map_followed_textview.text =
+        binding.mapFollowedTextview.text =
             getString(R.string.map_followed_text, marker.title, marker.snippet)
     }
 
     private fun hideFollowedView(animate: Boolean = true) {
         if (animate) {
-            map_followed_constraintlayout.animate()
-                .y(-map_followed_constraintlayout.height.toFloat())
+            binding.mapFollowedConstraintlayout.animate()
+                .y(-binding.mapFollowedConstraintlayout.height.toFloat())
                 .setInterpolator(BounceInterpolator())
                 .setDuration(1000L)
                 .start()
         } else {
-            map_followed_constraintlayout.apply {
+            binding.mapFollowedConstraintlayout.apply {
                 post {
                     y = -height.toFloat()
                     visibility = View.VISIBLE

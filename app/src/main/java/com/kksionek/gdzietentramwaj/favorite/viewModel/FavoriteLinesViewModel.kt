@@ -74,8 +74,4 @@ class FavoriteLinesViewModel @ViewModelInject constructor(
         compositeDisposable.clear()
         super.onCleared()
     }
-
-    companion object {
-        const val TAG = "FavoriteLinesActivityVi"
-    }
 }

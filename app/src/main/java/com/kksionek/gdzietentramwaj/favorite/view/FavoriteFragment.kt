@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.observeNonNull
+import com.kksionek.gdzietentramwaj.databinding.FragmentFavoriteBinding
 import com.kksionek.gdzietentramwaj.favorite.viewModel.FavoriteLinesViewModel
 import com.kksionek.gdzietentramwaj.makeExhaustive
 import com.kksionek.gdzietentramwaj.map.view.UiState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_favorite.*
 
 private const val COLUMN_COUNT = 7
 
@@ -23,11 +23,16 @@ class FavoriteFragment : Fragment() {
 
     private val viewModel: FavoriteLinesViewModel by viewModels()
 
+    private var _binding: FragmentFavoriteBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_favorite, container, false)
+    ): View = FragmentFavoriteBinding.inflate(inflater, container, false)
+        .also { _binding = it }
+        .root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,7 +40,7 @@ class FavoriteFragment : Fragment() {
         val favAdapter = FavoritesAdapter {
             viewModel.setTramFavorite(it.lineId, !it.isFavorite)
         }
-        favorites_lines_recyclerview.apply {
+        binding.favoritesLinesRecyclerview.apply {
             layoutManager = GridLayoutManager(view.context, COLUMN_COUNT)
             addItemDecoration(SpacesItemDecoration(view.context, R.dimen.grid_offset))
             itemAnimator = object : DefaultItemAnimator() {
@@ -43,7 +48,7 @@ class FavoriteFragment : Fragment() {
             }
             adapter = favAdapter
         }
-        favorites_error_button.setOnClickListener {
+        binding.favoritesErrorButton.setOnClickListener {
             viewModel.forceReloadFavorites()
         }
 
@@ -51,23 +56,28 @@ class FavoriteFragment : Fragment() {
             .observeNonNull(viewLifecycleOwner) {
                 when (it) {
                     is UiState.Success -> {
-                        favorites_progress.visibility = View.GONE
-                        favorites_error_view_constraintlayout.visibility = View.GONE
-                        favorites_success_view_constraintlayout.visibility = View.VISIBLE
+                        binding.favoritesProgress.visibility = View.GONE
+                        binding.favoritesErrorViewConstraintlayout.visibility = View.GONE
+                        binding.favoritesSuccessViewConstraintlayout.visibility = View.VISIBLE
                         favAdapter.submitList(it.data)
                     }
                     is UiState.Error -> {
-                        favorites_progress.visibility = View.GONE
-                        favorites_error_view_constraintlayout.visibility = View.VISIBLE
-                        favorites_success_view_constraintlayout.visibility = View.GONE
-                        favorites_error_textview.text = getString(it.message, it.args)
+                        binding.favoritesProgress.visibility = View.GONE
+                        binding.favoritesErrorViewConstraintlayout.visibility = View.VISIBLE
+                        binding.favoritesSuccessViewConstraintlayout.visibility = View.GONE
+                        binding.favoritesErrorTextview.text = getString(it.message, it.args)
                     }
                     is UiState.InProgress -> {
-                        favorites_progress.visibility = View.VISIBLE
-                        favorites_error_view_constraintlayout.visibility = View.GONE
-                        favorites_success_view_constraintlayout.visibility = View.GONE
+                        binding.favoritesProgress.visibility = View.VISIBLE
+                        binding.favoritesErrorViewConstraintlayout.visibility = View.GONE
+                        binding.favoritesSuccessViewConstraintlayout.visibility = View.GONE
                     }
                 }.makeExhaustive
             }
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 }

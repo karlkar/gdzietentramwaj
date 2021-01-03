@@ -115,8 +115,4 @@ class MainViewModel @ViewModelInject constructor(
         compositeDisposable.clear()
         super.onCleared()
     }
-
-    companion object {
-        const val TAG = "MainViewModel"
-    }
 }

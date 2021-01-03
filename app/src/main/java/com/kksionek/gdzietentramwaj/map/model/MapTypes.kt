@@ -2,6 +2,7 @@ package com.kksionek.gdzietentramwaj.map.model
 
 import com.google.android.gms.maps.GoogleMap
 
+@Suppress("unused")
 enum class MapTypes(val googleCode: Int) {
     NORMAL(GoogleMap.MAP_TYPE_NORMAL),
     SATELLITE(GoogleMap.MAP_TYPE_SATELLITE),

@@ -14,6 +14,8 @@ import com.kksionek.gdzietentramwaj.base.dataSource.MyDatabase
 import com.kksionek.gdzietentramwaj.base.dataSource.TramDao
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.PicassoImageLoader
+import com.kksionek.gdzietentramwaj.map.repository.IconSettingsManager
+import com.kksionek.gdzietentramwaj.map.repository.MapSettingsManager
 import com.kksionek.gdzietentramwaj.map.repository.MapsViewSettingsRepository
 import com.kksionek.gdzietentramwaj.map.repository.SettingsRepositoryImpl
 import com.squareup.picasso.Picasso
@@ -98,4 +100,14 @@ class AppModule {
     @Provides
     internal fun provideMapsViewSettingsRepository(settingsRepositoryImpl: SettingsRepositoryImpl): MapsViewSettingsRepository =
         settingsRepositoryImpl
+
+    @Provides
+    internal fun provideMapSettingsManager(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): MapSettingsManager = settingsRepositoryImpl
+
+    @Provides
+    internal fun provideIconSettingsManager(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): IconSettingsManager = settingsRepositoryImpl
 }

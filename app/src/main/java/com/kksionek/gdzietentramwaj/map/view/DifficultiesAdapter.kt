@@ -1,21 +1,20 @@
 package com.kksionek.gdzietentramwaj.map.view
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.recyclerview.widget.DiffUtil
-import com.kksionek.gdzietentramwaj.R
 import com.kksionek.gdzietentramwaj.base.view.BaseAdapter
 import com.kksionek.gdzietentramwaj.base.view.ImageLoader
 import com.kksionek.gdzietentramwaj.base.view.OnItemClickListener
+import com.kksionek.gdzietentramwaj.databinding.ItemDifficultyBinding
 import com.kksionek.gdzietentramwaj.map.model.DifficultiesEntity
-import kotlinx.android.synthetic.main.item_difficulty.*
 
 class DifficultiesAdapter(
     private val imageLoader: ImageLoader,
-    onItemClickListener: OnItemClickListener<DifficultiesEntity>) :
+    onItemClickListener: OnItemClickListener<DifficultiesEntity>
+) :
     BaseAdapter<DifficultiesEntity, DifficultiesAdapter.ViewHolder>(
         onItemClickListener,
         DiffCallback()
@@ -33,24 +32,25 @@ class DifficultiesAdapter(
         parent: ViewGroup,
         viewType: Int
     ): BaseAdapter.ViewHolder<DifficultiesEntity> {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_difficulty, parent, false)
-        return ViewHolder(this, view, imageLoader)
+        val binding =
+            ItemDifficultyBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(this, binding, imageLoader)
     }
 
     class ViewHolder(
         parent: BaseAdapter<DifficultiesEntity, *>,
-        view: View,
+        private val binding: ItemDifficultyBinding,
         imageLoader: ImageLoader
-    ) : BaseAdapter.ViewHolder<DifficultiesEntity>(parent, view) {
+    ) : BaseAdapter.ViewHolder<DifficultiesEntity>(parent, binding.root) {
 
         init {
-            recyclerview_difficulty_icons.adapter = DifficultyIconsAdapter(imageLoader)
+            binding.recyclerviewDifficultyIcons.adapter = DifficultyIconsAdapter(imageLoader)
         }
 
         override fun bind(data: DifficultiesEntity) {
-            (recyclerview_difficulty_icons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
-            textview_difficulty_description.text = HtmlCompat.fromHtml(data.msg, FROM_HTML_MODE_LEGACY)
+            (binding.recyclerviewDifficultyIcons.adapter as DifficultyIconsAdapter).submitList(data.iconUrl)
+            binding.textviewDifficultyDescription.text =
+                HtmlCompat.fromHtml(data.msg, FROM_HTML_MODE_LEGACY)
         }
     }
 }

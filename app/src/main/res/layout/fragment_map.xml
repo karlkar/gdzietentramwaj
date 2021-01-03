@@ -64,5 +64,7 @@
         android:tint="#555555"
         tools:ignore="RtlHardcoded" />
 
-    <include layout="@layout/bottom_sheet_difficulties" />
+    <include
+        android:id="@+id/difficulties_bottom_sheet"
+        layout="@layout/bottom_sheet_difficulties" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

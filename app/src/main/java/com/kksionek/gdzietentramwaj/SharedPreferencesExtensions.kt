@@ -2,7 +2,7 @@ package com.kksionek.gdzietentramwaj
 
 import android.content.SharedPreferences
 
-fun SharedPreferences.Editor.putDouble(key: String, double: Double) =
+fun SharedPreferences.Editor.putDouble(key: String, double: Double): SharedPreferences.Editor =
     putLong(key, java.lang.Double.doubleToRawLongBits(double))
 
 fun SharedPreferences.getDouble(key: String, default: Double) =
