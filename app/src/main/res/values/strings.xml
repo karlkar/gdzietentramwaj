@@ -2,6 +2,7 @@
     <string name="app_name">Where\'s that tram?</string>
     <string name="adMobAppId" translatable="false">ca-app-pub-9982327151344679~9129163343</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-9982327151344679/1605896548</string>
+    <string name="adMobTestDeviceMi9TPro" translatable="false">901BCD98373B802A4AD6F591527FED9E</string>
 
     <string name="map_menu_refresh">Refresh</string>
     <string name="map_menu_toggle_favorite_view">Toggle favorite view</string>
